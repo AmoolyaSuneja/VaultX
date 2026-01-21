@@ -1,0 +1,22 @@
+{
+  "name": "secure-vault",
+  "version": "1.0.0",
+  "description": "Secure Digital Vault with Conditional Access Control - Week 2 MVP",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "keywords": [
+    "vault",
+    "security",
+    "encryption"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  }
+}
+
