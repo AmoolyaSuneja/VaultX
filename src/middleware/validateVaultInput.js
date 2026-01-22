@@ -1,9 +1,4 @@
-/**
- * Middleware to validate vault input
- * Ensures the request body contains a valid 'data' field (non-empty string)
- */
 const validateVaultInput = (req, res, next) => {
-  // Check if request body exists
   if (!req.body) {
     return res.status(400).json({
       status: 'error',
@@ -11,7 +6,6 @@ const validateVaultInput = (req, res, next) => {
     });
   }
 
-  // Check if 'data' field exists
   if (!req.body.hasOwnProperty('data')) {
     return res.status(400).json({
       status: 'error',
@@ -19,7 +13,6 @@ const validateVaultInput = (req, res, next) => {
     });
   }
 
-  // Check if 'data' is a string
   if (typeof req.body.data !== 'string') {
     return res.status(400).json({
       status: 'error',
@@ -27,7 +20,6 @@ const validateVaultInput = (req, res, next) => {
     });
   }
 
-  // Check if 'data' is not empty
   if (req.body.data.trim().length === 0) {
     return res.status(400).json({
       status: 'error',
@@ -35,7 +27,6 @@ const validateVaultInput = (req, res, next) => {
     });
   }
 
-  // Validation passed, proceed to next middleware/controller
   next();
 };
 
