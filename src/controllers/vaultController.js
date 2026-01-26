@@ -8,7 +8,7 @@ const previewVaultData = (req, res) => {
     status: 'received',
     originalLength: originalLength,
     storedAt: storedAt,
-    note: 'Data will be encrypted in next phase'
+    note: 'Data accepted and processed'
   };
 
   res.status(200).json(response);
