@@ -1,20 +1,33 @@
-const previewVaultData = (req, res) => {
-  const { data } = req.body;
+const Vault = require('../models/Vault');
 
-  const originalLength = data.length;
-  const storedAt = new Date().toISOString();
+const previewVaultData = async (req, res) => {
+  try {
+    const { data } = req.body;
 
-  const response = {
-    status: 'received',
-    originalLength: originalLength,
-    storedAt: storedAt,
-    note: 'Data accepted and processed'
-  };
+    const vaultEntry = new Vault({
+      data: data,
+      length: data.length,
+      storedAt: new Date()
+    });
 
-  res.status(200).json(response);
+    await vaultEntry.save();
+
+    res.status(201).json({
+      status: 'stored',
+      id: vaultEntry._id,
+      originalLength: vaultEntry.length,
+      storedAt: vaultEntry.storedAt,
+      note: 'Data stored successfully (encryption in next phase)'
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to store vault data'
+    });
+  }
 };
 
 module.exports = {
   previewVaultData
 };
-
