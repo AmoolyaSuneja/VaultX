@@ -1,29 +1,26 @@
+const mongoose = require('mongoose');
+
 const validateVaultInput = (req, res, next) => {
-  if (!req.body) {
+  const { title, data, owner } = req.body;
+
+  if (!title || typeof title !== 'string' || title.trim().length === 0) {
     return res.status(400).json({
-      status: 'error',
-      message: 'Request body is required'
+      success: false,
+      message: 'Valid "title" is required'
     });
   }
 
-  if (!req.body.hasOwnProperty('data')) {
+  if (!data || typeof data !== 'string' || data.trim().length === 0) {
     return res.status(400).json({
-      status: 'error',
-      message: 'Field "data" is required in request body'
+      success: false,
+      message: 'Valid "data" is required'
     });
   }
 
-  if (typeof req.body.data !== 'string') {
+  if (!owner || !mongoose.Types.ObjectId.isValid(owner)) {
     return res.status(400).json({
-      status: 'error',
-      message: 'Field "data" must be a string'
-    });
-  }
-
-  if (req.body.data.trim().length === 0) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Field "data" cannot be empty'
+      success: false,
+      message: 'Valid "owner" ObjectId is required'
     });
   }
 
@@ -31,4 +28,3 @@ const validateVaultInput = (req, res, next) => {
 };
 
 module.exports = validateVaultInput;
-

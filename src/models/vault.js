@@ -2,21 +2,37 @@ const mongoose = require('mongoose');
 
 const vaultSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
     data: {
       type: String,
       required: true
     },
-    length: {
-      type: Number,
-      required: true
+
+    category: {
+      type: String,
+      default: 'general'
     },
-    storedAt: {
-      type: Date,
+
+    tags: [
+      {
+        type: String
+      }
+    ],
+
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     }
   },
   {
-    collection: 'vault_data' 
+    timestamps: true,
+    collection: 'vault_data'
   }
 );
 
