@@ -6,6 +6,7 @@ import { AuthPage } from '@/pages/Auth';
 import { DashboardPage } from '@/pages/Dashboard';
 import { EntryDetailPage } from '@/pages/EntryDetail';
 import { ProfilePage } from '@/pages/Profile';
+import { SharedLinkPage } from '@/pages/SharedLink';
 
 function AnimatedRouteOutlet() {
   const location = useLocation();
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AuthPage />
+  },
+  {
+    path: '/shared/:shareId',
+    element: <SharedLinkPage />
   },
   {
     element: <ProtectedLayout />,

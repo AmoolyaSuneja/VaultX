@@ -67,3 +67,14 @@ export async function deleteVaultEntry(token: string, id: string) {
     headers: authHeaders(token)
   });
 }
+
+export async function createShareLink(token: string, id: string, payload: { filePath: string; password: string }) {
+  return request<{ data: { shareId: string; link: string }; message: string }>(`/api/vault/${id}/share-link`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(token),
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}

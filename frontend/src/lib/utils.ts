@@ -76,3 +76,58 @@ export function parseTags(value: string) {
     .map((tag) => tag.trim())
     .filter(Boolean);
 }
+
+export function getAttachmentKind(fileUrl: string) {
+  if (/\.pdf(?:$|\?)/i.test(fileUrl)) return 'pdf';
+  if (/\.(png|jpe?g|webp|gif|bmp|svg)(?:$|\?)/i.test(fileUrl)) return 'image';
+  return 'file';
+}
+
+function getExtensionFromContentType(contentType: string) {
+  const normalized = contentType.toLowerCase();
+
+  if (normalized.includes('application/pdf')) return 'pdf';
+  if (normalized.includes('image/jpeg')) return 'jpg';
+  if (normalized.includes('image/png')) return 'png';
+  if (normalized.includes('image/webp')) return 'webp';
+  if (normalized.includes('image/gif')) return 'gif';
+  if (normalized.includes('image/bmp')) return 'bmp';
+  if (normalized.includes('image/svg+xml')) return 'svg';
+
+  return '';
+}
+
+function getExtensionFromUrl(fileUrl: string) {
+  const match = fileUrl.match(/\.([a-z0-9]+)(?:$|\?)/i);
+  return match?.[1]?.toLowerCase() ?? '';
+}
+
+async function saveFetchedResource(response: Response, baseName: string, fallbackUrl = '') {
+  if (!response.ok) {
+    throw new Error('Unable to download attachment');
+  }
+
+  const blob = await response.blob();
+  const contentType = response.headers.get('content-type') || blob.type || '';
+  const extension = getExtensionFromContentType(contentType) || getExtensionFromUrl(fallbackUrl) || 'bin';
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = objectUrl;
+  link.download = `${baseName}.${extension}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+export async function downloadAttachment(fileUrl: string, baseName: string) {
+  const response = await fetch(fileUrl);
+  await saveFetchedResource(response, baseName, fileUrl);
+}
+
+export async function downloadProtectedResource(resourceUrl: string, baseName: string, init?: RequestInit) {
+  const response = await fetch(resourceUrl, init);
+  await saveFetchedResource(response, baseName, resourceUrl);
+}

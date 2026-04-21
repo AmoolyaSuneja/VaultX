@@ -1,5 +1,6 @@
+const crypto = require('crypto');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2; 
+const cloudinary = require('cloudinary').v2;
 const multerCloudinary = require('multer-storage-cloudinary');
 require('dotenv').config();
 
@@ -10,13 +11,22 @@ cloudinary.config({
 });
 
 
+function createOpaquePublicId() {
+  return crypto.randomBytes(18).toString('hex');
+}
+
 const storageOptions = {
   cloudinary: require('cloudinary'),
-  params: {
-    folder: 'vaultx_uploads', 
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf','webp'], 
-    resource_type: 'auto' 
-  },
+  params: (req, file, cb) => {
+    cb(undefined, {
+      folder: 'vaultx_uploads',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'pdf', 'webp'],
+      resource_type: 'auto',
+      public_id: createOpaquePublicId(),
+      use_filename: false,
+      unique_filename: false
+    });
+  }
 };
 
 let storage;

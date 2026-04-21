@@ -1,12 +1,30 @@
 const mongoose = require('mongoose');
-const { encrypt } = require('../Utils/encryption'); 
+const { encrypt } = require('../Utils/encryption');
+
+function encryptArray(values) {
+  if (!Array.isArray(values)) {
+    return values;
+  }
+
+  return values.map((value) => {
+    if (value === undefined || value === null || value === '') {
+      return value;
+    }
+
+    return encrypt(value);
+  });
+}
 
 const vaultSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      set: (value) => {
+        if (value === undefined || value === null || value === '') return value;
+        return encrypt(value);
+      }
     },
     data: {
       type: String,
@@ -51,7 +69,8 @@ const vaultSchema = new mongoose.Schema(
     ],
     filePath: {
       type: [String],
-      default: []
+      default: [],
+      set: encryptArray
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,

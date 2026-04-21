@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { useMemo } from 'react';
 import { useAuthStore } from '@/features/auth/auth.store';
 import {
+  createShareLink,
   createVaultEntry,
   deleteVaultEntry,
   getVaultEntries,
@@ -44,6 +45,17 @@ export function useCreateEntry() {
     onSuccess: () => {
       toast.success('Vault entry saved');
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+    }
+  });
+}
+
+export function useCreateShareLink(id: string) {
+  const token = useAuthStore((state) => state.token);
+
+  return useMutation({
+    mutationFn: (payload: { filePath: string; password: string }) => createShareLink(token, id, payload),
+    onSuccess: (data) => {
+      toast.success(data.message || 'Share link created');
     }
   });
 }

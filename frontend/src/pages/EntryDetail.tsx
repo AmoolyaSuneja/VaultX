@@ -1,21 +1,26 @@
-import { Copy, ExternalLink, Eye, EyeOff, Pencil } from 'lucide-react';
+import { Copy, Download, ExternalLink, Eye, EyeOff, FileImage, FileText, Pencil, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EntryForm } from '@/components/forms/EntryForm';
-import { Badge, Button, Card } from '@/components/ui';
-import { useVaultEntry, useUpdateEntry } from '@/features/vault/useVault';
-import { copyToClipboard, formatDateTime, maskValue, normalizeUrl } from '@/lib/utils';
+import { Badge, Button, Card, Input, Modal } from '@/components/ui';
+import { useCreateShareLink, useVaultEntry, useUpdateEntry } from '@/features/vault/useVault';
+import { copyToClipboard, downloadAttachment, formatDateTime, getAttachmentKind, maskValue, normalizeUrl } from '@/lib/utils';
 
 export function EntryDetailPage() {
   const navigate = useNavigate();
   const { id = '' } = useParams();
   const entryQuery = useVaultEntry(id);
   const updateMutation = useUpdateEntry(id);
+  const createShareLinkMutation = useCreateShareLink(id);
   const [revealed, setRevealed] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(30);
   const [editing, setEditing] = useState(false);
+  const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
+  const [shareTarget, setShareTarget] = useState<{ filePath: string; label: string } | null>(null);
+  const [sharePassword, setSharePassword] = useState('');
+  const [generatedLink, setGeneratedLink] = useState('');
   const entry = entryQuery.data;
 
   useEffect(() => {
@@ -136,6 +141,87 @@ export function EntryDetailPage() {
           </Card>
 
           <Card className="rounded-xl">
+            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Attachments</p>
+            <div className="mt-4 grid gap-3">
+              {entry.filePath?.length ? (
+                entry.filePath.map((fileUrl, index) => {
+                  const kind = getAttachmentKind(fileUrl);
+                  const image = kind === 'image';
+                  const label = `Attachment ${index + 1}`;
+                  const downloadLabel = kind === 'pdf' ? 'Download PDF' : kind === 'image' ? 'Download image' : 'Download file';
+
+                  return (
+                    <div key={fileUrl} className="group rounded-xl border border-line bg-white/55 p-3 transition hover:border-brand/40 hover:bg-white/75">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-light text-brand">
+                          {image ? <FileImage className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-textPrimary">{label}</p>
+                          <p className="mt-1 text-xs text-textMuted">
+                            {kind === 'image' ? 'Image attachment' : kind === 'pdf' ? 'PDF document' : 'Stored attachment'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => window.open(fileUrl, '_blank', 'noopener,noreferrer')}
+                            className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-white/80 hover:text-brand"
+                            aria-label={`Open ${label}`}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShareTarget({ filePath: fileUrl, label });
+                              setSharePassword('');
+                              setGeneratedLink('');
+                            }}
+                            className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-white/80 hover:text-brand"
+                            aria-label={`Share ${label}`}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                setDownloadingIndex(index);
+                                await downloadAttachment(fileUrl, label.toLowerCase().replace(/\s+/g, '-'));
+                                toast.success(`${downloadLabel} ready`);
+                              } catch (error) {
+                                const message = error instanceof Error ? error.message : 'Download failed';
+                                toast.error(message);
+                              } finally {
+                                setDownloadingIndex(null);
+                              }
+                            }}
+                            disabled={downloadingIndex === index}
+                            className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-white/80 hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={`${downloadLabel} for ${label}`}
+                          >
+                            <Download className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      {image ? (
+                        <img src={fileUrl} alt={label} className="mt-3 h-32 w-full rounded-lg border border-line/70 object-cover" />
+                      ) : null}
+                      <div className="mt-3 flex items-center gap-3 text-xs text-textMuted">
+                        <span>{downloadLabel}</span>
+                        {downloadingIndex === index ? <span>Downloading...</span> : null}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-textMuted">No files attached to this entry.</p>
+              )}
+            </div>
+          </Card>
+
+          <Card className="rounded-xl">
             <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Related context</p>
             <div className="mt-4 space-y-3 text-sm text-textMuted">
               <p>This MVP stores a lightweight activity summary in the right rail.</p>
@@ -164,6 +250,93 @@ export function EntryDetailPage() {
           setEditing(false);
         }}
       />
+
+      <Modal
+        open={Boolean(shareTarget)}
+        onClose={() => {
+          setShareTarget(null);
+          setSharePassword('');
+          setGeneratedLink('');
+        }}
+      >
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Protected share link</p>
+            <h3 className="font-heading text-2xl text-textPrimary">{shareTarget?.label}</h3>
+            <p className="text-sm text-textMuted">
+              Create a localhost link for this document only. The recipient will need the password before the download button appears.
+            </p>
+          </div>
+
+          <Input
+            label="Link password"
+            type="password"
+            value={sharePassword}
+            onChange={(event) => setSharePassword(event.target.value)}
+            placeholder="Minimum 4 characters"
+          />
+
+          {generatedLink ? (
+            <Input
+              label="Generated localhost link"
+              value={generatedLink}
+              readOnly
+              rightAdornment={
+                <button
+                  type="button"
+                  className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
+                  aria-label="Copy share link"
+                  onClick={async () => {
+                    if (await copyToClipboard(generatedLink)) toast.success('Share link copied');
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+              }
+            />
+          ) : null}
+
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            {generatedLink ? (
+              <Button type="button" variant="secondary" onClick={() => window.open(generatedLink, '_blank', 'noopener,noreferrer')}>
+                Open link
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setShareTarget(null);
+                setSharePassword('');
+                setGeneratedLink('');
+              }}
+            >
+              Close
+            </Button>
+            <Button
+              type="button"
+              loading={createShareLinkMutation.isPending}
+              onClick={async () => {
+                if (!shareTarget) return;
+
+                try {
+                  const payload = await createShareLinkMutation.mutateAsync({
+                    filePath: shareTarget.filePath,
+                    password: sharePassword
+                  });
+
+                  setGeneratedLink(payload.data.link);
+                } catch (error) {
+                  const message = error instanceof Error ? error.message : 'Unable to create share link';
+                  toast.error(message);
+                }
+              }}
+            >
+              Generate link
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
