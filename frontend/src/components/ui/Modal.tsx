@@ -21,12 +21,13 @@ export function Modal({ open, onClose, children }: ModalProps) {
           />
           <div className="fixed inset-0 overflow-y-auto p-4">
             <div className="mx-auto mt-20 flex min-h-full max-w-md items-start justify-center">
-              <DialogPanel
-                as={motion.div}
-                {...scaleIn}
-                className="w-full rounded-xl border border-line bg-panel p-6 shadow-card backdrop-blur-panel"
-              >
-                {children}
+              <DialogPanel className="w-full">
+                <motion.div
+                  {...scaleIn}
+                  className="w-full rounded-xl border border-line bg-panel p-6 shadow-card backdrop-blur-panel"
+                >
+                  {children}
+                </motion.div>
               </DialogPanel>
             </div>
           </div>

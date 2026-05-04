@@ -25,4 +25,4 @@ export const scaleIn = {
 export const shakeX = {
   x: [0, -6, 6, -4, 4, 0],
   transition: { duration: 0.36 }
-} as const;
+};

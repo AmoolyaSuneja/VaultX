@@ -164,6 +164,6 @@ export function getVaultStats(entries: VaultEntry[] = []): VaultStats {
       .map((entry) => entry.updatedAt || entry.createdAt)
       .filter(Boolean)
       .sort()
-      .at(-1)
+      .slice(-1)[0]
   };
 }

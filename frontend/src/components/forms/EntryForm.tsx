@@ -3,7 +3,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import { motion } from 'framer-motion';
 import { Copy, Eye, EyeOff, Globe, Link2, Sparkles, X } from 'lucide-react';
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Button, Input, Textarea, Toggle } from '@/components/ui';
 import { defaultCategories } from '@/lib/constants';
@@ -40,7 +40,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
   const [files, setFiles] = useState<File[]>([]);
 
   const form = useForm<EntryValues>({
-    resolver: zodResolver(entrySchema),
+    resolver: zodResolver(entrySchema) as Resolver<EntryValues>,
     defaultValues: {
       title: '',
       category: 'General',
@@ -131,11 +131,11 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="pointer-events-none fixed inset-y-0 right-0 flex w-screen max-w-full justify-end">
-              <DialogPanel
-                as={motion.div}
-                {...slideRight}
-                className="pointer-events-auto relative flex h-full w-full max-w-2xl flex-col border-l border-line bg-panel shadow-card backdrop-blur-panel sm:max-w-lg"
-              >
+              <DialogPanel className="pointer-events-auto h-full w-full max-w-2xl sm:max-w-lg">
+                <motion.div
+                  {...slideRight}
+                  className="relative flex h-full w-full flex-col border-l border-line bg-panel shadow-card backdrop-blur-panel"
+                >
                 <div className="flex items-start justify-between border-b border-line px-6 py-5">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-textMuted">
@@ -319,6 +319,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                     <Button type="submit">{mode === 'create' ? 'Save entry' : 'Save changes'}</Button>
                   </div>
                 </form>
+                </motion.div>
               </DialogPanel>
             </div>
           </div>
