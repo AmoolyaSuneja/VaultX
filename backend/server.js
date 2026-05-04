@@ -15,9 +15,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const frontendDistDir = path.join(__dirname, '..', 'frontend', 'dist');
 
+app.set('trust proxy', true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(frontendDistDir));
+
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Database connection failed' });
+  }
+});
 
 app.post('/api/test', (req, res) => {
   res.json({
@@ -75,4 +85,8 @@ async function startServer() {
   }
 }
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;

@@ -6,6 +6,7 @@ const SharedLink = require('../models/sharedLink');
 const { decrypt } = require('../Utils/encryption');
 const { enforceVaultUnlock } = require('../Utils/lockAccess');
 const { pipeRemoteDocument, resolveDocumentKind } = require('../Utils/remoteDocument');
+const { buildAppUrl } = require('../Utils/appUrl');
 
 function decryptFileList(filePaths = []) {
   return filePaths.map((filePath) => decrypt(filePath));
@@ -59,7 +60,7 @@ const createSharedLink = async (req, res) => {
       message: 'Protected share link created',
       data: {
         shareId,
-        link: `${req.protocol}://${req.get('host')}/shared/${shareId}`
+        link: buildAppUrl(req, `/shared/${shareId}`)
       }
     });
   } catch (error) {

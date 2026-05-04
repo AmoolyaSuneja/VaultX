@@ -16,6 +16,27 @@ Secure digital vault with a Node/Express backend and a React/Vite frontend.
 - `npm run build`: Build the frontend into `frontend/dist`
 - `npm start`: Start the backend in normal mode
 
+## Deployment
+
+This project is ready to deploy on Vercel with `vercel.json`.
+
+Set these environment variables in Vercel before deploying:
+
+- `MONGO_URI`
+- `JWT_SECRET`
+- `ENCRYPTION_KEY`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- `APP_URL` with your deployed app URL
+- `GMAIL_USER`
+- `GMAIL_APP_PASSWORD`
+- `MAIL_FROM`
+
+For Gmail, create an App Password in your Google account and use it as `GMAIL_APP_PASSWORD`.
+When a two-person access request is created, VaultX emails the assigned approver a link to the deployed entry page.
+Protected file share links are also generated with the deployed app URL.
+
 ## Notes
 
 - The old static frontend has been removed.

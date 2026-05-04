@@ -5,6 +5,8 @@ const { decrypt, encrypt } = require('../Utils/encryption');
 const { enforceVaultUnlock } = require('../Utils/lockAccess');
 const { pipeRemoteDocument } = require('../Utils/remoteDocument');
 const { normalizeUnlockAt, isVaultLocked } = require('../Utils/timeLock');
+const { buildAppUrl } = require('../Utils/appUrl');
+const { sendDualApprovalRequestEmail } = require('../Utils/email');
 
 const DUAL_ACCESS_WINDOW_MS = 10 * 60 * 1000;
 
@@ -355,7 +357,9 @@ const deleteVaultEntry = async (req, res) => {
 
 const requestVaultAccessApproval = async (req, res) => {
   try {
-    const vaultEntry = await Vault.findById(req.params.id).populate('secondApprover', 'name email');
+    const vaultEntry = await Vault.findById(req.params.id)
+      .populate('owner', 'name email')
+      .populate('secondApprover', 'name email');
 
     if (!vaultEntry) {
       return res.status(404).json({ success: false, message: 'Vault entry not found' });
@@ -386,9 +390,28 @@ const requestVaultAccessApproval = async (req, res) => {
       metadata: { secondApproverEmail: vaultEntry.secondApprover.email }
     });
 
+    const entryTitle = decrypt(vaultEntry.title);
+    const approvalUrl = buildAppUrl(req, `/vault/${vaultEntry._id}`);
+    let emailSent = false;
+
+    try {
+      const emailResult = await sendDualApprovalRequestEmail({
+        to: vaultEntry.secondApprover.email,
+        approverName: vaultEntry.secondApprover.name,
+        ownerName: vaultEntry.owner?.name || req.user.name,
+        entryTitle,
+        approvalUrl
+      });
+      emailSent = Boolean(emailResult.sent);
+    } catch (emailError) {
+      console.error('Approval email failed:', emailError.message);
+    }
+
     return res.status(200).json({
       success: true,
-      message: `Approval request sent to ${vaultEntry.secondApprover.email}`,
+      message: emailSent
+        ? `Approval email sent to ${vaultEntry.secondApprover.email}`
+        : `Approval request created for ${vaultEntry.secondApprover.email}`,
       data: formatVaultEntry(vaultEntry, { redactSensitive: true, userId: req.user._id })
     });
   } catch (error) {

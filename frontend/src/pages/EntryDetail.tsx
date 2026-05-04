@@ -379,7 +379,7 @@ export function EntryDetailPage() {
             <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Protected share link</p>
             <h3 className="font-heading text-2xl text-textPrimary">{shareTarget?.label}</h3>
             <p className="text-sm text-textMuted">
-              Create a localhost link for this document only. The recipient will need the password before the download button appears.
+              Create a protected link for this document only. The recipient will need the password before the download button appears.
             </p>
           </div>
 
@@ -393,7 +393,7 @@ export function EntryDetailPage() {
 
           {generatedLink ? (
             <Input
-              label="Generated localhost link"
+              label="Generated share link"
               value={generatedLink}
               readOnly
               rightAdornment={
