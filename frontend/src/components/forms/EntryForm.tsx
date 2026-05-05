@@ -1,18 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { Copy, Eye, EyeOff, Globe, Link2, Sparkles, X } from 'lucide-react';
+import { Globe, Link2, Sparkles, X } from 'lucide-react';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import { Button, Input, Textarea, Toggle } from '@/components/ui';
 import { defaultCategories } from '@/lib/constants';
 import { slideRight } from '@/lib/motion';
-import { copyToClipboard, normalizeUrl, parseTags, toDateTimeInputValue } from '@/lib/utils';
+import { normalizeUrl, parseTags, toDateTimeInputValue } from '@/lib/utils';
 import { entrySchema, type EntryValues } from '@/lib/validators';
 import type { VaultEntry } from '@/features/vault/vault.types';
 import { FileUpload } from './FileUpload';
-import { PasswordGenerator } from './PasswordGenerator';
 
 interface EntryFormProps {
   open: boolean;
@@ -36,7 +34,6 @@ interface EntryFormProps {
 }
 
 export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormProps) {
-  const [showPassword, setShowPassword] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
   const form = useForm<EntryValues>({
@@ -98,8 +95,8 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
       title: values.title,
       category: values.category,
       url: values.url || '',
-      username: values.username || '',
-      password: values.password || '',
+      username: '',
+      password: '',
       notes: values.notes || '',
       data: values.notes || '',
       tags: parseTags(values.tagsText || ''),
@@ -199,66 +196,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                         }
                         {...form.register('url')}
                       />
-                    </section>
-
-                    <section className="space-y-4 border-t border-line pt-6">
-                      <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Credentials</p>
-                      <Input
-                        label="Username / email"
-                        placeholder="alex@company.com"
-                        error={form.formState.errors.username?.message}
-                        rightAdornment={
-                          <button
-                            type="button"
-                            className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
-                            aria-label="Copy username"
-                            onClick={async () => {
-                              const value = form.getValues('username');
-                              if (await copyToClipboard(value || '')) toast.success('Username copied');
-                            }}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </button>
-                        }
-                        {...form.register('username')}
-                      />
-                      <div className="grid gap-2">
-                        <Input
-                          label="Password"
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Sensitive value"
-                          error={form.formState.errors.password?.message}
-                          rightAdornment={
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
-                                onClick={() => setShowPassword((value) => !value)}
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                              >
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                              </button>
-                              <button
-                                type="button"
-                                className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
-                                aria-label="Copy password"
-                                onClick={async () => {
-                                  const value = form.getValues('password');
-                                  if (await copyToClipboard(value || '')) toast.success('Password copied');
-                                }}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </button>
-                            </div>
-                          }
-                          {...form.register('password')}
-                        />
-                        <div className="flex justify-end">
-                          <PasswordGenerator
-                            onUse={(password) => form.setValue('password', password, { shouldDirty: true })}
-                          />
-                        </div>
-                      </div>
                     </section>
 
                     <section className="space-y-4 border-t border-line pt-6">
