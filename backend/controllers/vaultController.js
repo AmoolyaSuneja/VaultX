@@ -393,6 +393,7 @@ const requestVaultAccessApproval = async (req, res) => {
     const entryTitle = decrypt(vaultEntry.title);
     const approvalUrl = buildAppUrl(req, `/vault/${vaultEntry._id}`);
     let emailSent = false;
+    let emailErrorMessage = '';
 
     try {
       const emailResult = await sendDualApprovalRequestEmail({
@@ -403,15 +404,19 @@ const requestVaultAccessApproval = async (req, res) => {
         approvalUrl
       });
       emailSent = Boolean(emailResult.sent);
+      if (emailResult.skipped) {
+        emailErrorMessage = 'SMTP credentials are not configured on the server';
+      }
     } catch (emailError) {
       console.error('Approval email failed:', emailError.message);
+      emailErrorMessage = emailError.message;
     }
 
     return res.status(200).json({
       success: true,
       message: emailSent
         ? `Approval email sent to ${vaultEntry.secondApprover.email}`
-        : `Approval request created for ${vaultEntry.secondApprover.email}`,
+        : `Approval request created for ${vaultEntry.secondApprover.email}, but email was not sent${emailErrorMessage ? `: ${emailErrorMessage}` : ''}`,
       data: formatVaultEntry(vaultEntry, { redactSensitive: true, userId: req.user._id })
     });
   } catch (error) {
