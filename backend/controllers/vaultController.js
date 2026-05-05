@@ -10,16 +10,24 @@ const { sendDualApprovalRequestEmail } = require('../Utils/email');
 
 const DUAL_ACCESS_WINDOW_MS = 10 * 60 * 1000;
 
+function toIdString(value) {
+  if (!value) {
+    return '';
+  }
+
+  if (value._id) {
+    return value._id.toString();
+  }
+
+  return value.toString();
+}
+
 function isOwner(vaultEntry, userId) {
-  const ownerId = vaultEntry.owner?._id ? vaultEntry.owner._id.toString() : vaultEntry.owner?.toString();
-  return ownerId === userId.toString();
+  return toIdString(vaultEntry.owner) === toIdString(userId);
 }
 
 function isSecondApprover(vaultEntry, userId) {
-  const approverId = vaultEntry.secondApprover?._id
-    ? vaultEntry.secondApprover._id.toString()
-    : vaultEntry.secondApprover?.toString();
-  return approverId === userId.toString();
+  return toIdString(vaultEntry.secondApprover) === toIdString(userId);
 }
 
 function isDualAccessParticipant(vaultEntry, userId) {
@@ -39,14 +47,12 @@ function getUserSummary(user) {
 }
 
 function getApprovalRequesterId(vaultEntry) {
-  return vaultEntry?.dualAccess?.requestedBy?._id
-    ? vaultEntry.dualAccess.requestedBy._id.toString()
-    : vaultEntry?.dualAccess?.requestedBy?.toString();
+  return toIdString(vaultEntry?.dualAccess?.requestedBy);
 }
 
 function isApprovalRequester(vaultEntry, userId) {
   const requesterId = getApprovalRequesterId(vaultEntry);
-  return Boolean(requesterId) && requesterId === userId.toString();
+  return Boolean(requesterId) && requesterId === toIdString(userId);
 }
 
 function getCounterparty(vaultEntry, userId) {
