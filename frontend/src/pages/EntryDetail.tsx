@@ -43,7 +43,7 @@ export function EntryDetailPage() {
   const lockedError = queryError instanceof ApiError && queryError.status === 403;
   const accessPolicy = entry?.accessPolicy;
   const canSeeSensitive = Boolean(entry?.password || entry?.notes || entry?.data || entry?.url || entry?.username || entry?.filePath?.length);
-  const ownerView = accessPolicy?.role !== 'approver';
+  const ownerView = accessPolicy?.role === 'owner';
   const attachmentCount = entry?.attachmentCount ?? entry?.filePath?.length ?? 0;
 
   useEffect(() => {
@@ -190,16 +190,16 @@ export function EntryDetailPage() {
             <div className="rounded-xl border border-brand/20 bg-brand-light/30 p-4">
               <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Two-person access</p>
               <h2 className="mt-2 font-heading text-2xl text-textPrimary">
-                {accessPolicy.approvalStatus === 'approved' ? 'Approved access is active' : 'Second approval required'}
+                {accessPolicy.approvalStatus === 'approved' ? 'Approved access is active' : 'Participant approval required'}
               </h2>
               <p className="mt-2 text-sm leading-6 text-textMuted">
-                {accessPolicy.role === 'approver'
-                  ? accessPolicy.approvalStatus === 'pending'
-                    ? 'The owner requested access. Approve it here to unlock this document for 10 minutes.'
-                    : 'You are the assigned approver for this document. Sensitive content stays hidden from your account.'
-                  : accessPolicy.approvalStatus === 'approved'
-                    ? `Sensitive content stays open until ${formatDateTime(accessPolicy.approvalExpiresAt)}.`
-                    : `A second user must approve this document before sensitive content and attachments are available.`}
+                {accessPolicy.approvalStatus === 'approved'
+                  ? `Sensitive content stays open until ${formatDateTime(accessPolicy.approvalExpiresAt)}.`
+                  : accessPolicy.approvalStatus === 'pending'
+                    ? accessPolicy.requestedByCurrentUser
+                      ? `Waiting for ${accessPolicy.approvalTarget?.email || 'the other participant'} to approve this access request.`
+                      : `${accessPolicy.requestedBy?.email || 'The other participant'} requested access. Approve it here to unlock this document for 10 minutes.`
+                    : 'Either vault participant must request access, and the other participant must approve before sensitive content and attachments are available.'}
               </p>
               {accessPolicy.secondApprover?.email ? (
                 <p className="mt-3 text-xs uppercase tracking-[0.18em] text-textMuted">
@@ -216,7 +216,7 @@ export function EntryDetailPage() {
                       await entryQuery.refetch();
                     }}
                   >
-                    {accessPolicy.approvalStatus === 'pending' ? 'Resend request' : 'Request access approval'}
+                    {accessPolicy.approvalStatus === 'pending' && accessPolicy.requestedByCurrentUser ? 'Resend request' : 'Request access approval'}
                   </Button>
                 ) : null}
                 {accessPolicy.canApprove && accessPolicy.approvalStatus !== 'approved' ? (
@@ -332,7 +332,7 @@ export function EntryDetailPage() {
                 ))
               ) : attachmentCount ? (
                 <p className="text-sm text-textMuted">
-                  Attachments are protected until the second approver authorizes access.
+                  Attachments are protected until the other vault participant authorizes access.
                 </p>
               ) : (
                 <p className="text-sm text-textMuted">No files attached to this entry.</p>

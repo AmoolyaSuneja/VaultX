@@ -22,6 +22,45 @@ function isSecondApprover(vaultEntry, userId) {
   return approverId === userId.toString();
 }
 
+function isDualAccessParticipant(vaultEntry, userId) {
+  return isOwner(vaultEntry, userId) || isSecondApprover(vaultEntry, userId);
+}
+
+function getUserSummary(user) {
+  if (!user) {
+    return null;
+  }
+
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email
+  };
+}
+
+function getApprovalRequesterId(vaultEntry) {
+  return vaultEntry?.dualAccess?.requestedBy?._id
+    ? vaultEntry.dualAccess.requestedBy._id.toString()
+    : vaultEntry?.dualAccess?.requestedBy?.toString();
+}
+
+function isApprovalRequester(vaultEntry, userId) {
+  const requesterId = getApprovalRequesterId(vaultEntry);
+  return Boolean(requesterId) && requesterId === userId.toString();
+}
+
+function getCounterparty(vaultEntry, userId) {
+  if (isOwner(vaultEntry, userId)) {
+    return vaultEntry.secondApprover;
+  }
+
+  if (isSecondApprover(vaultEntry, userId)) {
+    return vaultEntry.owner;
+  }
+
+  return null;
+}
+
 function hasActiveDualApproval(vaultEntry) {
   return Boolean(vaultEntry?.dualAccess?.expiresAt) && new Date(vaultEntry.dualAccess.expiresAt).getTime() > Date.now();
 }
@@ -48,6 +87,18 @@ function getApprovalStatus(vaultEntry) {
 
 function buildAccessPolicy(vaultEntry, userId) {
   const role = isOwner(vaultEntry, userId) ? 'owner' : isSecondApprover(vaultEntry, userId) ? 'approver' : 'viewer';
+  const requestedByCurrentUser = isApprovalRequester(vaultEntry, userId);
+  const requester = getUserSummary(vaultEntry?.dualAccess?.requestedBy);
+  const approvalTarget = getUserSummary(getCounterparty(vaultEntry, userId));
+  const canRequestApproval =
+    (role === 'owner' || role === 'approver') &&
+    Boolean(vaultEntry.requiresDualApproval) &&
+    getApprovalStatus(vaultEntry) !== 'approved';
+  const canApprove =
+    (role === 'owner' || role === 'approver') &&
+    Boolean(vaultEntry.requiresDualApproval) &&
+    Boolean(vaultEntry?.dualAccess?.requestedAt) &&
+    !requestedByCurrentUser;
 
   return {
     role,
@@ -59,17 +110,21 @@ function buildAccessPolicy(vaultEntry, userId) {
           email: vaultEntry.secondApprover.email
         }
       : null,
+    owner: vaultEntry.owner && vaultEntry.owner.email ? getUserSummary(vaultEntry.owner) : null,
+    approvalTarget,
+    requestedBy: requester,
+    requestedByCurrentUser,
     approvalStatus: getApprovalStatus(vaultEntry),
     requestedAt: vaultEntry?.dualAccess?.requestedAt || null,
     approvedAt: vaultEntry?.dualAccess?.approvedAt || null,
     approvalExpiresAt: vaultEntry?.dualAccess?.expiresAt || null,
-    canRequestApproval: role === 'owner' && Boolean(vaultEntry.requiresDualApproval),
-    canApprove: role === 'approver' && Boolean(vaultEntry.requiresDualApproval) && Boolean(vaultEntry?.dualAccess?.requestedAt)
+    canRequestApproval,
+    canApprove
   };
 }
 
 function canViewSensitiveContent(vaultEntry, userId) {
-  if (!isOwner(vaultEntry, userId)) {
+  if (!isDualAccessParticipant(vaultEntry, userId)) {
     return false;
   }
 
@@ -365,12 +420,18 @@ const requestVaultAccessApproval = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vault entry not found' });
     }
 
-    if (!isOwner(vaultEntry, req.user._id)) {
-      return res.status(401).json({ success: false, message: 'Only the owner can request dual approval' });
+    if (!isDualAccessParticipant(vaultEntry, req.user._id)) {
+      return res.status(401).json({ success: false, message: 'Only vault participants can request dual approval' });
     }
 
     if (!vaultEntry.requiresDualApproval || !vaultEntry.secondApprover) {
       return res.status(400).json({ success: false, message: 'Dual approval is not enabled for this entry' });
+    }
+
+    const approvalTarget = getCounterparty(vaultEntry, req.user._id);
+
+    if (!approvalTarget?.email) {
+      return res.status(400).json({ success: false, message: 'The other vault participant could not be found' });
     }
 
     vaultEntry.dualAccess = {
@@ -387,7 +448,7 @@ const requestVaultAccessApproval = async (req, res) => {
       user: req.user._id,
       action: 'VAULT_ACCESS_REQUESTED',
       vault: vaultEntry._id,
-      metadata: { secondApproverEmail: vaultEntry.secondApprover.email }
+      metadata: { approvalTargetEmail: approvalTarget.email }
     });
 
     const entryTitle = decrypt(vaultEntry.title);
@@ -397,9 +458,9 @@ const requestVaultAccessApproval = async (req, res) => {
 
     try {
       const emailResult = await sendDualApprovalRequestEmail({
-        to: vaultEntry.secondApprover.email,
-        approverName: vaultEntry.secondApprover.name,
-        ownerName: vaultEntry.owner?.name || req.user.name,
+        to: approvalTarget.email,
+        approverName: approvalTarget.name,
+        ownerName: req.user.name,
         entryTitle,
         approvalUrl
       });
@@ -415,8 +476,8 @@ const requestVaultAccessApproval = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: emailSent
-        ? `Approval email sent to ${vaultEntry.secondApprover.email}`
-        : `Approval request created for ${vaultEntry.secondApprover.email}, but email was not sent${emailErrorMessage ? `: ${emailErrorMessage}` : ''}`,
+        ? `Approval email sent to ${approvalTarget.email}`
+        : `Approval request created for ${approvalTarget.email}, but email was not sent${emailErrorMessage ? `: ${emailErrorMessage}` : ''}`,
       data: formatVaultEntry(vaultEntry, { redactSensitive: true, userId: req.user._id })
     });
   } catch (error) {
@@ -426,14 +487,17 @@ const requestVaultAccessApproval = async (req, res) => {
 
 const approveVaultAccessRequest = async (req, res) => {
   try {
-    const vaultEntry = await Vault.findById(req.params.id).populate('secondApprover', 'name email');
+    const vaultEntry = await Vault.findById(req.params.id)
+      .populate('owner', 'name email')
+      .populate('secondApprover', 'name email')
+      .populate('dualAccess.requestedBy', 'name email');
 
     if (!vaultEntry) {
       return res.status(404).json({ success: false, message: 'Vault entry not found' });
     }
 
-    if (!isSecondApprover(vaultEntry, req.user._id)) {
-      return res.status(401).json({ success: false, message: 'Only the assigned second approver can approve this request' });
+    if (!isDualAccessParticipant(vaultEntry, req.user._id)) {
+      return res.status(401).json({ success: false, message: 'Only vault participants can approve this request' });
     }
 
     if (!vaultEntry.requiresDualApproval) {
@@ -442,6 +506,10 @@ const approveVaultAccessRequest = async (req, res) => {
 
     if (!vaultEntry?.dualAccess?.requestedAt) {
       return res.status(400).json({ success: false, message: 'There is no pending approval request for this entry' });
+    }
+
+    if (isApprovalRequester(vaultEntry, req.user._id)) {
+      return res.status(400).json({ success: false, message: 'The other vault participant must approve this request' });
     }
 
     const approvedAt = new Date();
@@ -472,20 +540,22 @@ const approveVaultAccessRequest = async (req, res) => {
 };
 
 async function resolveOwnedAttachment(req, res) {
-  const vaultEntry = await Vault.findById(req.params.id);
+  const vaultEntry = await Vault.findById(req.params.id)
+    .populate('owner', 'name email')
+    .populate('secondApprover', 'name email');
 
   if (!vaultEntry) {
     res.status(404).json({ success: false, message: 'Vault entry not found' });
     return null;
   }
 
-  if (!isOwner(vaultEntry, req.user._id)) {
+  if (!isDualAccessParticipant(vaultEntry, req.user._id)) {
     res.status(401).json({ success: false, message: 'Not authorized to access this attachment' });
     return null;
   }
 
   if (!canViewSensitiveContent(vaultEntry, req.user._id)) {
-    res.status(403).json({ success: false, message: 'A second approver must approve access before attachments can be opened' });
+    res.status(403).json({ success: false, message: 'The other vault participant must approve access before attachments can be opened' });
     return null;
   }
 

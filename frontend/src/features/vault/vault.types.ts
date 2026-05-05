@@ -8,6 +8,22 @@ export interface VaultAccessPolicy {
     name: string;
     email: string;
   } | null;
+  owner?: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
+  approvalTarget?: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
+  requestedBy?: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
+  requestedByCurrentUser: boolean;
   approvalStatus: 'not_required' | 'awaiting_request' | 'pending' | 'approved' | 'expired';
   requestedAt?: string | null;
   approvedAt?: string | null;
