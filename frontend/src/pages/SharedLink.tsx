@@ -38,7 +38,7 @@ export function SharedLinkPage() {
       <div className="mx-auto flex min-h-screen max-w-xl items-center px-4 py-10">
         <Card className="w-full rounded-xl">
           <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Protected link</p>
-          <h1 className="mt-3 font-heading text-3xl text-textPrimary">Link unavailable</h1>
+          <h1 className="mt-3 font-heading text-2xl text-textPrimary sm:text-3xl">Link unavailable</h1>
           <p className="mt-3 text-sm leading-7 text-textMuted">This shared link does not exist anymore or was entered incorrectly.</p>
         </Card>
       </div>
@@ -57,7 +57,7 @@ export function SharedLinkPage() {
           </div>
 
           <p className="mt-6 text-xs uppercase tracking-[0.22em] text-textMuted">Protected document</p>
-          <h1 className="mt-3 font-heading text-3xl text-textPrimary">Enter password to continue</h1>
+          <h1 className="mt-3 font-heading text-2xl text-textPrimary sm:text-3xl">Enter password to continue</h1>
           <p className="mt-3 text-sm leading-7 text-textMuted">
             This link grants access to one shared document only. Enter the password to unlock the download option.
           </p>
@@ -71,9 +71,10 @@ export function SharedLinkPage() {
               placeholder="Enter shared password"
             />
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               <Button
                 type="button"
+                className="w-full sm:w-auto"
                 loading={loading}
                 onClick={async () => {
                   try {
@@ -107,6 +108,7 @@ export function SharedLinkPage() {
                 <Button
                   type="button"
                   variant="secondary"
+                  className="w-full sm:w-auto"
                   loading={downloading}
                   onClick={async () => {
                     try {
@@ -132,13 +134,13 @@ export function SharedLinkPage() {
 
             {accessToken && kind === 'pdf' ? (
               <div className="overflow-hidden rounded-xl border border-line bg-surface-raised">
-                <iframe src={previewUrl} title="Protected PDF preview" className="h-[500px] w-full" />
+                <iframe src={previewUrl} title="Protected PDF preview" className="h-[60vh] min-h-80 w-full sm:h-[500px]" />
               </div>
             ) : null}
 
             {accessToken && kind === 'image' ? (
               <div className="overflow-hidden rounded-xl border border-line bg-surface-raised">
-                <img src={previewUrl} alt="Protected document preview" className="max-h-[500px] w-full object-contain" />
+                <img src={previewUrl} alt="Protected document preview" className="max-h-[60vh] w-full object-contain sm:max-h-[500px]" />
               </div>
             ) : null}
           </div>

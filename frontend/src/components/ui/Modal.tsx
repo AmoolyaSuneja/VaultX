@@ -20,12 +20,12 @@ export function Modal({ open, onClose, children }: ModalProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.14 }}
           />
-          <div className="fixed inset-0 overflow-y-auto p-4">
-            <div className="mx-auto mt-20 flex min-h-full max-w-md items-start justify-center">
+          <div className="fixed inset-0 overflow-y-auto px-3 py-4 sm:p-4">
+            <div className="mx-auto flex min-h-full max-w-md items-end justify-center sm:items-start sm:pt-20">
               <DialogPanel className="w-full">
                 <motion.div
                   {...scaleIn}
-                  className="w-full transform-gpu rounded-xl border border-line bg-panel p-6 shadow-card backdrop-blur-panel will-change-transform"
+                  className="w-full transform-gpu rounded-xl border border-line bg-panel p-4 shadow-card backdrop-blur-panel will-change-transform sm:p-6"
                 >
                   {children}
                 </motion.div>

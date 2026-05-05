@@ -13,10 +13,10 @@ export function SettingsPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.28em] text-textMuted">Settings</p>
-        <h1 className="mt-3 font-heading text-4xl text-textPrimary">Tune how the vault behaves.</h1>
+        <h1 className="mt-3 font-heading text-3xl text-textPrimary sm:text-4xl">Tune how the vault behaves.</h1>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 xl:grid-cols-2">
         <Card className="rounded-xl">
           <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Security</p>
           <div className="mt-5 grid gap-4">

@@ -17,8 +17,8 @@ export function TopBar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-panel/90 backdrop-blur-panel">
-      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <Link to="/vault" className="min-w-fit font-heading text-2xl text-textPrimary">
+      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
+        <Link to="/vault" className="min-w-fit font-heading text-xl text-textPrimary sm:text-2xl">
           Secure Vault
         </Link>
 
@@ -34,7 +34,7 @@ export function TopBar() {
           </label>
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={toggleTheme}
@@ -46,7 +46,7 @@ export function TopBar() {
           </button>
 
           <Menu as="div" className="relative">
-            <MenuButton className="focus-ring flex items-center gap-3 rounded-full border border-line bg-surface-soft py-1.5 pl-1.5 pr-3 transition hover:border-brand/40 hover:bg-surface-raised">
+            <MenuButton className="focus-ring flex items-center gap-3 rounded-full border border-line bg-surface-soft p-1.5 transition hover:border-brand/40 hover:bg-surface-raised sm:py-1.5 sm:pl-1.5 sm:pr-3">
               <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand text-xs font-semibold text-background">
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt={user?.name ?? 'Profile'} className="h-full w-full object-cover" />

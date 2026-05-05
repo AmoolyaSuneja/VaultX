@@ -22,7 +22,7 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
       <button
         type="button"
         className={cn(
-          'focus-ring flex min-h-[140px] flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed px-4 py-6 text-center transition',
+          'focus-ring flex min-h-[120px] flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed px-4 py-5 text-center transition sm:min-h-[140px] sm:py-6',
           dragging ? 'border-brand bg-brand-light' : 'border-line bg-surface-soft hover:border-brand/40 hover:bg-surface-raised'
         )}
         onDragEnter={() => setDragging(true)}
@@ -55,7 +55,7 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
             href={file}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-between rounded-md border border-line bg-surface-soft px-3 py-2 text-sm transition hover:border-brand/40 hover:bg-surface-raised"
+            className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface-soft px-3 py-2 text-sm transition hover:border-brand/40 hover:bg-surface-raised"
           >
             <span className="flex min-w-0 items-center gap-2 truncate text-textPrimary">
               <FileText className="h-4 w-4 text-brand" />
@@ -69,7 +69,7 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
         ))}
 
         {files.map((file, index) => (
-          <div key={`${file.name}-${index}`} className="flex items-center justify-between rounded-md border border-line bg-surface-soft px-3 py-2 text-sm">
+          <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface-soft px-3 py-2 text-sm">
             <span className="flex min-w-0 items-center gap-2 text-textPrimary">
               <FileText className="h-4 w-4 text-brand" />
               <span className="truncate">{file.name}</span>

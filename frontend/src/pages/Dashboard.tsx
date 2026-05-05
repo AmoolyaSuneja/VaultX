@@ -63,42 +63,42 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const updateMutation = useUpdateEntry(editingEntry?._id ?? '');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-textMuted">Vault dashboard</p>
         </div>
-        <Button onClick={() => navigate('/vault/new')} className="justify-center">
+        <Button onClick={() => navigate('/vault/new')} className="w-full justify-center sm:w-auto">
           New entry
         </Button>
       </div>
 
       <StatsStrip stats={stats} />
 
-      <div className="sticky top-16 z-30 rounded-xl border border-line bg-panel/90 p-4 shadow-soft backdrop-blur-panel">
+      <div className="sticky top-16 z-30 rounded-lg border border-line bg-panel/95 p-3 shadow-soft backdrop-blur-panel sm:rounded-xl sm:p-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
-          <label className="focus-within:shadow-focus flex flex-1 items-center gap-3 rounded-md border border-line bg-panel/80 px-4 py-3 transition focus-within:border-brand">
+          <label className="focus-within:shadow-focus flex min-w-0 flex-1 items-center gap-3 rounded-md border border-line bg-panel/80 px-3 py-3 transition focus-within:border-brand sm:px-4">
             <Search className="h-4 w-4 text-textMuted" />
             <input
               id="vault-search"
               value={localSearch}
               onChange={(event) => setLocalSearch(event.target.value)}
               placeholder="Search titles, usernames, notes, or URLs"
-              className="flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/70"
+              className="min-w-0 flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/70"
             />
             <span className="hidden rounded-full border border-line bg-surface-muted px-2 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted md:inline-flex">
               Cmd+K
             </span>
           </label>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
             <Listbox value={selectedCategories} onChange={setSelectedCategories} multiple>
               <div className="relative">
-                <Listbox.Button className="focus-ring flex items-center gap-2 rounded-full border border-line bg-surface-soft px-4 py-2 text-sm text-textPrimary">
+                <Listbox.Button className="focus-ring flex min-h-11 w-full items-center justify-between gap-2 rounded-full border border-line bg-surface-soft px-4 py-2 text-sm text-textPrimary sm:w-auto">
                   Category
                   <ChevronDown className="h-4 w-4 text-textMuted" />
                 </Listbox.Button>
-                <Listbox.Options className="absolute right-0 z-40 mt-2 max-h-72 w-64 overflow-auto rounded-xl border border-line bg-panel p-2 shadow-card backdrop-blur-panel">
+                <Listbox.Options className="absolute right-0 z-40 mt-2 max-h-72 w-[min(18rem,calc(100vw-2rem))] overflow-auto rounded-xl border border-line bg-panel p-2 shadow-card backdrop-blur-panel">
                   {categories.map((category) => {
                     const selected = selectedCategories.includes(category);
                     return (
@@ -122,7 +122,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
 
             <Listbox value={sort} onChange={setSort}>
               <div className="relative">
-                <Listbox.Button className="focus-ring flex items-center gap-2 rounded-full border border-line bg-surface-soft px-4 py-2 text-sm text-textPrimary">
+                <Listbox.Button className="focus-ring flex min-h-11 w-full items-center justify-between gap-2 rounded-full border border-line bg-surface-soft px-4 py-2 text-sm text-textPrimary sm:w-auto">
                   {sortOptions.find((option) => option.value === sort)?.label}
                   <ChevronDown className="h-4 w-4 text-textMuted" />
                 </Listbox.Button>

@@ -18,7 +18,7 @@ export function StatsStrip({ stats }: StatsStripProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
       {items.map((item, index) => {
         const Icon = icons[index];
 
@@ -29,7 +29,7 @@ export function StatsStrip({ stats }: StatsStripProps) {
                 <p className="text-xs uppercase tracking-[0.22em] text-textMuted">{item.label}</p>
                 <p className="mt-3 text-2xl font-semibold text-textPrimary">{item.value}</p>
               </div>
-              <span className="rounded-full bg-brand-light p-2 text-brand">
+              <span className="shrink-0 rounded-full bg-brand-light p-2 text-brand">
                 <Icon className="h-5 w-5" />
               </span>
             </div>

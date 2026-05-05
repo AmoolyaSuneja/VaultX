@@ -122,11 +122,11 @@ export function EntryDetailPage() {
 
   if (locked) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <Badge>{entry.category || 'General'}</Badge>
-            <h1 className="mt-4 font-heading text-4xl text-textPrimary">{entry.title}</h1>
+            <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:mt-4 sm:text-4xl">{entry.title}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-textMuted">
               This entry is time-locked. Sensitive content and attachments will unlock automatically when the scheduled time arrives.
             </p>
@@ -171,14 +171,14 @@ export function EntryDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <Badge>{entry.category || 'General'}</Badge>
-          <h1 className="mt-4 font-heading text-4xl text-textPrimary">{entry.title}</h1>
+          <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:mt-4 sm:text-4xl">{entry.title}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-textMuted">{entry.notes || entry.data || 'No notes saved yet.'}</p>
         </div>
-        <Button variant="ghost" onClick={() => navigate('/vault')}>
+        <Button variant="ghost" onClick={() => navigate('/vault')} className="w-full sm:w-auto">
           Back to vault
         </Button>
       </div>
@@ -333,7 +333,7 @@ export function EntryDetailPage() {
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="focus-ring fixed bottom-24 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-background shadow-card transition hover:-translate-y-px lg:bottom-8"
+        className="focus-ring fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-background shadow-card transition hover:-translate-y-px sm:right-6 lg:bottom-8"
       >
         <Pencil className="h-4 w-4" />
         Edit
@@ -397,15 +397,16 @@ export function EntryDetailPage() {
             />
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
             {generatedLink ? (
-              <Button type="button" variant="secondary" onClick={() => window.open(generatedLink, '_blank', 'noopener,noreferrer')}>
+              <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={() => window.open(generatedLink, '_blank', 'noopener,noreferrer')}>
                 Open link
               </Button>
             ) : null}
             <Button
               type="button"
               variant="ghost"
+              className="w-full sm:w-auto"
               onClick={() => {
                 setShareTarget(null);
                 setSharePassword('');
@@ -416,6 +417,7 @@ export function EntryDetailPage() {
             </Button>
             <Button
               type="button"
+              className="w-full sm:w-auto"
               loading={createShareLinkMutation.isPending}
               onClick={async () => {
                 if (!shareTarget) return;
@@ -459,7 +461,7 @@ function DetailRow({
         <p className="text-xs uppercase tracking-[0.22em] text-textMuted">{label}</p>
         {action}
       </div>
-      <div className={multiline ? 'rounded-lg bg-surface p-4 text-sm leading-7 text-textPrimary' : 'text-lg font-medium text-textPrimary'}>
+      <div className={multiline ? 'break-words rounded-lg bg-surface p-4 text-sm leading-7 text-textPrimary' : 'break-words text-base font-medium text-textPrimary sm:text-lg'}>
         {value || 'Not provided'}
       </div>
     </div>
@@ -470,7 +472,7 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-surface-soft p-4">
       <p className="text-xs uppercase tracking-[0.2em] text-textMuted">{label}</p>
-      <p className="mt-2 text-sm font-medium text-textPrimary">{value}</p>
+      <p className="mt-2 break-words text-sm font-medium text-textPrimary">{value}</p>
     </div>
   );
 }
@@ -586,7 +588,7 @@ function AttachmentCard({
 
   return (
     <div className="group rounded-xl border border-line bg-surface-soft p-3 transition hover:border-brand/40 hover:bg-surface-raised">
-      <div className="flex items-start gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-light text-brand">
           {image ? <FileImage className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
         </div>
@@ -596,7 +598,7 @@ function AttachmentCard({
             {image ? 'Image attachment' : pdf ? 'PDF document' : 'Stored attachment'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 sm:justify-start">
           <button
             type="button"
             onClick={async () => {

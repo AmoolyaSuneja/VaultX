@@ -49,7 +49,7 @@ export function ApproveAccessPage() {
         </div>
 
         <p className="mt-6 text-xs uppercase tracking-[0.22em] text-textMuted">Vault access</p>
-        <h1 className="mt-3 font-heading text-3xl text-textPrimary">
+        <h1 className="mt-3 font-heading text-2xl text-textPrimary sm:text-3xl">
           {state === 'success' ? 'Access granted successfully' : state === 'error' ? 'Approval failed' : 'Granting access'}
         </h1>
         <p className="mt-3 text-sm leading-7 text-textMuted">
@@ -58,7 +58,7 @@ export function ApproveAccessPage() {
         </p>
 
         <div className="mt-6">
-          <Button type="button" variant={state === 'success' ? 'secondary' : 'primary'} onClick={() => navigate('/')}>
+          <Button type="button" className="w-full sm:w-auto" variant={state === 'success' ? 'secondary' : 'primary'} onClick={() => navigate('/')}>
             Open VaultX
           </Button>
         </div>

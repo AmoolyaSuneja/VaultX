@@ -8,7 +8,7 @@ export function AppShell() {
       <TopBar />
 
       <div className="mx-auto flex max-w-[1600px] pt-16">
-        <main className="min-h-[calc(100vh-4rem)] flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8">
+        <main className="min-h-[calc(100vh-4rem)] flex-1 px-3 pb-[calc(6.75rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pb-8">
           <Outlet />
         </main>
       </div>

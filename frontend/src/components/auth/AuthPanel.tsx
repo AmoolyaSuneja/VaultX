@@ -96,10 +96,10 @@ export function AuthPanel() {
   );
 
   return (
-    <div className="glass-panel relative mx-auto w-full max-w-[430px] transform-gpu overflow-hidden rounded-xl p-7 shadow-card">
+    <div className="glass-panel relative mx-auto w-full max-w-[430px] transform-gpu overflow-hidden rounded-xl p-5 shadow-card sm:p-7">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/45 to-transparent" />
-      <div className="mb-8 text-center">
-        <h2 className="mt-3 font-heading text-4xl leading-tight text-textPrimary">
+      <div className="mb-6 text-center sm:mb-8">
+        <h2 className="mt-3 font-heading text-3xl leading-tight text-textPrimary sm:text-4xl">
           {heading}
         </h2>
       </div>

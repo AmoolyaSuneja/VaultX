@@ -71,12 +71,12 @@ export function ProfilePage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.28em] text-textMuted">Profile</p>
-        <h1 className="mt-3 font-heading text-4xl text-textPrimary">Keep your identity up to date.</h1>
+        <h1 className="mt-3 font-heading text-3xl text-textPrimary sm:text-4xl">Keep your identity up to date.</h1>
       </div>
 
       <Card className="rounded-xl">
         <form onSubmit={handleSubmit} className="grid gap-6">
-          <div className="flex flex-wrap items-center gap-6">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
             <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-raised text-lg font-semibold text-textPrimary">
               {previewUrl ? (
                 <img src={previewUrl} alt="Profile" className="h-full w-full object-cover" />
@@ -106,7 +106,7 @@ export function ProfilePage() {
           <Input label="Email" value={user?.email ?? ''} disabled />
 
           <div className="flex justify-end">
-            <Button type="submit" loading={isSaving} disabled={isSaving}>
+            <Button type="submit" className="w-full sm:w-auto" loading={isSaving} disabled={isSaving}>
               Save profile
             </Button>
           </div>

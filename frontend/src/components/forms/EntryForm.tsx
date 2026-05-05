@@ -163,17 +163,17 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="pointer-events-none fixed inset-y-0 right-0 flex w-screen max-w-full justify-end">
-              <DialogPanel className="pointer-events-auto h-full w-full max-w-2xl sm:max-w-lg">
+              <DialogPanel className="pointer-events-auto h-full w-full sm:max-w-lg lg:max-w-2xl">
                 <motion.div
                   {...slideRight}
                   className="relative flex h-full w-full transform-gpu flex-col border-l border-line bg-panel shadow-card backdrop-blur-panel will-change-transform"
                 >
-                <div className="flex items-start justify-between border-b border-line px-6 py-5">
+                <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-4 sm:px-6 sm:py-5">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-textMuted">
                       {mode === 'create' ? 'Create entry' : 'Edit entry'}
                     </p>
-                    <h3 className="mt-2 font-heading text-3xl text-textPrimary">
+                    <h3 className="mt-2 font-heading text-2xl text-textPrimary sm:text-3xl">
                       {mode === 'create' ? 'Capture something important' : 'Refine vault details'}
                     </h3>
                   </div>
@@ -189,7 +189,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                 </div>
 
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
-                  <div className="scrollbar-thin flex-1 space-y-8 overflow-y-auto px-6 py-6">
+                  <div className="scrollbar-thin flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:space-y-8 sm:px-6 sm:py-6">
                     <section className="space-y-4">
                       <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Basic info</p>
                       <Input
@@ -285,11 +285,11 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                     </section>
                   </div>
 
-                  <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-line bg-panel/95 px-6 py-4 backdrop-blur-panel">
-                    <Button type="button" variant="ghost" onClick={closePanel} disabled={isSubmitting}>
+                  <div className="sticky bottom-0 grid gap-3 border-t border-line bg-panel/95 px-4 py-4 backdrop-blur-panel sm:flex sm:items-center sm:justify-end sm:px-6">
+                    <Button type="button" variant="ghost" className="w-full sm:w-auto" onClick={closePanel} disabled={isSubmitting}>
                       Cancel
                     </Button>
-                    <Button type="submit" loading={submitState === 'saving'} disabled={isSubmitting}>
+                    <Button type="submit" className="w-full sm:w-auto" loading={submitState === 'saving'} disabled={isSubmitting}>
                       {submitState === 'saved' ? <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> : null}
                       {submitLabel}
                     </Button>
