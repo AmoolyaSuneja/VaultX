@@ -1,5 +1,5 @@
 function trimTrailingSlash(value) {
-  return value ? value.replace(/\/+$/, '') : '';
+  return value ? value.trim().replace(/\/+$/, '') : '';
 }
 
 function getConfiguredAppUrl() {
