@@ -2,8 +2,26 @@ function trimTrailingSlash(value) {
   return value ? value.trim().replace(/\/+$/, '') : '';
 }
 
+function getValidOrigin(value) {
+  if (!value || typeof value !== 'string') {
+    return '';
+  }
+
+  try {
+    const parsed = new URL(value.trim());
+
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return '';
+    }
+
+    return trimTrailingSlash(parsed.origin);
+  } catch {
+    return '';
+  }
+}
+
 function getConfiguredAppUrl() {
-  const explicitUrl = trimTrailingSlash(process.env.APP_URL || process.env.FRONTEND_URL || '');
+  const explicitUrl = getValidOrigin(process.env.APP_URL || process.env.FRONTEND_URL || '');
 
   if (explicitUrl) {
     return explicitUrl;
@@ -17,6 +35,12 @@ function getConfiguredAppUrl() {
 }
 
 function getRequestOrigin(req) {
+  const browserOrigin = getValidOrigin(req.get('x-app-origin') || req.get('origin') || '');
+
+  if (browserOrigin) {
+    return browserOrigin;
+  }
+
   const configuredUrl = getConfiguredAppUrl();
 
   if (configuredUrl) {
@@ -37,5 +61,6 @@ function buildAppUrl(req, path = '/') {
 module.exports = {
   buildAppUrl,
   getConfiguredAppUrl,
-  getRequestOrigin
+  getRequestOrigin,
+  getValidOrigin
 };

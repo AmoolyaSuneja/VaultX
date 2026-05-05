@@ -21,6 +21,25 @@ async function request<T>(path: string, init: RequestInit = {}) {
   return payload as T;
 }
 
+function getBrowserOrigin() {
+  return typeof window !== 'undefined' ? window.location.origin : '';
+}
+
+function normalizeAppLink(link: string, fallbackPath: string) {
+  const origin = getBrowserOrigin();
+
+  if (!origin) {
+    return link;
+  }
+
+  try {
+    const parsed = new URL(link, origin);
+    return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return `${origin}${fallbackPath.startsWith('/') ? fallbackPath : `/${fallbackPath}`}`;
+  }
+}
+
 export function authHeaders(token: string): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -82,14 +101,21 @@ export async function deleteVaultEntry(token: string, id: string) {
 }
 
 export async function createShareLink(token: string, id: string, payload: { filePath: string; password: string }) {
-  return request<{ data: { shareId: string; link: string }; message: string }>(`/api/vault/${id}/share-link`, {
+  const response = await request<{ data: { shareId: string; link: string }; message: string }>(`/api/vault/${id}/share-link`, {
     method: 'POST',
     headers: {
       ...authHeaders(token),
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...(getBrowserOrigin() ? { 'X-App-Origin': getBrowserOrigin() } : {})
     },
     body: JSON.stringify(payload)
   });
+
+  if (response.data?.shareId) {
+    response.data.link = normalizeAppLink(response.data.link, `/shared/${response.data.shareId}`);
+  }
+
+  return response;
 }
 
 export async function requestEntryApproval(token: string, id: string) {
