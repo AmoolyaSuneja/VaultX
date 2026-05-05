@@ -7,7 +7,7 @@ import { EntryForm } from '@/components/forms/EntryForm';
 import { Badge, Button, Card, Input, Modal } from '@/components/ui';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { ApiError, authHeaders } from '@/features/vault/vault.service';
-import { useApproveEntryAccess, useCreateShareLink, useRequestEntryApproval, useVaultEntry, useUpdateEntry } from '@/features/vault/useVault';
+import { useCreateShareLink, useRequestEntryApproval, useVaultEntry, useUpdateEntry } from '@/features/vault/useVault';
 import {
   copyToClipboard,
   downloadProtectedResource,
@@ -28,7 +28,6 @@ export function EntryDetailPage() {
   const updateMutation = useUpdateEntry(id);
   const createShareLinkMutation = useCreateShareLink(id);
   const requestApprovalMutation = useRequestEntryApproval(id);
-  const approveAccessMutation = useApproveEntryAccess(id);
   const [revealed, setRevealed] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(30);
   const [editing, setEditing] = useState(false);
@@ -197,8 +196,8 @@ export function EntryDetailPage() {
                   ? `Sensitive content stays open until ${formatDateTime(accessPolicy.approvalExpiresAt)}.`
                   : accessPolicy.approvalStatus === 'pending'
                     ? accessPolicy.requestedByCurrentUser
-                      ? `Waiting for ${accessPolicy.approvalTarget?.email || 'the other participant'} to approve this access request.`
-                      : `${accessPolicy.requestedBy?.email || 'The other participant'} requested access. Approve it here to unlock this document for 10 minutes.`
+                      ? `Waiting for ${accessPolicy.approvalTarget?.email || 'the other participant'} to approve this access request from the email link.`
+                      : `${accessPolicy.requestedBy?.email || 'The other participant'} requested access. Use the approval email to grant access for 10 minutes.`
                     : 'Either vault participant must request access, and the other participant must approve before sensitive content and attachments are available.'}
               </p>
               {accessPolicy.secondApprover?.email ? (
@@ -217,18 +216,6 @@ export function EntryDetailPage() {
                     }}
                   >
                     {accessPolicy.approvalStatus === 'pending' && accessPolicy.requestedByCurrentUser ? 'Resend request' : 'Request access approval'}
-                  </Button>
-                ) : null}
-                {accessPolicy.canApprove && accessPolicy.approvalStatus !== 'approved' ? (
-                  <Button
-                    type="button"
-                    loading={approveAccessMutation.isPending}
-                    onClick={async () => {
-                      await approveAccessMutation.mutateAsync();
-                      await entryQuery.refetch();
-                    }}
-                  >
-                    Approve access
                   </Button>
                 ) : null}
               </div>

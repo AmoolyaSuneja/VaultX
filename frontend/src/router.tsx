@@ -6,6 +6,7 @@ import { AuthPage } from '@/pages/Auth';
 import { DashboardPage } from '@/pages/Dashboard';
 import { EntryDetailPage } from '@/pages/EntryDetail';
 import { ProfilePage } from '@/pages/Profile';
+import { ApproveAccessPage } from '@/pages/ApproveAccess';
 import { SharedLinkPage } from '@/pages/SharedLink';
 
 function AnimatedRouteOutlet() {
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
   {
     path: '/shared/:shareId',
     element: <SharedLinkPage />
+  },
+  {
+    path: '/approve-access/:token',
+    element: <ApproveAccessPage />
   },
   {
     element: <ProtectedLayout />,

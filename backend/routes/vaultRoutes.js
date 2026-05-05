@@ -13,11 +13,13 @@ const {
   deleteVaultEntry,
   requestVaultAccessApproval,
   approveVaultAccessRequest,
+  approveVaultAccessFromEmail,
   previewVaultAttachment,
   downloadVaultAttachment
 } = require('../controllers/vaultController');
 
 router.get('/', protect, getAllVaultEntries);
+router.post('/approve-email', approveVaultAccessFromEmail);
 router.get('/:id', protect, getVaultEntryById);
 router.get('/:id/attachments/:attachmentIndex/preview', protect, previewVaultAttachment);
 router.get('/:id/attachments/:attachmentIndex/download', protect, downloadVaultAttachment);
