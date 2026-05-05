@@ -1,4 +1,4 @@
-import type { LoginValues, RegisterValues } from '@/lib/validators';
+import type { ForgotPasswordValues, LoginValues, RegisterValues, ResetPasswordValues } from '@/lib/validators';
 import type { AuthUser } from './auth.store';
 import { requestJson } from '@/lib/request';
 
@@ -23,6 +23,24 @@ export function loginUser(values: LoginValues) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(values)
+  });
+}
+
+export function requestPasswordReset(values: ForgotPasswordValues) {
+  return requestJson<{ message: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(values)
+  });
+}
+
+export function resetPassword(values: ResetPasswordValues) {
+  const { confirmPassword, ...body } = values;
+  void confirmPassword;
+  return requestJson<{ message: string }>('/api/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
   });
 }
 

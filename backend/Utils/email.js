@@ -2,21 +2,31 @@ const nodemailer = require('nodemailer');
 
 let cachedTransporter = null;
 
+function readEnv(name) {
+  const value = process.env[name];
+
+  if (!value) {
+    return '';
+  }
+
+  return value.trim().replace(/^['"]|['"]$/g, '');
+}
+
 function getEmailConfig() {
-  const user = process.env.SMTP_USER || process.env.GMAIL_USER || process.env.GMAIL_EMAIL;
-  const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASSWORD;
+  const user = readEnv('SMTP_USER') || readEnv('GMAIL_USER') || readEnv('GMAIL_EMAIL');
+  const pass = readEnv('SMTP_PASS') || readEnv('GMAIL_APP_PASSWORD') || readEnv('GMAIL_PASSWORD');
 
   if (!user || !pass) {
     return null;
   }
 
   return {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : true,
+    host: readEnv('SMTP_HOST') || 'smtp.gmail.com',
+    port: Number(readEnv('SMTP_PORT') || 465),
+    secure: readEnv('SMTP_SECURE') ? readEnv('SMTP_SECURE') === 'true' : true,
     user,
     pass,
-    from: process.env.MAIL_FROM || process.env.SMTP_FROM || user
+    from: readEnv('MAIL_FROM') || readEnv('SMTP_FROM') || user
   };
 }
 
@@ -105,6 +115,50 @@ async function sendDualApprovalRequestEmail({ to, approverName, ownerName, entry
   return { sent: true, skipped: false };
 }
 
+async function sendPasswordResetCodeEmail({ to, name, code }) {
+  const mailer = getTransporter();
+
+  if (!mailer) {
+    console.warn('Password reset email skipped: SMTP_USER/GMAIL_USER and SMTP_PASS/GMAIL_APP_PASSWORD are not configured.');
+    return { sent: false, skipped: true };
+  }
+
+  const safeName = name || 'there';
+  const htmlName = escapeHtml(safeName);
+  const htmlCode = escapeHtml(code);
+  const subject = 'VaultX password recovery code';
+  const text = [
+    `Hi ${safeName},`,
+    '',
+    `Your VaultX password recovery code is: ${code}`,
+    '',
+    'This code expires in 10 minutes. If you did not request this, you can ignore this email.',
+    '',
+    'VaultX'
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6">
+      <p>Hi ${htmlName},</p>
+      <p>Your VaultX password recovery code is:</p>
+      <p style="font-size:28px;letter-spacing:8px;font-weight:700;margin:16px 0">${htmlCode}</p>
+      <p>This code expires in 10 minutes. If you did not request this, you can ignore this email.</p>
+      <p>VaultX</p>
+    </div>
+  `;
+
+  await mailer.transporter.sendMail({
+    from: mailer.from,
+    to,
+    subject,
+    text,
+    html
+  });
+
+  return { sent: true, skipped: false };
+}
+
 module.exports = {
-  sendDualApprovalRequestEmail
+  sendDualApprovalRequestEmail,
+  sendPasswordResetCodeEmail
 };

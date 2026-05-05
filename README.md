@@ -34,6 +34,9 @@ Set these environment variables in Vercel before deploying:
 - `MAIL_FROM`
 
 For Gmail, create an App Password in your Google account and use it as `GMAIL_APP_PASSWORD`.
+If you use custom SMTP instead, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, and `SMTP_PASS`.
+For example, Brevo uses `smtp-relay.brevo.com`, port `587`, `SMTP_SECURE=false`, and the SMTP login/password from Brevo's SMTP settings.
+The `535 5.7.8 Authentication failed` error means the provider rejected those SMTP credentials.
 When a two-person access request is created, VaultX emails the assigned approver a link to the deployed entry page.
 Protected file share links are also generated with the deployed app URL.
 

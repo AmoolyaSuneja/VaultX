@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { loginUser, registerUser, verifyOtp } from './auth.service';
+import { loginUser, registerUser, requestPasswordReset, resetPassword, verifyOtp } from './auth.service';
 import { useAuthStore } from './auth.store';
 
 export function useLogin() {
@@ -20,6 +20,24 @@ export function useRegister() {
     mutationFn: registerUser,
     onSuccess: (data) => {
       toast.success(data.message || `Account created for ${data.user.name}`);
+    }
+  });
+}
+
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: requestPasswordReset,
+    onSuccess: (data) => {
+      toast.success(data.message || 'Recovery code sent');
+    }
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: resetPassword,
+    onSuccess: (data) => {
+      toast.success(data.message || 'Password reset successfully');
     }
   });
 }
