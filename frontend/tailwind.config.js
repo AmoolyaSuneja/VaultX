@@ -10,36 +10,36 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#F0F6FF',
-        panel: 'rgba(246, 248, 255, 0.92)',
-        surface: '#F6F8FF',
-        'surface-soft': '#EEF3FB',
-        'surface-muted': '#E6EDF8',
-        'surface-raised': '#FFFFFF',
-        'surface-sunken': '#DCE6F3',
+        background: 'hsl(var(--color-background) / <alpha-value>)',
+        panel: 'hsl(var(--color-panel) / <alpha-value>)',
+        surface: 'hsl(var(--color-surface) / <alpha-value>)',
+        'surface-soft': 'hsl(var(--color-surface-soft) / <alpha-value>)',
+        'surface-muted': 'hsl(var(--color-surface-muted) / <alpha-value>)',
+        'surface-raised': 'hsl(var(--color-surface-raised) / <alpha-value>)',
+        'surface-sunken': 'hsl(var(--color-surface-sunken) / <alpha-value>)',
         brand: {
-          DEFAULT: '#1F5FA6',
-          deep: '#0B3060',
-          light: '#C9DEFF',
-          muted: 'rgba(31, 95, 166, 0.12)'
+          DEFAULT: 'hsl(var(--color-brand) / <alpha-value>)',
+          deep: 'hsl(var(--color-brand-deep) / <alpha-value>)',
+          light: 'hsl(var(--color-brand-light) / <alpha-value>)',
+          muted: 'hsl(var(--color-brand-muted) / <alpha-value>)'
         },
         accent: {
-          DEFAULT: '#5B9BD5',
-          light: '#DDE9FB',
-          muted: 'rgba(91, 155, 213, 0.14)'
+          DEFAULT: 'hsl(var(--color-accent) / <alpha-value>)',
+          light: 'hsl(var(--color-accent-light) / <alpha-value>)',
+          muted: 'hsl(var(--color-accent-muted) / <alpha-value>)'
         },
         steel: {
-          DEFAULT: '#607D8B',
-          light: '#B8C6D8',
-          muted: 'rgba(96, 125, 139, 0.16)'
+          DEFAULT: 'hsl(var(--color-steel) / <alpha-value>)',
+          light: 'hsl(var(--color-steel-light) / <alpha-value>)',
+          muted: 'hsl(var(--color-steel-muted) / <alpha-value>)'
         },
         danger: {
-          DEFAULT: '#B34B54',
-          light: 'rgba(179, 75, 84, 0.10)'
+          DEFAULT: 'hsl(var(--color-danger) / <alpha-value>)',
+          light: 'hsl(var(--color-danger-light) / <alpha-value>)'
         },
-        line: 'rgba(96, 125, 139, 0.22)',
-        textPrimary: '#183B63',
-        textMuted: '#607D8B'
+        line: 'hsl(var(--color-line) / <alpha-value>)',
+        textPrimary: 'hsl(var(--color-text-primary) / <alpha-value>)',
+        textMuted: 'hsl(var(--color-text-muted) / <alpha-value>)'
       },
       fontFamily: {
         sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],

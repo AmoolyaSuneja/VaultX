@@ -1,7 +1,8 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { LogOut, Search, UserCircle2 } from 'lucide-react';
+import { LogOut, Moon, Search, Sun, UserCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
+import { useSettingsStore } from '@/features/settings/settings.store';
 import { useVaultStore } from '@/features/vault/vault.store';
 import { getInitials } from '@/lib/utils';
 
@@ -9,6 +10,8 @@ export function TopBar() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const theme = useSettingsStore((state) => state.theme);
+  const toggleTheme = useSettingsStore((state) => state.toggleTheme);
   const search = useVaultStore((state) => state.search);
   const setSearch = useVaultStore((state) => state.setSearch);
 
@@ -32,6 +35,16 @@ export function TopBar() {
         </div>
 
         <div className="ml-auto flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="focus-ring flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-soft text-textMuted transition hover:border-brand/40 hover:bg-surface-raised hover:text-brand"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
           <Menu as="div" className="relative">
             <MenuButton className="focus-ring flex items-center gap-3 rounded-full border border-line bg-surface-soft py-1.5 pl-1.5 pr-3 transition hover:border-brand/40 hover:bg-surface-raised">
               <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand text-xs font-semibold text-background">

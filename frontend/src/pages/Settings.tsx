@@ -4,8 +4,10 @@ import { useSettingsStore } from '@/features/settings/settings.store';
 export function SettingsPage() {
   const compactCards = useSettingsStore((state) => state.compactCards);
   const blurSensitive = useSettingsStore((state) => state.blurSensitive);
+  const theme = useSettingsStore((state) => state.theme);
   const setCompactCards = useSettingsStore((state) => state.setCompactCards);
   const setBlurSensitive = useSettingsStore((state) => state.setBlurSensitive);
+  const toggleTheme = useSettingsStore((state) => state.toggleTheme);
 
   return (
     <div className="space-y-6">
@@ -25,6 +27,7 @@ export function SettingsPage() {
         <Card className="rounded-xl">
           <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Interface</p>
           <div className="mt-5 grid gap-4">
+            <Toggle checked={theme === 'dark'} onChange={toggleTheme} label="Use dark mode" />
             <Toggle checked={compactCards} onChange={setCompactCards} label="Use compact vault cards" />
             <div className="rounded-lg bg-surface p-4 text-sm leading-7 text-textMuted">
               Motion honors the operating system reduced-motion preference through Framer Motion's user setting at the app root.
