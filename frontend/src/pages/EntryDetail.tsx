@@ -44,6 +44,18 @@ export function EntryDetailPage() {
   const canSeeSensitive = Boolean(entry?.password || entry?.notes || entry?.data || entry?.url || entry?.username || entry?.filePath?.length);
   const ownerView = accessPolicy?.role === 'owner';
   const attachmentCount = entry?.attachmentCount ?? entry?.filePath?.length ?? 0;
+  const approvalContact =
+    accessPolicy?.approvalStatus === 'pending' && !accessPolicy.requestedByCurrentUser
+      ? accessPolicy.requestedBy
+      : accessPolicy?.approvalTarget || accessPolicy?.secondApprover || accessPolicy?.owner;
+  const approvalContactLabel =
+    accessPolicy?.approvalStatus === 'pending'
+      ? accessPolicy.requestedByCurrentUser
+        ? 'Approval sent to'
+        : 'Requested by'
+      : accessPolicy?.role === 'owner'
+        ? 'Second approver'
+        : 'Approval partner';
 
   useEffect(() => {
     if (!revealed) {
@@ -200,9 +212,9 @@ export function EntryDetailPage() {
                       : `${accessPolicy.requestedBy?.email || 'The other participant'} requested access. Use the approval email to grant access for 10 minutes.`
                     : 'Either vault participant must request access, and the other participant must approve before sensitive content and attachments are available.'}
               </p>
-              {accessPolicy.secondApprover?.email ? (
+              {approvalContact?.email ? (
                 <p className="mt-3 text-xs uppercase tracking-[0.18em] text-textMuted">
-                  Approver: {accessPolicy.secondApprover.email}
+                  {approvalContactLabel}: {approvalContact.email}
                 </p>
               ) : null}
               <div className="mt-4 flex flex-wrap gap-3">
