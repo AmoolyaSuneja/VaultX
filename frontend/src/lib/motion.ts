@@ -1,15 +1,22 @@
+export const appleSpring = {
+  type: 'spring',
+  stiffness: 420,
+  damping: 38,
+  mass: 0.9
+} as const;
+
 export const fadeUp = {
-  initial: { opacity: 0, y: 10 },
+  initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 6 },
-  transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] }
+  exit: { opacity: 0, y: 4 },
+  transition: appleSpring
 } as const;
 
 export const slideRight = {
-  initial: { opacity: 0, x: 28 },
+  initial: { opacity: 0, x: 36 },
   animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: 28 },
-  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
+  exit: { opacity: 0, x: 24 },
+  transition: appleSpring
 } as const;
 
 export const staggerChildren = {
@@ -17,10 +24,10 @@ export const staggerChildren = {
 } as const;
 
 export const scaleIn = {
-  initial: { scale: 0.98, opacity: 0, y: 8 },
+  initial: { scale: 0.985, opacity: 0, y: 6 },
   animate: { scale: 1, opacity: 1 },
-  exit: { scale: 0.98, opacity: 0, y: 6 },
-  transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] }
+  exit: { scale: 0.985, opacity: 0, y: 4 },
+  transition: appleSpring
 } as const;
 
 export const shakeX = {

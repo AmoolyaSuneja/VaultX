@@ -35,7 +35,7 @@ export function VaultCard({ entry, index, onView, onEdit, onDelete }: VaultCardP
     <article
       role="article"
       aria-label={`${entry.title} entry`}
-      className="group glass-panel flex cursor-pointer flex-col gap-5 rounded-lg p-5 shadow-soft transition-all duration-200 hover:-translate-y-1 hover:border-brand/30 hover:shadow-card"
+      className="group glass-panel flex transform-gpu cursor-pointer flex-col gap-5 rounded-lg p-5 shadow-soft transition-[border-color,box-shadow,transform] duration-300 ease-out will-change-transform hover:-translate-y-1 hover:border-brand/30 hover:shadow-card"
       onClick={() => onView(entry._id)}
     >
         <div className="flex flex-col gap-4">
@@ -163,6 +163,7 @@ export function VaultCard({ entry, index, onView, onEdit, onDelete }: VaultCardP
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                     className="font-medium"
                   >
                     {maskValue(entry.password, revealed)}

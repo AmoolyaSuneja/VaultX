@@ -166,7 +166,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
               <DialogPanel className="pointer-events-auto h-full w-full max-w-2xl sm:max-w-lg">
                 <motion.div
                   {...slideRight}
-                  className="relative flex h-full w-full flex-col border-l border-line bg-panel shadow-card backdrop-blur-panel"
+                  className="relative flex h-full w-full transform-gpu flex-col border-l border-line bg-panel shadow-card backdrop-blur-panel will-change-transform"
                 >
                 <div className="flex items-start justify-between border-b border-line px-6 py-5">
                   <div>

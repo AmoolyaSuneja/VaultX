@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@/components/ui';
-import { shakeX } from '@/lib/motion';
+import { appleSpring, shakeX } from '@/lib/motion';
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -96,7 +96,7 @@ export function AuthPanel() {
   );
 
   return (
-    <div className="glass-panel relative mx-auto w-full max-w-[430px] overflow-hidden rounded-xl p-7 shadow-card">
+    <div className="glass-panel relative mx-auto w-full max-w-[430px] transform-gpu overflow-hidden rounded-xl p-7 shadow-card">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/45 to-transparent" />
       <div className="mb-8 text-center">
         <h2 className="mt-3 font-heading text-4xl leading-tight text-textPrimary">
@@ -111,7 +111,8 @@ export function AuthPanel() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.24 }}
+            transition={appleSpring}
+            className="transform-gpu will-change-transform"
           >
             <form className="grid gap-5" onSubmit={loginForm.handleSubmit(submitLogin)}>
               <Input
@@ -154,7 +155,8 @@ export function AuthPanel() {
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
-            transition={{ duration: 0.24 }}
+            transition={appleSpring}
+            className="transform-gpu will-change-transform"
           >
             <form className="grid gap-5" onSubmit={registerForm.handleSubmit(submitRegister)}>
               <Input
@@ -199,7 +201,8 @@ export function AuthPanel() {
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
-            transition={{ duration: 0.24 }}
+            transition={appleSpring}
+            className="transform-gpu will-change-transform"
           >
             <form className="grid gap-5" onSubmit={forgotForm.handleSubmit(submitForgotPassword)}>
               <Input
@@ -222,7 +225,8 @@ export function AuthPanel() {
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
-            transition={{ duration: 0.24 }}
+            transition={appleSpring}
+            className="transform-gpu will-change-transform"
           >
             <form className="grid gap-5" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
               <Input

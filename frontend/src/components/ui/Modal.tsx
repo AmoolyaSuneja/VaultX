@@ -25,7 +25,7 @@ export function Modal({ open, onClose, children }: ModalProps) {
               <DialogPanel className="w-full">
                 <motion.div
                   {...scaleIn}
-                  className="w-full rounded-xl border border-line bg-panel p-6 shadow-card backdrop-blur-panel"
+                  className="w-full transform-gpu rounded-xl border border-line bg-panel p-6 shadow-card backdrop-blur-panel will-change-transform"
                 >
                   {children}
                 </motion.div>
