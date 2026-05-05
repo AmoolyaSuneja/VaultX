@@ -2,8 +2,9 @@ import { create } from 'zustand';
 
 const THEME_KEY = 'vaultx-theme';
 const THEME_VERSION_KEY = 'vaultx-theme-version';
-const THEME_VERSION = '2';
+const THEME_VERSION = '3';
 type ThemeMode = 'light' | 'dark';
+const DEFAULT_THEME: ThemeMode = 'light';
 
 function getStorage() {
   if (typeof window === 'undefined') {
@@ -20,7 +21,7 @@ function readInitialTheme(): ThemeMode {
   if (storageVersion !== THEME_VERSION) {
     storage?.removeItem(THEME_KEY);
     storage?.setItem(THEME_VERSION_KEY, THEME_VERSION);
-    return 'light';
+    return DEFAULT_THEME;
   }
 
   const storageTheme = getStorage()?.getItem(THEME_KEY);
@@ -29,7 +30,7 @@ function readInitialTheme(): ThemeMode {
     return storageTheme;
   }
 
-  return 'light';
+  return DEFAULT_THEME;
 }
 
 function applyTheme(theme: ThemeMode) {
