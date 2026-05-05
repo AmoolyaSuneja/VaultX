@@ -348,7 +348,6 @@ export function EntryDetailPage() {
         onClose={() => setEditing(false)}
         onSubmit={async (payload) => {
           await updateMutation.mutateAsync(payload);
-          setEditing(false);
         }}
       />
       ) : null}

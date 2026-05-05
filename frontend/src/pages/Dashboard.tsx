@@ -182,7 +182,6 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
         onSubmit={async (payload) => {
           if (!editingEntry?._id) return;
           await updateMutation.mutateAsync(payload);
-          setEditingEntry(undefined);
         }}
       />
     </div>

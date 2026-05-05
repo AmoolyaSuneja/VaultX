@@ -33,7 +33,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       {...props}
     >
       {loading ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-      <span>{children}</span>
+      <span className="inline-flex items-center justify-center gap-2">{children}</span>
     </button>
   )
 );

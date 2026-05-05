@@ -18,6 +18,7 @@ export function Modal({ open, onClose, children }: ModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.14 }}
           />
           <div className="fixed inset-0 overflow-y-auto p-4">
             <div className="mx-auto mt-20 flex min-h-full max-w-md items-start justify-center">

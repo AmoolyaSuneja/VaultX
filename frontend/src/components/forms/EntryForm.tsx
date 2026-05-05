@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { Globe, Link2, Sparkles, X } from 'lucide-react';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { CheckCircle2, Globe, Link2, Sparkles, X } from 'lucide-react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { Button, Input, Textarea, Toggle } from '@/components/ui';
 import { defaultCategories } from '@/lib/constants';
@@ -35,6 +35,8 @@ interface EntryFormProps {
 
 export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormProps) {
   const [files, setFiles] = useState<File[]>([]);
+  const [submitState, setSubmitState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const submitLockedRef = useRef(false);
 
   const form = useForm<EntryValues>({
     resolver: zodResolver(entrySchema) as Resolver<EntryValues>,
@@ -51,6 +53,13 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
       unlockAt: ''
     }
   });
+
+  useEffect(() => {
+    if (!open) {
+      submitLockedRef.current = false;
+      setSubmitState('idle');
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!entry) {
@@ -91,28 +100,54 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
   }, [form]);
 
   async function handleSubmit(values: EntryValues) {
-    await onSubmit({
-      title: values.title,
-      category: values.category,
-      url: values.url || '',
-      username: '',
-      password: '',
-      notes: values.notes || '',
-      data: values.notes || '',
-      tags: parseTags(values.tagsText || ''),
-      files,
-      unlockAt: values.unlockAt || '',
-      requiresDualApproval: values.requiresDualApproval,
-      secondApproverEmail: values.secondApproverEmail || ''
-    });
-    onClose();
+    if (submitLockedRef.current || submitState !== 'idle') return;
+
+    submitLockedRef.current = true;
+    setSubmitState('saving');
+
+    try {
+      await onSubmit({
+        title: values.title,
+        category: values.category,
+        url: values.url || '',
+        username: '',
+        password: '',
+        notes: values.notes || '',
+        data: values.notes || '',
+        tags: parseTags(values.tagsText || ''),
+        files,
+        unlockAt: values.unlockAt || '',
+        requiresDualApproval: values.requiresDualApproval,
+        secondApproverEmail: values.secondApproverEmail || ''
+      });
+      setSubmitState('saved');
+      window.setTimeout(onClose, 450);
+    } catch (error) {
+      submitLockedRef.current = false;
+      setSubmitState('idle');
+      throw error;
+    }
   }
 
   const dualApprovalEnabled = form.watch('requiresDualApproval');
+  const isSubmitting = submitState !== 'idle' || form.formState.isSubmitting;
+  const submitLabel =
+    submitState === 'saved'
+      ? 'Saved'
+      : submitState === 'saving'
+        ? 'Saving...'
+        : mode === 'create'
+          ? 'Save entry'
+          : 'Save changes';
+  const closePanel = () => {
+    if (!isSubmitting) {
+      onClose();
+    }
+  };
 
   return (
     <Transition appear show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-[75]" onClose={onClose}>
+      <Dialog as="div" className="relative z-[75]" onClose={closePanel}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-200"
@@ -144,7 +179,8 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                   </div>
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={closePanel}
+                    disabled={isSubmitting}
                     className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
                     aria-label="Close panel"
                   >
@@ -250,10 +286,13 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                   </div>
 
                   <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-line bg-panel/95 px-6 py-4 backdrop-blur-panel">
-                    <Button type="button" variant="ghost" onClick={onClose}>
+                    <Button type="button" variant="ghost" onClick={closePanel} disabled={isSubmitting}>
                       Cancel
                     </Button>
-                    <Button type="submit">{mode === 'create' ? 'Save entry' : 'Save changes'}</Button>
+                    <Button type="submit" loading={submitState === 'saving'} disabled={isSubmitting}>
+                      {submitState === 'saved' ? <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> : null}
+                      {submitLabel}
+                    </Button>
                   </div>
                 </form>
                 </motion.div>

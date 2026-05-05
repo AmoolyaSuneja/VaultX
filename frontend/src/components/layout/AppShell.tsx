@@ -4,7 +4,7 @@ import { TopBar } from './TopBar';
 
 export function AppShell() {
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
       <TopBar />
 
       <div className="mx-auto flex max-w-[1600px] pt-16">

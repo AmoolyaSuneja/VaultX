@@ -61,6 +61,7 @@
 
   html {
     color-scheme: light;
+    scroll-behavior: smooth;
   }
 
   html.dark {
@@ -69,6 +70,9 @@
 
   body {
     @apply min-h-screen bg-background font-sans text-textPrimary antialiased;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
     background-image:
       linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(221, 233, 251, 0.74) 48%, rgba(240, 246, 255, 1) 100%),
       linear-gradient(135deg, rgba(201, 222, 255, 0.26) 0%, rgba(91, 155, 213, 0.08) 40%, rgba(96, 125, 139, 0.08) 100%);
@@ -125,6 +129,9 @@
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: rgba(96, 125, 139, 0.35) transparent;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .scrollbar-thin::-webkit-scrollbar {

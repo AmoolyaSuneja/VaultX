@@ -1,15 +1,15 @@
 export const fadeUp = {
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 8 },
-  transition: { duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }
+  exit: { opacity: 0, y: 6 },
+  transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] }
 } as const;
 
 export const slideRight = {
-  initial: { x: '100%' },
-  animate: { x: 0 },
-  exit: { x: '100%' },
-  transition: { type: 'spring', damping: 30, stiffness: 300 }
+  initial: { opacity: 0, x: 28 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 28 },
+  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
 } as const;
 
 export const staggerChildren = {
@@ -17,9 +17,10 @@ export const staggerChildren = {
 } as const;
 
 export const scaleIn = {
-  initial: { scale: 0.95, opacity: 0 },
+  initial: { scale: 0.98, opacity: 0, y: 8 },
   animate: { scale: 1, opacity: 1 },
-  transition: { duration: 0.18, ease: 'easeOut' }
+  exit: { scale: 0.98, opacity: 0, y: 6 },
+  transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] }
 } as const;
 
 export const shakeX = {
