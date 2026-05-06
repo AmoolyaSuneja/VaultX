@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 const THEME_KEY = 'vaultx-theme';
 const THEME_VERSION_KEY = 'vaultx-theme-version';
-const THEME_VERSION = '4';
+const THEME_VERSION = '5';
 type ThemeMode = 'light' | 'dark';
 const DEFAULT_THEME: ThemeMode = 'light';
 
