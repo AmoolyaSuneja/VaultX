@@ -1,7 +1,7 @@
 export type VaultSort = 'newest' | 'oldest' | 'az' | 'za';
 
 export interface VaultAccessPolicy {
-  role: 'owner' | 'approver' | 'viewer';
+  role: 'owner' | 'approver' | 'nominee' | 'viewer';
   requiresDualApproval: boolean;
   secondApprover?: {
     _id: string;

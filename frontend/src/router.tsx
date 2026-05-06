@@ -6,6 +6,7 @@ import { AuthPage } from '@/pages/Auth';
 import { DashboardPage } from '@/pages/Dashboard';
 import { EntryDetailPage } from '@/pages/EntryDetail';
 import { ProfilePage } from '@/pages/Profile';
+import { SettingsPage } from '@/pages/Settings';
 import { ApproveAccessPage } from '@/pages/ApproveAccess';
 import { SharedLinkPage } from '@/pages/SharedLink';
 import { appleSpring } from '@/lib/motion';
@@ -73,6 +74,10 @@ export const router = createBrowserRouter([
           {
             path: '/vault/profile',
             element: <ProfilePage />
+          },
+          {
+            path: '/vault/settings',
+            element: <SettingsPage />
           }
         ]
       }

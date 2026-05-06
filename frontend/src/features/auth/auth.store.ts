@@ -16,6 +16,7 @@ export interface AuthUser {
   name: string;
   email: string;
   avatarUrl?: string;
+  role?: 'admin' | 'user';
 }
 
 interface AuthState {

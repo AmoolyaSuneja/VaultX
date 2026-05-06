@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Copy, Ellipsis, Eye, FileText, LockKeyhole, Pencil, Trash2 } from 'lucide-react';
+import { Copy, Ellipsis, Eye, FileText, LockKeyhole, Pencil, ShieldCheck, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Badge } from '@/components/ui';
@@ -21,6 +21,8 @@ export function VaultCard({ entry, index, onView, onEdit, onDelete }: VaultCardP
   const locked = isUnlockPending(entry.unlockAt);
   const role = entry.accessPolicy?.role || 'owner';
   const dualApproval = entry.accessPolicy?.requiresDualApproval;
+  const nomineeAccess = role === 'nominee';
+  const ownerLabel = entry.accessPolicy?.owner?.name || entry.accessPolicy?.owner?.email;
   void index;
 
   useEffect(() => {
@@ -40,7 +42,15 @@ export function VaultCard({ entry, index, onView, onEdit, onDelete }: VaultCardP
     >
         <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between gap-4">
-            <Badge className={categoryClass}>{entry.category || 'General'}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className={categoryClass}>{entry.category || 'General'}</Badge>
+              {nomineeAccess ? (
+                <Badge variant="status" statusTone="archived" className="gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {ownerLabel ? `Nominee access: ${ownerLabel}` : 'Nominee access'}
+                </Badge>
+              ) : null}
+            </div>
             <Menu as="div" className="relative">
               <MenuButton
                 onClick={(event) => event.stopPropagation()}

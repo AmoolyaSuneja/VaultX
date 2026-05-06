@@ -31,8 +31,41 @@ function isSecondApprover(vaultEntry, userId) {
   return toIdString(vaultEntry.secondApprover) === toIdString(userId);
 }
 
+function isActiveNomineeOwner(vaultEntry, activeNomineeOwnerIds = new Set()) {
+  return activeNomineeOwnerIds.has(toIdString(vaultEntry.owner));
+}
+
 function isDualAccessParticipant(vaultEntry, userId) {
   return isOwner(vaultEntry, userId) || isSecondApprover(vaultEntry, userId);
+}
+
+async function getActiveNomineeOwnerIds(user) {
+  const owners = await User.find({
+    'nominee.status': 'active',
+    $or: [{ 'nominee.user': user._id }, { 'nominee.email': user.email }]
+  }).select('_id');
+
+  return owners.map((owner) => owner._id);
+}
+
+async function canReadVaultEntry(vaultEntry, user) {
+  if (isDualAccessParticipant(vaultEntry, user._id)) {
+    return {
+      allowed: true,
+      activeNomineeOwnerIds: new Set()
+    };
+  }
+
+  const nomineeOwner = await User.findOne({
+    _id: toIdString(vaultEntry.owner),
+    'nominee.status': 'active',
+    $or: [{ 'nominee.user': user._id }, { 'nominee.email': user.email }]
+  }).select('_id');
+
+  return {
+    allowed: Boolean(nomineeOwner),
+    activeNomineeOwnerIds: nomineeOwner ? new Set([nomineeOwner._id.toString()]) : new Set()
+  };
 }
 
 function getUserSummary(user) {
@@ -92,8 +125,14 @@ function getApprovalStatus(vaultEntry) {
   return 'awaiting_request';
 }
 
-function buildAccessPolicy(vaultEntry, userId) {
-  const role = isOwner(vaultEntry, userId) ? 'owner' : isSecondApprover(vaultEntry, userId) ? 'approver' : 'viewer';
+function buildAccessPolicy(vaultEntry, userId, activeNomineeOwnerIds = new Set()) {
+  const role = isOwner(vaultEntry, userId)
+    ? 'owner'
+    : isSecondApprover(vaultEntry, userId)
+      ? 'approver'
+      : isActiveNomineeOwner(vaultEntry, activeNomineeOwnerIds)
+        ? 'nominee'
+        : 'viewer';
   const requestedByCurrentUser = isApprovalRequester(vaultEntry, userId);
   const requester = getUserSummary(vaultEntry?.dualAccess?.requestedBy);
   const approvalTarget = getUserSummary(getCounterparty(vaultEntry, userId));
@@ -125,7 +164,11 @@ function buildAccessPolicy(vaultEntry, userId) {
   };
 }
 
-function canViewSensitiveContent(vaultEntry, userId) {
+function canViewSensitiveContent(vaultEntry, userId, activeNomineeOwnerIds = new Set()) {
+  if (isActiveNomineeOwner(vaultEntry, activeNomineeOwnerIds)) {
+    return true;
+  }
+
   if (!isDualAccessParticipant(vaultEntry, userId)) {
     return false;
   }
@@ -177,7 +220,7 @@ function redactFormattedEntry(formattedEntry, fileCount) {
 }
 
 const formatVaultEntry = (vaultEntry, options = {}) => {
-  const { redactLocked = false, redactSensitive = false, userId = null } = options;
+  const { redactLocked = false, redactSensitive = false, userId = null, activeNomineeOwnerIds = new Set() } = options;
   const formattedEntry = vaultEntry.toObject();
   const fileCount = Array.isArray(formattedEntry.filePath) ? formattedEntry.filePath.length : 0;
   const locked = isVaultLocked(formattedEntry);
@@ -187,7 +230,7 @@ const formatVaultEntry = (vaultEntry, options = {}) => {
   formattedEntry.password = decrypt(formattedEntry.password);
   formattedEntry.notes = decrypt(formattedEntry.notes);
   formattedEntry.attachmentCount = fileCount;
-  formattedEntry.accessPolicy = userId ? buildAccessPolicy(vaultEntry, userId) : undefined;
+  formattedEntry.accessPolicy = userId ? buildAccessPolicy(vaultEntry, userId, activeNomineeOwnerIds) : undefined;
 
   if (redactLocked && locked) {
     return redactFormattedEntry(formattedEntry, fileCount);
@@ -262,7 +305,9 @@ const getVaultEntryById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vault entry not found' });
     }
 
-    if (!isOwner(vaultEntry, req.user._id) && !isSecondApprover(vaultEntry, req.user._id)) {
+    const readAccess = await canReadVaultEntry(vaultEntry, req.user);
+
+    if (!readAccess.allowed) {
       return res.status(401).json({ success: false, message: 'Not authorized to view this entry' });
     }
 
@@ -273,8 +318,9 @@ const getVaultEntryById = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: formatVaultEntry(vaultEntry, {
-        redactSensitive: !canViewSensitiveContent(vaultEntry, req.user._id),
-        userId: req.user._id
+        redactSensitive: !canViewSensitiveContent(vaultEntry, req.user._id, readAccess.activeNomineeOwnerIds),
+        userId: req.user._id,
+        activeNomineeOwnerIds: readAccess.activeNomineeOwnerIds
       })
     });
   } catch (error) {
@@ -284,8 +330,10 @@ const getVaultEntryById = async (req, res) => {
 
 const getAllVaultEntries = async (req, res) => {
   try {
+    const nomineeOwnerIds = await getActiveNomineeOwnerIds(req.user);
+    const activeNomineeOwnerIds = new Set(nomineeOwnerIds.map((ownerId) => ownerId.toString()));
     const vaults = await Vault.find({
-      $or: [{ owner: req.user._id }, { secondApprover: req.user._id }]
+      $or: [{ owner: req.user._id }, { secondApprover: req.user._id }, { owner: { $in: nomineeOwnerIds } }]
     })
       .populate('owner', 'name email')
       .populate('secondApprover', 'name email')
@@ -298,7 +346,8 @@ const getAllVaultEntries = async (req, res) => {
         formatVaultEntry(vaultEntry, {
           redactLocked: true,
           redactSensitive: true,
-          userId: req.user._id
+          userId: req.user._id,
+          activeNomineeOwnerIds
         })
       )
     });
@@ -598,12 +647,14 @@ async function resolveOwnedAttachment(req, res) {
     return null;
   }
 
-  if (!isDualAccessParticipant(vaultEntry, req.user._id)) {
+  const readAccess = await canReadVaultEntry(vaultEntry, req.user);
+
+  if (!readAccess.allowed) {
     res.status(401).json({ success: false, message: 'Not authorized to access this attachment' });
     return null;
   }
 
-  if (!canViewSensitiveContent(vaultEntry, req.user._id)) {
+  if (!canViewSensitiveContent(vaultEntry, req.user._id, readAccess.activeNomineeOwnerIds)) {
     res.status(403).json({ success: false, message: 'The other vault participant must approve access before attachments can be opened' });
     return null;
   }

@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      user: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl }
+      user: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl, role: user.role }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -66,7 +66,7 @@ const loginUser = async (req, res) => {
       success: true,
       message: 'Login successful',
       token: token,
-      user: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl }
+      user: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl, role: user.role }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

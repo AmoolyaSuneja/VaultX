@@ -1,5 +1,5 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { LogOut, Moon, Search, Sun, UserCircle2 } from 'lucide-react';
+import { LogOut, Moon, Search, Settings, Sun, UserCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useSettingsStore } from '@/features/settings/settings.store';
@@ -72,6 +72,20 @@ export function TopBar() {
                   >
                     <UserCircle2 className="h-4 w-4" />
                     Profile
+                  </button>
+                )}
+              </MenuItem>
+              <MenuItem>
+                {({ focus }) => (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/vault/settings')}
+                    className={`focus-ring flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                      focus ? 'bg-brand text-background' : 'text-textPrimary hover:bg-surface-raised'
+                    }`}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Settings
                   </button>
                 )}
               </MenuItem>

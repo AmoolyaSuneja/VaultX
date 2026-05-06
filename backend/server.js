@@ -10,6 +10,7 @@ const vaultRoutes = require('./routes/vaultRoutes');
 const userRoutes = require('./routes/UserRoutes');
 const activityRoutes = require('./routes/activityRoutes');
 const sharedLinkRoutes = require('./routes/sharedLinkRoutes');
+const nomineeRoutes = require('./routes/nomineeRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +55,7 @@ app.use('/api/vault', vaultRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/shared', sharedLinkRoutes);
+app.use('/api/nominee', nomineeRoutes);
 
 app.get('*', (req, res) => {
   if (!fs.existsSync(frontendDistDir)) {

@@ -46,7 +46,7 @@ const getMe = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl }
+      data: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl, role: user.role }
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -77,7 +77,7 @@ const updateMe = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Profile updated',
-      data: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl }
+      data: { id: user._id, name: user.name, email: user.email, avatarUrl: user.avatarUrl, role: user.role }
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

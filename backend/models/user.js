@@ -48,6 +48,98 @@ const userSchema = new mongoose.Schema(
       default: true,
       index: true,
     },
+    nominee: {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+      },
+      name: {
+        type: String,
+        default: '',
+        trim: true
+      },
+      email: {
+        type: String,
+        default: '',
+        lowercase: true,
+        trim: true,
+        match: [/.+\@.+\..+/, 'Please fill a valid nominee email address']
+      },
+      relationship: {
+        type: String,
+        default: '',
+        trim: true
+      },
+      condition: {
+        type: String,
+        enum: ['death', 'incapacity', 'inactivity', 'courtOrder', null],
+        default: null
+      },
+      status: {
+        type: String,
+        enum: ['pending', 'approved', 'active', 'revoked'],
+        default: 'pending',
+        index: true
+      },
+      requestedAt: {
+        type: Date,
+        default: null
+      },
+      approvedAt: {
+        type: Date,
+        default: null
+      },
+      activatedAt: {
+        type: Date,
+        default: null
+      },
+      claim: {
+        submittedAt: {
+          type: Date,
+          default: null
+        },
+        proofType: {
+          type: String,
+          default: '',
+          trim: true
+        },
+        proofNotes: {
+          type: String,
+          default: '',
+          trim: true
+        },
+        proofDocumentUrl: {
+          type: String,
+          default: '',
+          trim: true
+        },
+        proofDocumentName: {
+          type: String,
+          default: '',
+          trim: true
+        },
+        reviewedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          default: null
+        },
+        reviewedAt: {
+          type: Date,
+          default: null
+        },
+        activatedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          default: null
+        },
+        activationNotes: {
+          type: String,
+          default: '',
+          trim: true
+        }
+      }
+    },
   },
   {
     timestamps: true,         

@@ -1,4 +1,4 @@
-import { AlertTriangle, Copy, Download, ExternalLink, Eye, EyeOff, FileImage, FileText, LockKeyhole, Pencil, Share2 } from 'lucide-react';
+import { AlertTriangle, Copy, Download, ExternalLink, Eye, EyeOff, FileImage, FileText, LockKeyhole, Pencil, Share2, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import toast from 'react-hot-toast';
@@ -43,6 +43,8 @@ export function EntryDetailPage() {
   const accessPolicy = entry?.accessPolicy;
   const canSeeSensitive = Boolean(entry?.password || entry?.notes || entry?.data || entry?.url || entry?.username || entry?.filePath?.length);
   const ownerView = accessPolicy?.role === 'owner';
+  const nomineeAccess = accessPolicy?.role === 'nominee';
+  const ownerLabel = accessPolicy?.owner?.name || accessPolicy?.owner?.email;
   const attachmentCount = entry?.attachmentCount ?? entry?.filePath?.length ?? 0;
   const approvalContact =
     accessPolicy?.approvalStatus === 'pending' && !accessPolicy.requestedByCurrentUser
@@ -137,7 +139,15 @@ export function EntryDetailPage() {
       <div className="space-y-5 sm:space-y-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <Badge>{entry.category || 'General'}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge>{entry.category || 'General'}</Badge>
+              {nomineeAccess ? (
+                <Badge variant="status" statusTone="archived" className="gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {ownerLabel ? `Nominee access: ${ownerLabel}` : 'Nominee access'}
+                </Badge>
+              ) : null}
+            </div>
             <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:mt-4 sm:text-4xl">{entry.title}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-textMuted">
               This entry is time-locked. Sensitive content and attachments will unlock automatically when the scheduled time arrives.
@@ -186,7 +196,15 @@ export function EntryDetailPage() {
       <div className="space-y-5 sm:space-y-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <Badge>{entry.category || 'General'}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>{entry.category || 'General'}</Badge>
+            {nomineeAccess ? (
+              <Badge variant="status" statusTone="archived" className="gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {ownerLabel ? `Nominee access: ${ownerLabel}` : 'Nominee access'}
+              </Badge>
+            ) : null}
+          </div>
           <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:mt-4 sm:text-4xl">{entry.title}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-textMuted">{entry.notes || entry.data || 'No notes saved yet.'}</p>
         </div>
