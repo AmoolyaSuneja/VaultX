@@ -1,4 +1,4 @@
-import { LockKeyhole, PlusCircle, Settings, UserCircle2 } from 'lucide-react';
+import { LockKeyhole, PlusCircle, UserCircle2 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import type { VaultStats } from '@/features/vault/vault.types';
 
@@ -9,8 +9,7 @@ interface SidebarProps {
 const navItems = [
   { to: '/vault', label: 'Vault', icon: LockKeyhole },
   { to: '/vault/new', label: 'New entry', icon: PlusCircle },
-  { to: '/vault/profile', label: 'Profile', icon: UserCircle2 },
-  { to: '/vault/settings', label: 'Settings', icon: Settings }
+  { to: '/vault/profile', label: 'Profile', icon: UserCircle2 }
 ];
 
 export function Sidebar({ stats }: SidebarProps) {

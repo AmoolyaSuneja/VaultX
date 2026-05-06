@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input } from '@/components/ui';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useUpdateProfile } from '@/features/user/useUser';
 import { uploadProfileAvatar } from '@/features/user/user.service';
 
 export function ProfilePage() {
+  const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
   const updateProfile = useUpdateProfile();
@@ -111,6 +114,19 @@ export function ProfilePage() {
             </Button>
           </div>
         </form>
+      </Card>
+
+      <Card className="rounded-xl">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Nominee access</p>
+            <h2 className="mt-2 text-xl font-semibold text-textPrimary">Emergency succession</h2>
+          </div>
+          <Button type="button" className="w-full sm:w-auto" onClick={() => navigate('/vault/settings')}>
+            <ShieldCheck className="h-4 w-4" />
+            Add a nominee
+          </Button>
+        </div>
       </Card>
     </div>
   );
