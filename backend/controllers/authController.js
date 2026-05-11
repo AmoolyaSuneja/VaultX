@@ -96,11 +96,28 @@ const requestPasswordReset = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     try {
-      await sendPasswordResetCodeEmail({
+      const emailResult = await sendPasswordResetCodeEmail({
         to: user.email,
         name: user.name,
         code
       });
+
+      if (emailResult?.skipped) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`Development password reset fallback for ${user.email}: ${code}`);
+          return res.status(200).json({
+            success: true,
+            message: 'Email is not configured, so the recovery code is shown for local development',
+            recoveryCode: code
+          });
+        }
+
+        return res.status(500).json({
+          success: false,
+          message:
+            'Email is not configured on the server. Set SMTP_USER/SMTP_PASS (or GMAIL_USER/GMAIL_APP_PASSWORD) and MAIL_FROM.'
+        });
+      }
     } catch (emailError) {
       console.error('Password reset email failed:', emailError.message);
 
