@@ -29,6 +29,10 @@ export function useRequestPasswordReset() {
     mutationFn: requestPasswordReset,
     onSuccess: (data) => {
       toast.success(data.message || 'Recovery code sent');
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Unable to send recovery code';
+      toast.error(message);
     }
   });
 }
@@ -38,6 +42,10 @@ export function useResetPassword() {
     mutationFn: resetPassword,
     onSuccess: (data) => {
       toast.success(data.message || 'Password reset successfully');
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Unable to reset password';
+      toast.error(message);
     }
   });
 }

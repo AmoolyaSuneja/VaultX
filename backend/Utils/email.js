@@ -52,6 +52,12 @@ function getTransporter() {
       host: config.host,
       port: config.port,
       secure: config.secure,
+      pool: true,
+      maxConnections: 1,
+      maxMessages: 25,
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
+      socketTimeout: 20_000,
       auth: {
         user: config.user,
         pass: config.pass
@@ -157,13 +163,28 @@ async function sendPasswordResetCodeEmail({ to, name, code }) {
     </div>
   `;
 
-  await mailer.transporter.sendMail({
-    from: mailer.from,
-    to,
-    subject,
-    text,
-    html
-  });
+  const mailOptions = { from: mailer.from, to, subject, text, html };
+
+  // Retry once for transient network/SMTP failures (common on serverless).
+  try {
+    await mailer.transporter.sendMail(mailOptions);
+  } catch (error) {
+    const code = error?.code;
+    const message = String(error?.message || '');
+    const isTransient =
+      code === 'ETIMEDOUT' ||
+      code === 'ECONNRESET' ||
+      code === 'EAI_AGAIN' ||
+      code === 'ESOCKET' ||
+      /timed out|socket|connection.*closed/i.test(message);
+
+    if (!isTransient) {
+      throw error;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    await mailer.transporter.sendMail(mailOptions);
+  }
 
   return { sent: true, skipped: false };
 }
