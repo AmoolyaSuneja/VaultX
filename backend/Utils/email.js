@@ -20,10 +20,20 @@ function getEmailConfig() {
     return null;
   }
 
+  const host = readEnv('SMTP_HOST') || 'smtp.gmail.com';
+  const rawPort = readEnv('SMTP_PORT');
+  const rawSecure = readEnv('SMTP_SECURE');
+
+  // Defaults chosen to be more compatible with serverless platforms:
+  // - Gmail commonly works on 587 (STARTTLS) whereas 465 can be blocked by some hosts.
+  const isGmailHost = host.toLowerCase() === 'smtp.gmail.com';
+  const port = rawPort ? Number(rawPort) : isGmailHost ? 587 : 465;
+  const secure = rawSecure ? rawSecure === 'true' : port === 465;
+
   return {
-    host: readEnv('SMTP_HOST') || 'smtp.gmail.com',
-    port: Number(readEnv('SMTP_PORT') || 465),
-    secure: readEnv('SMTP_SECURE') ? readEnv('SMTP_SECURE') === 'true' : true,
+    host,
+    port,
+    secure,
     user,
     pass,
     from: readEnv('MAIL_FROM') || readEnv('SMTP_FROM') || user
