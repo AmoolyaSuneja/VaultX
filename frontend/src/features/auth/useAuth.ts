@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { loginUser, registerUser, requestPasswordReset, resetPassword, verifyOtp } from './auth.service';
+import { loginUser, registerUser, requestPasswordReset, resetPassword } from './auth.service';
 import { useAuthStore } from './auth.store';
 
 export function useLogin() {
@@ -46,15 +46,6 @@ export function useResetPassword() {
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Unable to reset password';
       toast.error(message);
-    }
-  });
-}
-
-export function useVerifyOtp() {
-  return useMutation({
-    mutationFn: verifyOtp,
-    onSuccess: () => {
-      toast.success('Verification complete');
     }
   });
 }

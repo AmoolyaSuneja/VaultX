@@ -15,12 +15,6 @@ export const registerSchema = loginSchema
     message: 'Passwords do not match'
   });
 
-export const otpSchema = z.object({
-  code: z
-    .string()
-    .regex(/^\d{6}$/, 'Enter the 6-digit verification code')
-});
-
 export const forgotPasswordSchema = z.object({
   email: z.string().email('Enter a valid email address')
 });
@@ -62,7 +56,6 @@ export const entrySchema = z.object({
 
 export type LoginValues = z.infer<typeof loginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
-export type OtpValues = z.infer<typeof otpSchema>;
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 export type EntryValues = z.infer<typeof entrySchema>;

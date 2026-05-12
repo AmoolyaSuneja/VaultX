@@ -43,11 +43,3 @@ export function resetPassword(values: ResetPasswordValues) {
     body: JSON.stringify(body)
   });
 }
-
-export function verifyOtp(code: string) {
-  if (!/^\d{6}$/.test(code)) {
-    throw new Error('Enter a valid 6-digit code');
-  }
-
-  return Promise.resolve({ success: true });
-}
