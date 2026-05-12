@@ -1,5 +1,5 @@
 import { Listbox } from '@headlessui/react';
-import { Check, ChevronDown, Plus, Search } from 'lucide-react';
+import { Check, ChevronDown, LayoutGrid, List, Plus, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, EmptyState } from '@/components/ui';
@@ -30,6 +30,15 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const deleteMutation = useDeleteEntry();
   const [editingEntry, setEditingEntry] = useState<VaultEntry | undefined>();
   const [localSearch, setLocalSearch] = useState('');
+  const [view, setView] = useState<'grid' | 'list'>(() => {
+    if (typeof window === 'undefined') return 'grid';
+    return (window.localStorage.getItem('vaultx-view') as 'grid' | 'list') || 'grid';
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('vaultx-view', view);
+  }, [view]);
 
   const search = useVaultStore((state) => state.search);
   const setSearch = useVaultStore((state) => state.setSearch);
@@ -153,6 +162,31 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                 </Listbox.Options>
               </div>
             </Listbox>
+
+            <div
+              role="group"
+              aria-label="Change view"
+              className="flex items-center rounded-md border border-line bg-surface p-0.5"
+            >
+              <button
+                type="button"
+                onClick={() => setView('grid')}
+                aria-pressed={view === 'grid'}
+                className={`focus-ring flex h-9 w-9 items-center justify-center rounded transition-colors ${view === 'grid' ? 'bg-surface-muted text-textPrimary' : 'text-textMuted hover:text-textPrimary'}`}
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('list')}
+                aria-pressed={view === 'list'}
+                className={`focus-ring flex h-9 w-9 items-center justify-center rounded transition-colors ${view === 'list' ? 'bg-surface-muted text-textPrimary' : 'text-textMuted hover:text-textPrimary'}`}
+                aria-label="List view"
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -173,6 +207,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
       ) : (
         <VaultGrid
           entries={filteredEntries}
+          view={view}
           onView={(id) => navigate(`/vault/${id}`)}
           onEdit={(entry) => setEditingEntry(entry)}
           onDelete={(entry) => deleteMutation.mutate(entry._id)}
