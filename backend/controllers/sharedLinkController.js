@@ -3,228 +3,175 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Vault = require('../models/vault');
 const SharedLink = require('../models/sharedLink');
+const asyncHandler = require('../Utils/asyncHandler');
+const { HttpError } = require('../middleware/errorHandler');
 const { decrypt } = require('../Utils/encryption');
 const { enforceVaultUnlock } = require('../Utils/lockAccess');
 const { pipeRemoteDocument, resolveDocumentKind } = require('../Utils/remoteDocument');
 const { buildAppUrl } = require('../Utils/appUrl');
 
+const DOWNLOAD_TOKEN_SCOPE = 'shared-document-download';
+const DOWNLOAD_TOKEN_TTL = '15m';
+
 function decryptFileList(filePaths = []) {
   return filePaths.map((filePath) => decrypt(filePath));
 }
 
-const createSharedLink = async (req, res) => {
-  try {
-    const { filePath, password } = req.body;
-
-    if (!filePath || typeof filePath !== 'string') {
-      return res.status(400).json({ success: false, message: 'Document reference is required' });
-    }
-
-    if (!password || typeof password !== 'string' || password.trim().length < 4) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 4 characters long' });
-    }
-
-    const vaultEntry = await Vault.findById(req.params.id);
-
-    if (!vaultEntry) {
-      return res.status(404).json({ success: false, message: 'Vault entry not found' });
-    }
-
-    if (vaultEntry.owner.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: 'Not authorized to share documents from this entry' });
-    }
-
-    if (await enforceVaultUnlock(req, res, vaultEntry, 'create a shared link')) {
-      return;
-    }
-
-    const decryptedFiles = decryptFileList(vaultEntry.filePath || []);
-
-    if (!decryptedFiles.includes(filePath)) {
-      return res.status(400).json({ success: false, message: 'That document does not belong to this vault entry' });
-    }
-
-    const shareId = crypto.randomBytes(24).toString('hex');
-    const passwordHash = await bcrypt.hash(password.trim(), 10);
-
-    await SharedLink.create({
-      shareId,
-      vault: vaultEntry._id,
-      owner: req.user._id,
-      filePath,
-      passwordHash
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: 'Protected share link created',
-      data: {
-        shareId,
-        link: buildAppUrl(req, `/shared/${shareId}`)
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const getSharedLinkInfo = async (req, res) => {
-  try {
-    const sharedLink = await SharedLink.findOne({ shareId: req.params.shareId });
-
-    if (!sharedLink) {
-      return res.status(404).json({ success: false, message: 'Share link not found' });
-    }
-
-    const filePath = decrypt(sharedLink.filePath);
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        kind: await resolveDocumentKind(filePath)
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const verifySharedLinkPassword = async (req, res) => {
-  try {
-    const { password } = req.body;
-
-    if (!password || typeof password !== 'string') {
-      return res.status(400).json({ success: false, message: 'Password is required' });
-    }
-
-    const sharedLink = await SharedLink.findOne({ shareId: req.params.shareId }).select('+passwordHash');
-
-    if (!sharedLink) {
-      return res.status(404).json({ success: false, message: 'Share link not found' });
-    }
-
-    const matches = await bcrypt.compare(password.trim(), sharedLink.passwordHash);
-
-    if (!matches) {
-      return res.status(401).json({ success: false, message: 'Incorrect password' });
-    }
-
-    const filePath = decrypt(sharedLink.filePath);
-    const accessToken = jwt.sign(
-      {
-        shareId: sharedLink.shareId,
-        scope: 'shared-document-download'
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '15m' }
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: 'Password verified',
-      data: {
-        accessToken,
-        kind: await resolveDocumentKind(filePath)
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 function validateDownloadToken(shareId, token) {
   if (!token || typeof token !== 'string') {
-    return { error: 'Download token is required' };
+    throw new HttpError('Download token is required', 401);
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (decoded.scope !== 'shared-document-download' || decoded.shareId !== shareId) {
-      return { error: 'Invalid download token scope' };
+    if (decoded.scope !== DOWNLOAD_TOKEN_SCOPE || decoded.shareId !== shareId) {
+      throw new HttpError('Invalid download token scope', 401);
     }
 
-    return { decoded };
-  } catch {
-    return { error: 'Invalid or expired download token' };
+    return decoded;
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
+    throw new HttpError('Invalid or expired download token', 401);
   }
 }
 
-const downloadSharedDocument = async (req, res) => {
-  try {
-    const { token } = req.query;
-    const validation = validateDownloadToken(req.params.shareId, token);
+async function loadSharedLink(shareId, { withPassword = false } = {}) {
+  const query = SharedLink.findOne({ shareId });
+  const sharedLink = await (withPassword ? query.select('+passwordHash') : query);
 
-    if (validation.error) {
-      return res.status(401).json({ success: false, message: validation.error });
-    }
-
-    const sharedLink = await SharedLink.findOne({ shareId: req.params.shareId });
-
-    if (!sharedLink) {
-      return res.status(404).json({ success: false, message: 'Share link not found' });
-    }
-
-    const vaultEntry = await Vault.findById(sharedLink.vault);
-
-    if (!vaultEntry) {
-      return res.status(404).json({ success: false, message: 'Vault entry not found' });
-    }
-
-    if (await enforceVaultUnlock(req, res, vaultEntry, 'download a shared document')) {
-      return;
-    }
-
-    const filePath = decrypt(sharedLink.filePath);
-    const proxied = await pipeRemoteDocument(req, res, filePath, {
-      disposition: 'attachment'
-    });
-
-    if (!proxied.ok) {
-      return res.status(502).json({ success: false, message: 'Unable to fetch shared document' });
-    }
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+  if (!sharedLink) {
+    throw new HttpError('Share link not found', 404);
   }
-};
 
-const previewSharedDocument = async (req, res) => {
-  try {
-    const { token } = req.query;
-    const validation = validateDownloadToken(req.params.shareId, token);
+  return sharedLink;
+}
 
-    if (validation.error) {
-      return res.status(401).json({ success: false, message: validation.error });
-    }
+async function loadVaultForSharedLink(vaultId) {
+  const vaultEntry = await Vault.findById(vaultId);
 
-    const sharedLink = await SharedLink.findOne({ shareId: req.params.shareId });
-
-    if (!sharedLink) {
-      return res.status(404).json({ success: false, message: 'Share link not found' });
-    }
-
-    const vaultEntry = await Vault.findById(sharedLink.vault);
-
-    if (!vaultEntry) {
-      return res.status(404).json({ success: false, message: 'Vault entry not found' });
-    }
-
-    if (await enforceVaultUnlock(req, res, vaultEntry, 'preview a shared document')) {
-      return;
-    }
-
-    const filePath = decrypt(sharedLink.filePath);
-    const proxied = await pipeRemoteDocument(req, res, filePath, {
-      disposition: 'inline'
-    });
-
-    if (!proxied.ok) {
-      return res.status(502).json({ success: false, message: 'Unable to fetch shared document preview' });
-    }
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+  if (!vaultEntry) {
+    throw new HttpError('Vault entry not found', 404);
   }
-};
+
+  return vaultEntry;
+}
+
+const createSharedLink = asyncHandler(async (req, res) => {
+  const { filePath, password } = req.body;
+
+  if (!filePath || typeof filePath !== 'string') {
+    throw new HttpError('Document reference is required', 400);
+  }
+
+  if (!password || typeof password !== 'string' || password.trim().length < 4) {
+    throw new HttpError('Password must be at least 4 characters long', 400);
+  }
+
+  const vaultEntry = await Vault.findById(req.params.id);
+
+  if (!vaultEntry) {
+    throw new HttpError('Vault entry not found', 404);
+  }
+
+  if (vaultEntry.owner.toString() !== req.user._id.toString()) {
+    throw new HttpError('Not authorized to share documents from this entry', 401);
+  }
+
+  if (await enforceVaultUnlock(req, res, vaultEntry, 'create a shared link')) {
+    return;
+  }
+
+  const decryptedFiles = decryptFileList(vaultEntry.filePath || []);
+
+  if (!decryptedFiles.includes(filePath)) {
+    throw new HttpError('That document does not belong to this vault entry', 400);
+  }
+
+  const shareId = crypto.randomBytes(24).toString('hex');
+  const passwordHash = await bcrypt.hash(password.trim(), 10);
+
+  await SharedLink.create({
+    shareId,
+    vault: vaultEntry._id,
+    owner: req.user._id,
+    filePath,
+    passwordHash
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Protected share link created',
+    data: {
+      shareId,
+      link: buildAppUrl(req, `/shared/${shareId}`)
+    }
+  });
+});
+
+const getSharedLinkInfo = asyncHandler(async (req, res) => {
+  const sharedLink = await loadSharedLink(req.params.shareId);
+  const filePath = decrypt(sharedLink.filePath);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      kind: await resolveDocumentKind(filePath)
+    }
+  });
+});
+
+const verifySharedLinkPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body;
+
+  if (!password || typeof password !== 'string') {
+    throw new HttpError('Password is required', 400);
+  }
+
+  const sharedLink = await loadSharedLink(req.params.shareId, { withPassword: true });
+  const matches = await bcrypt.compare(password.trim(), sharedLink.passwordHash);
+
+  if (!matches) {
+    throw new HttpError('Incorrect password', 401);
+  }
+
+  const filePath = decrypt(sharedLink.filePath);
+  const accessToken = jwt.sign(
+    { shareId: sharedLink.shareId, scope: DOWNLOAD_TOKEN_SCOPE },
+    process.env.JWT_SECRET,
+    { expiresIn: DOWNLOAD_TOKEN_TTL }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: 'Password verified',
+    data: {
+      accessToken,
+      kind: await resolveDocumentKind(filePath)
+    }
+  });
+});
+
+async function serveSharedDocument(req, res, disposition) {
+  validateDownloadToken(req.params.shareId, req.query.token);
+
+  const sharedLink = await loadSharedLink(req.params.shareId);
+  const vaultEntry = await loadVaultForSharedLink(sharedLink.vault);
+
+  if (await enforceVaultUnlock(req, res, vaultEntry, `preview or download a shared document`)) {
+    return;
+  }
+
+  const filePath = decrypt(sharedLink.filePath);
+  const proxied = await pipeRemoteDocument(req, res, filePath, { disposition });
+
+  if (!proxied.ok) {
+    throw new HttpError('Unable to fetch shared document', 502);
+  }
+}
+
+const downloadSharedDocument = asyncHandler((req, res) => serveSharedDocument(req, res, 'attachment'));
+const previewSharedDocument = asyncHandler((req, res) => serveSharedDocument(req, res, 'inline'));
 
 module.exports = {
   createSharedLink,
