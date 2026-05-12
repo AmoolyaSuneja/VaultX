@@ -1,24 +1,27 @@
-const validateVaultInput = (req, res, next) => {
-    const { title, unlockAt, requiresDualApproval, secondApproverEmail } = req.body;
+const { HttpError } = require('./errorHandler');
 
-    if (!title || typeof title !== 'string') {
-        return res.status(400).json({ success: false, message: 'Valid title is required' });
+function validateVaultInput(req, res, next) {
+  const { title, unlockAt, requiresDualApproval, secondApproverEmail } = req.body;
+
+  if (!title || typeof title !== 'string' || !title.trim()) {
+    return next(new HttpError('Valid title is required', 400));
+  }
+
+  if (unlockAt !== undefined && unlockAt !== null && unlockAt !== '') {
+    const parsedUnlockAt = new Date(unlockAt);
+
+    if (Number.isNaN(parsedUnlockAt.getTime())) {
+      return next(new HttpError('unlockAt must be a valid date/time', 400));
     }
+  }
 
-    if (unlockAt !== undefined && unlockAt !== null && unlockAt !== '') {
-        const parsedUnlockAt = new Date(unlockAt);
+  const dualApprovalEnabled = requiresDualApproval === true || requiresDualApproval === 'true';
 
-        if (Number.isNaN(parsedUnlockAt.getTime())) {
-            return res.status(400).json({ success: false, message: 'unlockAt must be a valid date/time' });
-        }
-    }
+  if (dualApprovalEnabled && (!secondApproverEmail || typeof secondApproverEmail !== 'string' || !secondApproverEmail.trim())) {
+    return next(new HttpError('Second approver email is required when dual approval is enabled', 400));
+  }
 
-    const dualApprovalEnabled = requiresDualApproval === true || requiresDualApproval === 'true';
-    if (dualApprovalEnabled && (!secondApproverEmail || typeof secondApproverEmail !== 'string')) {
-        return res.status(400).json({ success: false, message: 'Second approver email is required when dual approval is enabled' });
-    }
-
-    next();
-};
+  return next();
+}
 
 module.exports = validateVaultInput;
