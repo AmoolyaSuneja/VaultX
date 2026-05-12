@@ -83,7 +83,8 @@ const vaultSchema = new mongoose.Schema(
     secondApprover: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      default: null
+      default: null,
+      index: true
     },
     dualAccess: {
       requestedBy: {
@@ -112,7 +113,8 @@ const vaultSchema = new mongoose.Schema(
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: true,
+      index: true
     }
   },
   {
@@ -120,5 +122,9 @@ const vaultSchema = new mongoose.Schema(
     collection: 'vault_data'
   }
 );
+
+vaultSchema.index({ owner: 1, createdAt: -1 });
+vaultSchema.index({ secondApprover: 1, createdAt: -1 });
+vaultSchema.index({ 'dualAccess.expiresAt': 1 });
 
 module.exports = mongoose.model('Vault', vaultSchema);

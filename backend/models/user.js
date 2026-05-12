@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      index: true,
       match: [/.+\@.+\..+/, 'Please fill a valid email address'],
     },
     avatarUrl: {
@@ -152,8 +153,11 @@ userSchema.pre('save', async function () {
     return;
   }
 
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+userSchema.index({ 'nominee.email': 1, 'nominee.status': 1 });
+userSchema.index({ 'nominee.user': 1, 'nominee.status': 1 });
 
 module.exports = mongoose.model('User', userSchema);
