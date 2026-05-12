@@ -6,13 +6,13 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'border border-brand/25 bg-gradient-to-br from-brand to-accent text-background shadow-soft hover:-translate-y-px hover:shadow-card',
+    'border border-brand/90 bg-brand text-background hover:bg-brand-deep',
   secondary:
-    'border border-brand/25 bg-brand-light text-brand hover:bg-brand hover:text-background',
+    'border border-line bg-surface text-textPrimary hover:bg-surface-muted',
   ghost:
-    'border border-line bg-surface-soft text-textMuted hover:border-brand/35 hover:bg-surface-raised hover:text-textPrimary',
+    'border border-transparent bg-transparent text-textMuted hover:bg-surface-muted hover:text-textPrimary',
   danger:
-    'border border-danger/25 bg-danger/10 text-danger hover:bg-danger hover:text-background'
+    'border border-danger/30 bg-transparent text-danger hover:bg-danger/10'
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,7 +25,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        'focus-ring inline-flex min-h-11 transform-gpu items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-[background-color,border-color,color,box-shadow,opacity,transform] duration-300 ease-out disabled:cursor-not-allowed disabled:opacity-40',
+        'focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50',
         variants[variant],
         className
       )}

@@ -78,17 +78,26 @@ export function AuthPanel() {
   const resetPasswordValue = resetForm.watch('password') ?? '';
   const heading =
     mode === 'register'
-      ? 'Create your vault workspace'
+      ? 'Create your workspace'
       : mode === 'forgot'
         ? 'Recover your account'
         : mode === 'reset'
           ? 'Set a new password'
-          : 'Welcome back!';
+          : 'Welcome back';
+  const subtext =
+    mode === 'register'
+      ? 'Start encrypting in under a minute.'
+      : mode === 'forgot'
+        ? 'Enter your email to receive a recovery code.'
+        : mode === 'reset'
+          ? 'Use the recovery code you received.'
+          : 'Sign in to continue.';
+
   const passwordToggle = (
     <button
       type="button"
       aria-label={showPassword ? 'Hide password' : 'Show password'}
-      className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
+      className="focus-ring rounded-full p-1 text-textMuted transition-colors hover:text-textPrimary"
       onClick={() => setShowPassword((value) => !value)}
     >
       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -96,29 +105,27 @@ export function AuthPanel() {
   );
 
   return (
-    <div className="glass-panel relative mx-auto w-full max-w-[430px] transform-gpu overflow-hidden rounded-xl p-5 shadow-card sm:p-7">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/45 to-transparent" />
-      <div className="mb-6 text-center sm:mb-8">
-        <h2 className="mt-3 font-heading text-3xl leading-tight text-textPrimary sm:text-4xl">
-          {heading}
-        </h2>
+    <div className="panel w-full rounded-lg p-6 shadow-card sm:p-8">
+      <div className="mb-6">
+        <h2 className="font-heading text-[28px] leading-tight text-textPrimary">{heading}</h2>
+        <p className="mt-1 text-sm text-textMuted">{subtext}</p>
       </div>
 
       <AnimatePresence mode="wait">
         {mode === 'login' ? (
           <motion.div
             key="login"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={appleSpring}
-            className="transform-gpu will-change-transform"
           >
-            <form className="grid gap-5" onSubmit={loginForm.handleSubmit(submitLogin)}>
+            <form className="grid gap-4" onSubmit={loginForm.handleSubmit(submitLogin)}>
               <Input
                 label="Email"
                 type="email"
-                placeholder="alex@example.com"
+                placeholder="you@example.com"
+                autoComplete="email"
                 error={loginForm.formState.errors.email?.message}
                 {...loginForm.register('email')}
               />
@@ -127,24 +134,27 @@ export function AuthPanel() {
                   label="Password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Your password"
+                  autoComplete="current-password"
                   error={loginForm.formState.errors.password?.message}
                   rightAdornment={passwordToggle}
                   {...loginForm.register('password')}
                 />
               </motion.div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    forgotForm.setValue('email', loginForm.getValues('email'));
+                    setMode('forgot');
+                  }}
+                  className="text-xs font-medium text-textMuted underline-offset-4 transition hover:text-textPrimary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
               <Button type="submit" className="w-full" loading={loginMutation.isPending}>
-                Unlock vault
+                Sign in
               </Button>
-              <button
-                type="button"
-                onClick={() => {
-                  forgotForm.setValue('email', loginForm.getValues('email'));
-                  setMode('forgot');
-                }}
-                className="text-left text-sm font-medium text-brand transition hover:text-brand-deep"
-              >
-                Forgot password?
-              </button>
             </form>
           </motion.div>
         ) : null}
@@ -152,23 +162,24 @@ export function AuthPanel() {
         {mode === 'register' ? (
           <motion.div
             key="register"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={appleSpring}
-            className="transform-gpu will-change-transform"
           >
-            <form className="grid gap-5" onSubmit={registerForm.handleSubmit(submitRegister)}>
+            <form className="grid gap-4" onSubmit={registerForm.handleSubmit(submitRegister)}>
               <Input
                 label="Name"
                 placeholder="Alex Morgan"
+                autoComplete="name"
                 error={registerForm.formState.errors.name?.message}
                 {...registerForm.register('name')}
               />
               <Input
                 label="Email"
                 type="email"
-                placeholder="alex@example.com"
+                placeholder="you@example.com"
+                autoComplete="email"
                 error={registerForm.formState.errors.email?.message}
                 {...registerForm.register('email')}
               />
@@ -176,6 +187,7 @@ export function AuthPanel() {
                 label="Password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Minimum 8 characters"
+                autoComplete="new-password"
                 error={registerForm.formState.errors.password?.message}
                 rightAdornment={passwordToggle}
                 {...registerForm.register('password')}
@@ -185,6 +197,7 @@ export function AuthPanel() {
                 label="Confirm password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repeat password"
+                autoComplete="new-password"
                 error={registerForm.formState.errors.confirmPassword?.message}
                 {...registerForm.register('confirmPassword')}
               />
@@ -198,17 +211,17 @@ export function AuthPanel() {
         {mode === 'forgot' ? (
           <motion.div
             key="forgot"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={appleSpring}
-            className="transform-gpu will-change-transform"
           >
-            <form className="grid gap-5" onSubmit={forgotForm.handleSubmit(submitForgotPassword)}>
+            <form className="grid gap-4" onSubmit={forgotForm.handleSubmit(submitForgotPassword)}>
               <Input
                 label="Account email"
                 type="email"
-                placeholder="alex@example.com"
+                placeholder="you@example.com"
+                autoComplete="email"
                 error={forgotForm.formState.errors.email?.message}
                 {...forgotForm.register('email')}
               />
@@ -222,17 +235,17 @@ export function AuthPanel() {
         {mode === 'reset' ? (
           <motion.div
             key="reset"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={appleSpring}
-            className="transform-gpu will-change-transform"
           >
-            <form className="grid gap-5" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
+            <form className="grid gap-4" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
               <Input
                 label="Account email"
                 type="email"
-                placeholder="alex@example.com"
+                placeholder="you@example.com"
+                autoComplete="email"
                 error={resetForm.formState.errors.email?.message}
                 {...resetForm.register('email')}
               />
@@ -247,6 +260,7 @@ export function AuthPanel() {
                 label="New password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Minimum 8 characters"
+                autoComplete="new-password"
                 error={resetForm.formState.errors.password?.message}
                 rightAdornment={passwordToggle}
                 {...resetForm.register('password')}
@@ -256,6 +270,7 @@ export function AuthPanel() {
                 label="Confirm new password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repeat password"
+                autoComplete="new-password"
                 error={resetForm.formState.errors.confirmPassword?.message}
                 {...resetForm.register('confirmPassword')}
               />
@@ -267,21 +282,21 @@ export function AuthPanel() {
         ) : null}
       </AnimatePresence>
 
-      <div className="mt-8 text-sm text-textMuted">
+      <div className="mt-6 border-t border-line pt-4 text-center text-sm text-textMuted">
         {mode === 'register' ? (
           <button
             type="button"
             onClick={() => setMode('login')}
-            className="font-medium text-brand transition hover:text-brand-deep"
+            className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
           >
             Already have an account? Sign in
           </button>
         ) : mode === 'forgot' || mode === 'reset' ? (
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <button
               type="button"
               onClick={() => setMode('login')}
-              className="font-medium text-brand transition hover:text-brand-deep"
+              className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
             >
               Back to sign in
             </button>
@@ -289,7 +304,7 @@ export function AuthPanel() {
               <button
                 type="button"
                 onClick={() => setMode('forgot')}
-                className="font-medium text-brand transition hover:text-brand-deep"
+                className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
               >
                 Send another code
               </button>
@@ -299,7 +314,7 @@ export function AuthPanel() {
           <button
             type="button"
             onClick={() => setMode('register')}
-            className="font-medium text-brand transition hover:text-brand-deep"
+            className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
           >
             New here? Create an account
           </button>

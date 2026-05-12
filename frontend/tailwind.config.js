@@ -2,10 +2,7 @@
 module.exports = {
   content: {
     relative: true,
-    files: [
-      './index.html',
-      './src/**/*.{ts,tsx}'
-    ]
+    files: ['./index.html', './src/**/*.{ts,tsx}']
   },
   theme: {
     extend: {
@@ -46,36 +43,31 @@ module.exports = {
         heading: ['"Fraunces"', 'Georgia', 'serif']
       },
       borderRadius: {
-        xl: '28px',
-        lg: '20px',
-        md: '16px',
-        sm: '10px'
+        xl: '20px',
+        lg: '14px',
+        md: '10px',
+        sm: '8px'
       },
       boxShadow: {
-        card: '0 18px 48px rgba(31, 95, 166, 0.12)',
-        soft: '0 10px 28px rgba(96, 125, 139, 0.12)',
-        focus: '0 0 0 4px rgba(91, 155, 213, 0.18)'
+        card: '0 1px 2px rgba(16, 18, 22, 0.04), 0 10px 30px -12px rgba(16, 18, 22, 0.12)',
+        soft: '0 1px 2px rgba(16, 18, 22, 0.04)',
+        focus: '0 0 0 3px hsl(var(--color-brand) / 0.18)'
       },
       backdropBlur: {
-        panel: '16px'
+        panel: '12px'
       },
       animation: {
-        shimmer: 'shimmer 1.4s ease-in-out',
-        float: 'float 8s ease-in-out infinite',
-        pulseSoft: 'pulseSoft 2.4s ease-in-out infinite'
+        fadeIn: 'fadeIn 0.35s ease-out both',
+        riseIn: 'riseIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both'
       },
       keyframes: {
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' }
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
         },
-        float: {
-          '0%, 100%': { transform: 'translate3d(0, 0, 0)' },
-          '50%': { transform: 'translate3d(0, -14px, 0)' }
-        },
-        pulseSoft: {
-          '0%, 100%': { opacity: '0.65' },
-          '50%': { opacity: '1' }
+        riseIn: {
+          '0%': { opacity: '0', transform: 'translate3d(0, 6px, 0)' },
+          '100%': { opacity: '1', transform: 'translate3d(0, 0, 0)' }
         }
       }
     }

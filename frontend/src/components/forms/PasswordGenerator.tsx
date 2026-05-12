@@ -26,6 +26,12 @@ function generatePassword({
 
   if (!pools) return '';
 
+  const buffer = new Uint32Array(length);
+  if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(buffer);
+    return Array.from(buffer, (value) => pools[value % pools.length]).join('');
+  }
+
   return Array.from({ length }, () => pools[Math.floor(Math.random() * pools.length)]).join('');
 }
 
@@ -48,37 +54,34 @@ export function PasswordGenerator({ onUse }: PasswordGeneratorProps) {
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <Button type="button" variant="secondary" className="px-3 py-2 text-xs">
-          <KeyRound className="h-4 w-4" />
+        <Button type="button" variant="secondary" className="h-8 min-h-8 px-3 py-1 text-xs">
+          <KeyRound className="h-3.5 w-3.5" />
           Generate
         </Button>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          sideOffset={10}
+          sideOffset={8}
           align="end"
-          className="z-[80] w-[320px] rounded-xl border border-line bg-panel p-4 shadow-card backdrop-blur-panel"
+          className="z-[80] w-[320px] rounded-md border border-line bg-panel p-4 shadow-card"
         >
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Generator</p>
-              <h4 className="mt-1 font-heading text-xl text-textPrimary">Create a strong password</h4>
-            </div>
+          <div className="mb-3 flex items-center justify-between">
+            <h4 className="font-heading text-lg text-textPrimary">Generator</h4>
             <button
               type="button"
-              className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
+              className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary"
               onClick={() => setPassword(generatePassword({ length, uppercase, lowercase, numbers, symbols }))}
-              aria-label="Generate another password"
+              aria-label="Regenerate"
             >
               <RefreshCcw className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="grid gap-4">
-            <label className="grid gap-2 text-sm text-textMuted">
-              <span className="flex items-center justify-between">
+          <div className="grid gap-3">
+            <label className="grid gap-1.5 text-sm text-textMuted">
+              <span className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.16em]">
                 <span>Length</span>
-                <span className="font-medium text-textPrimary">{length}</span>
+                <span className="font-mono text-textPrimary">{length}</span>
               </span>
               <input
                 type="range"
@@ -86,6 +89,7 @@ export function PasswordGenerator({ onUse }: PasswordGeneratorProps) {
                 max={64}
                 value={length}
                 onChange={(event) => setLength(Number(event.target.value))}
+                className="accent-textPrimary"
               />
             </label>
             <Toggle checked={uppercase} onChange={setUppercase} label="Uppercase" />
@@ -94,8 +98,10 @@ export function PasswordGenerator({ onUse }: PasswordGeneratorProps) {
             <Toggle checked={symbols} onChange={setSymbols} label="Symbols" />
 
             <div className="rounded-md border border-line bg-surface p-3">
-              <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Generated password</p>
-              <p className="mt-2 break-all font-medium text-textPrimary">{password || 'Choose at least one option'}</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Preview</p>
+              <p className="mt-1 break-all font-mono text-sm text-textPrimary">
+                {password || 'Choose at least one option'}
+              </p>
             </div>
 
             <PasswordStrengthMeter password={password} />

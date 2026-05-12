@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { Button, Card, Input } from '@/components/ui';
 import { requestJson } from '@/lib/request';
 import { downloadProtectedResource, type AttachmentKind } from '@/lib/utils';
+import { APP_NAME } from '@/lib/constants';
 
 export function SharedLinkPage() {
   const { shareId = '' } = useParams();
@@ -35,11 +36,13 @@ export function SharedLinkPage() {
 
   if (!linkExists) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-xl items-center px-4 py-10">
-        <Card className="w-full rounded-xl">
-          <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Protected link</p>
-          <h1 className="mt-3 font-heading text-2xl text-textPrimary sm:text-3xl">Link unavailable</h1>
-          <p className="mt-3 text-sm leading-7 text-textMuted">This shared link does not exist anymore or was entered incorrectly.</p>
+      <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-10">
+        <Card className="w-full">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted">Protected link</p>
+          <h1 className="mt-2 font-heading text-2xl text-textPrimary">Link unavailable</h1>
+          <p className="mt-2 text-sm leading-6 text-textMuted">
+            This shared link does not exist anymore or was entered incorrectly.
+          </p>
         </Card>
       </div>
     );
@@ -49,103 +52,103 @@ export function SharedLinkPage() {
   const previewUrl = accessToken ? `/api/shared/${shareId}/preview?token=${encodeURIComponent(accessToken)}` : '';
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <div className="mx-auto flex min-h-screen max-w-xl items-center px-4 py-10">
-        <Card className="w-full rounded-xl">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-light text-brand">
-            <LockKeyhole className="h-6 w-6" />
-          </div>
+    <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-10">
+      <Card className="w-full">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-textPrimary">
+          <LockKeyhole className="h-5 w-5" />
+        </div>
 
-          <p className="mt-6 text-xs uppercase tracking-[0.22em] text-textMuted">Protected document</p>
-          <h1 className="mt-3 font-heading text-2xl text-textPrimary sm:text-3xl">Enter password to continue</h1>
-          <p className="mt-3 text-sm leading-7 text-textMuted">
-            This link grants access to one shared document only. Enter the password to unlock the download option.
-          </p>
+        <p className="mt-5 text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted">
+          Protected document
+        </p>
+        <h1 className="mt-2 font-heading text-2xl text-textPrimary">Enter password to continue</h1>
+        <p className="mt-2 text-sm leading-6 text-textMuted">
+          This link grants access to one shared document only. Enter the password to unlock the download.
+        </p>
 
-          <div className="mt-6 space-y-4">
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter shared password"
-            />
+        <div className="mt-6 space-y-4">
+          <Input
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Enter shared password"
+          />
 
-            <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              loading={loading}
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  const payload = await requestJson<{
+                    data: { accessToken: string; kind: AttachmentKind };
+                    message: string;
+                  }>(`/api/shared/${shareId}/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                  });
+
+                  setAccessToken(payload.data.accessToken);
+                  setKind(payload.data.kind);
+                  toast.success(payload.message || 'Password verified');
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Verification failed');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              Unlock
+            </Button>
+
+            {accessToken ? (
               <Button
                 type="button"
+                variant="secondary"
                 className="w-full sm:w-auto"
-                loading={loading}
+                loading={downloading}
                 onClick={async () => {
                   try {
-                    setLoading(true);
-                    const payload = await requestJson<{ data: { accessToken: string; kind: AttachmentKind }; message: string }>(
-                      `/api/shared/${shareId}/verify`,
-                      {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ password })
-                      }
+                    setDownloading(true);
+                    await downloadProtectedResource(
+                      `/api/shared/${shareId}/download?token=${encodeURIComponent(accessToken)}`,
+                      'shared-document'
                     );
-
-                    setAccessToken(payload.data.accessToken);
-                    setKind(payload.data.kind);
-                    toast.success(payload.message || 'Password verified');
+                    toast.success(`${downloadLabel} ready`);
                   } catch (error) {
-                    const message = error instanceof Error ? error.message : 'Verification failed';
-                    toast.error(message);
+                    toast.error(error instanceof Error ? error.message : 'Download failed');
                   } finally {
-                    setLoading(false);
+                    setDownloading(false);
                   }
                 }}
               >
-                Unlock document
+                <Download className="h-4 w-4" />
+                {downloadLabel}
               </Button>
-
-              {accessToken ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="w-full sm:w-auto"
-                  loading={downloading}
-                  onClick={async () => {
-                    try {
-                      setDownloading(true);
-                      await downloadProtectedResource(
-                        `/api/shared/${shareId}/download?token=${encodeURIComponent(accessToken)}`,
-                        'shared-document'
-                      );
-                      toast.success(`${downloadLabel} ready`);
-                    } catch (error) {
-                      const message = error instanceof Error ? error.message : 'Download failed';
-                      toast.error(message);
-                    } finally {
-                      setDownloading(false);
-                    }
-                  }}
-                >
-                  <Download className="h-4 w-4" />
-                  {downloadLabel}
-                </Button>
-              ) : null}
-            </div>
-
-            {accessToken && kind === 'pdf' ? (
-              <div className="overflow-hidden rounded-xl border border-line bg-surface-raised">
-                <iframe src={previewUrl} title="Protected PDF preview" className="h-[60vh] min-h-80 w-full sm:h-[500px]" />
-              </div>
-            ) : null}
-
-            {accessToken && kind === 'image' ? (
-              <div className="overflow-hidden rounded-xl border border-line bg-surface-raised">
-                <img src={previewUrl} alt="Protected document preview" className="max-h-[60vh] w-full object-contain sm:max-h-[500px]" />
-              </div>
             ) : null}
           </div>
-        </Card>
-      </div>
+
+          {accessToken && kind === 'pdf' ? (
+            <div className="overflow-hidden rounded-md border border-line bg-surface">
+              <iframe src={previewUrl} title="Protected PDF preview" className="h-[60vh] min-h-80 w-full sm:h-[500px]" />
+            </div>
+          ) : null}
+
+          {accessToken && kind === 'image' ? (
+            <div className="overflow-hidden rounded-md border border-line bg-surface">
+              <img src={previewUrl} alt="Protected document preview" className="max-h-[60vh] w-full object-contain sm:max-h-[500px]" />
+            </div>
+          ) : null}
+
+          <p className="border-t border-line pt-4 text-center text-[11px] uppercase tracking-[0.18em] text-textMuted">
+            Shared via {APP_NAME}
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }

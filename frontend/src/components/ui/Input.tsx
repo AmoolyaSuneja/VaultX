@@ -11,41 +11,30 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, leftAdornment, rightAdornment, ...props }, ref) => {
-    const hasValue = props.value !== undefined && String(props.value).length > 0;
-
-    return (
-      <label className="grid gap-2 text-sm text-textMuted">
-        {label ? (
-          <span
-            className={cn(
-              'text-xs font-medium uppercase tracking-[0.22em] transition-colors',
-              hasValue ? 'text-brand' : 'text-textMuted'
-            )}
-          >
-            {label}
-          </span>
-        ) : null}
-        <span
-          className={cn(
-            'surface-field flex items-center gap-2 rounded-md px-3 py-2.5 transition-[border-color,box-shadow] duration-300 ease-out',
-            error ? 'border-danger/50' : 'border-line focus-within:border-brand focus-within:shadow-focus',
-            className
-          )}
-        >
-          {leftAdornment}
-          <input
-            ref={ref}
-            className="min-w-0 flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/70"
-            {...props}
-          />
-          {rightAdornment}
-        </span>
-        {error ? <span className="text-xs text-danger">{error}</span> : null}
-        {!error && hint ? <span className="text-xs text-textMuted">{hint}</span> : null}
-      </label>
-    );
-  }
+  ({ className, label, error, hint, leftAdornment, rightAdornment, ...props }, ref) => (
+    <label className="grid gap-1.5 text-sm text-textMuted">
+      {label ? (
+        <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">{label}</span>
+      ) : null}
+      <span
+        className={cn(
+          'surface-field flex items-center gap-2 rounded-md px-3 py-2.5 transition-colors duration-200 ease-out',
+          error ? 'border-danger/50' : 'focus-within:border-textPrimary/60',
+          className
+        )}
+      >
+        {leftAdornment}
+        <input
+          ref={ref}
+          className="min-w-0 flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/70"
+          {...props}
+        />
+        {rightAdornment}
+      </span>
+      {error ? <span className="text-xs text-danger">{error}</span> : null}
+      {!error && hint ? <span className="text-xs text-textMuted">{hint}</span> : null}
+    </label>
+  )
 );
 
 Input.displayName = 'Input';

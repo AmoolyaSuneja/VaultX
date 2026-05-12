@@ -19,19 +19,19 @@ export function EmptyState({
   onSecondaryAction
 }: EmptyStateProps) {
   return (
-    <div className="glass-panel flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center">
-      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-brand-light text-brand">
-        <ArchiveX className="h-8 w-8" aria-hidden="true" />
+    <div className="flex min-h-[280px] flex-col items-center justify-center rounded-lg border border-dashed border-line bg-panel px-6 py-10 text-center">
+      <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-textMuted">
+        <ArchiveX className="h-5 w-5" aria-hidden="true" />
       </div>
-      <h3 className="font-heading text-3xl text-textPrimary">{title}</h3>
-      <p className="mt-3 max-w-md text-sm leading-7 text-textMuted">{copy}</p>
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <h3 className="font-heading text-2xl text-textPrimary">{title}</h3>
+      <p className="mt-2 max-w-md text-sm leading-6 text-textMuted">{copy}</p>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
         {actionLabel ? <Button onClick={onAction}>{actionLabel}</Button> : null}
         {secondaryLabel ? (
           <button
             type="button"
             onClick={onSecondaryAction}
-            className="focus-ring text-sm font-medium text-accent transition hover:text-brand"
+            className="focus-ring text-sm font-medium text-textPrimary underline-offset-4 transition hover:underline"
           >
             {secondaryLabel}
           </button>

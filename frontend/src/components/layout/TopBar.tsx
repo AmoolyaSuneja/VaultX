@@ -1,9 +1,9 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { LogOut, Moon, Search, Sun, UserCircle2 } from 'lucide-react';
+import { LogOut, Moon, Settings, Sun, UserCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useSettingsStore } from '@/features/settings/settings.store';
-import { useVaultStore } from '@/features/vault/vault.store';
+import { APP_NAME } from '@/lib/constants';
 import { getInitials } from '@/lib/utils';
 
 export function TopBar() {
@@ -12,41 +12,29 @@ export function TopBar() {
   const logout = useAuthStore((state) => state.logout);
   const theme = useSettingsStore((state) => state.theme);
   const toggleTheme = useSettingsStore((state) => state.toggleTheme);
-  const search = useVaultStore((state) => state.search);
-  const setSearch = useVaultStore((state) => state.setSearch);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-panel/90 backdrop-blur-panel">
-      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
-        <Link to="/vault" className="min-w-fit font-heading text-xl text-textPrimary sm:text-2xl">
-          Secure Vault
+      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center gap-3 px-4 sm:px-8">
+        <Link
+          to="/vault"
+          className="font-heading text-[22px] font-semibold tracking-tight text-textPrimary"
+        >
+          {APP_NAME}
         </Link>
 
-        <div className="hidden flex-1 items-center md:flex">
-          <label className="focus-within:shadow-focus flex w-full max-w-xl items-center gap-3 rounded-full border border-line bg-surface px-4 py-2 transition focus-within:border-brand">
-            <Search className="h-4 w-4 text-textMuted" />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search your vault"
-              className="w-full bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/70"
-            />
-          </label>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={toggleTheme}
-            className="focus-ring flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-soft text-textMuted transition hover:border-brand/40 hover:bg-surface-raised hover:text-brand"
+            className="focus-ring flex h-9 w-9 items-center justify-center rounded-full text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
           <Menu as="div" className="relative">
-            <MenuButton className="focus-ring flex items-center gap-3 rounded-full border border-line bg-surface-soft p-1.5 transition hover:border-brand/40 hover:bg-surface-raised sm:py-1.5 sm:pl-1.5 sm:pr-3">
+            <MenuButton className="focus-ring flex items-center gap-2 rounded-full p-1 pr-3 transition-colors hover:bg-surface-muted">
               <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand text-xs font-semibold text-background">
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt={user?.name ?? 'Profile'} className="h-full w-full object-cover" />
@@ -59,15 +47,15 @@ export function TopBar() {
 
             <MenuItems
               anchor="bottom end"
-              className="z-[70] mt-2 min-w-[150px] rounded-full border border-line bg-panel/95 p-1.5 shadow-soft backdrop-blur-panel"
+              className="z-[70] mt-2 min-w-[180px] rounded-md border border-line bg-panel p-1 shadow-card"
             >
               <MenuItem>
                 {({ focus }) => (
                   <button
                     type="button"
                     onClick={() => navigate('/vault/profile')}
-                    className={`focus-ring flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                      focus ? 'bg-brand text-background' : 'text-textPrimary hover:bg-surface-raised'
+                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors ${
+                      focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'
                     }`}
                   >
                     <UserCircle2 className="h-4 w-4" />
@@ -79,13 +67,28 @@ export function TopBar() {
                 {({ focus }) => (
                   <button
                     type="button"
+                    onClick={() => navigate('/vault/settings')}
+                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors ${
+                      focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'
+                    }`}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Nominee
+                  </button>
+                )}
+              </MenuItem>
+              <div className="my-1 h-px bg-line" />
+              <MenuItem>
+                {({ focus }) => (
+                  <button
+                    type="button"
                     onClick={logout}
-                    className={`focus-ring flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                      focus ? 'bg-brand text-background' : 'text-textPrimary hover:bg-surface-raised'
+                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors ${
+                      focus ? 'bg-surface-muted text-danger' : 'text-textPrimary'
                     }`}
                   >
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    Sign out
                   </button>
                 )}
               </MenuItem>

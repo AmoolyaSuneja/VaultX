@@ -22,8 +22,8 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
       <button
         type="button"
         className={cn(
-          'focus-ring flex min-h-[120px] flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed px-4 py-5 text-center transition sm:min-h-[140px] sm:py-6',
-          dragging ? 'border-brand bg-brand-light' : 'border-line bg-surface-soft hover:border-brand/40 hover:bg-surface-raised'
+          'focus-ring flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-5 text-center transition-colors',
+          dragging ? 'border-textPrimary bg-surface-muted' : 'border-line bg-surface hover:border-textPrimary/40'
         )}
         onDragEnter={() => setDragging(true)}
         onDragLeave={() => setDragging(false)}
@@ -38,12 +38,12 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
         }}
         onClick={() => inputRef.current?.click()}
       >
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-brand shadow-sm">
-          {dragging ? <UploadCloud className="h-6 w-6" /> : <Paperclip className="h-6 w-6" />}
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-muted text-textMuted">
+          {dragging ? <UploadCloud className="h-5 w-5" /> : <Paperclip className="h-5 w-5" />}
         </div>
         <div>
-          <p className="text-sm font-medium text-textPrimary">Drag and drop files here</p>
-          <p className="mt-1 text-xs text-textMuted">or click to browse uploads</p>
+          <p className="text-sm font-medium text-textPrimary">Drag and drop or click to browse</p>
+          <p className="mt-0.5 text-xs text-textMuted">PDF, images, up to 10 files</p>
         </div>
         <input ref={inputRef} hidden type="file" multiple onChange={(event) => pushFiles(event.target.files)} />
       </button>
@@ -55,10 +55,10 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
             href={file}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface-soft px-3 py-2 text-sm transition hover:border-brand/40 hover:bg-surface-raised"
+            className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-3 py-2 text-sm transition-colors hover:bg-surface-muted"
           >
             <span className="flex min-w-0 items-center gap-2 truncate text-textPrimary">
-              <FileText className="h-4 w-4 text-brand" />
+              <FileText className="h-4 w-4 text-textMuted" />
               <span className="truncate">{`Saved attachment ${index + 1}`}</span>
             </span>
             <span className="flex items-center gap-1 text-xs text-textMuted">
@@ -69,14 +69,17 @@ export function FileUpload({ files, onChange, existingFiles = [] }: FileUploadPr
         ))}
 
         {files.map((file, index) => (
-          <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface-soft px-3 py-2 text-sm">
+          <div
+            key={`${file.name}-${index}`}
+            className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-3 py-2 text-sm"
+          >
             <span className="flex min-w-0 items-center gap-2 text-textPrimary">
-              <FileText className="h-4 w-4 text-brand" />
+              <FileText className="h-4 w-4 text-textMuted" />
               <span className="truncate">{file.name}</span>
             </span>
             <button
               type="button"
-              className="focus-ring rounded-full p-1 text-textMuted transition hover:text-danger"
+              className="focus-ring rounded-full p-1 text-textMuted transition-colors hover:text-danger"
               onClick={() => onChange(files.filter((_, fileIndex) => fileIndex !== index))}
               aria-label={`Remove ${file.name}`}
             >

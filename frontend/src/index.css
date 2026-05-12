@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,53 +6,65 @@
 
 @layer base {
   :root {
-    --color-background: 214 100% 97%;
-    --color-panel: 225 100% 98%;
-    --color-surface: 225 100% 98%;
-    --color-surface-soft: 214 59% 96%;
-    --color-surface-muted: 214 54% 94%;
+    /* Graphite — ink on warm off-white, cool slate accent. */
+    --color-background: 36 22% 97%;
+    --color-panel: 36 22% 98%;
+    --color-surface: 36 20% 96%;
+    --color-surface-soft: 36 18% 94%;
+    --color-surface-muted: 32 14% 90%;
     --color-surface-raised: 0 0% 100%;
-    --color-surface-sunken: 213 51% 91%;
-    --color-brand: 210 68% 39%;
-    --color-brand-deep: 211 79% 21%;
-    --color-brand-light: 216 100% 89%;
-    --color-brand-muted: 210 68% 39%;
-    --color-accent: 207 59% 60%;
-    --color-accent-light: 216 68% 93%;
-    --color-accent-muted: 207 59% 60%;
-    --color-steel: 199 18% 46%;
-    --color-steel-light: 214 25% 78%;
-    --color-steel-muted: 199 18% 46%;
-    --color-danger: 355 41% 50%;
-    --color-danger-light: 355 41% 50%;
-    --color-line: 210 34% 84%;
-    --color-text-primary: 210 61% 24%;
-    --color-text-muted: 199 18% 46%;
+    --color-surface-sunken: 32 14% 88%;
+
+    --color-brand: 220 12% 18%;
+    --color-brand-deep: 220 14% 10%;
+    --color-brand-light: 220 12% 92%;
+    --color-brand-muted: 220 8% 35%;
+
+    --color-accent: 215 16% 38%;
+    --color-accent-light: 215 18% 90%;
+    --color-accent-muted: 215 10% 55%;
+
+    --color-steel: 220 6% 45%;
+    --color-steel-light: 220 8% 82%;
+    --color-steel-muted: 220 4% 60%;
+
+    --color-danger: 358 58% 48%;
+    --color-danger-light: 358 60% 94%;
+
+    --color-line: 32 12% 86%;
+    --color-text-primary: 220 14% 12%;
+    --color-text-muted: 220 6% 42%;
   }
 
   .dark {
-    --color-background: 220 24% 10%;
-    --color-panel: 220 20% 14%;
-    --color-surface: 220 18% 16%;
-    --color-surface-soft: 220 16% 19%;
-    --color-surface-muted: 220 14% 23%;
-    --color-surface-raised: 220 18% 18%;
-    --color-surface-sunken: 222 31% 8%;
-    --color-brand: 210 46% 62%;
-    --color-brand-deep: 212 48% 74%;
-    --color-brand-light: 218 22% 24%;
-    --color-brand-muted: 210 34% 45%;
-    --color-accent: 214 34% 58%;
-    --color-accent-light: 216 18% 24%;
-    --color-accent-muted: 214 26% 42%;
-    --color-steel: 215 13% 66%;
-    --color-steel-light: 214 14% 38%;
-    --color-steel-muted: 215 12% 52%;
-    --color-danger: 354 54% 66%;
-    --color-danger-light: 354 26% 22%;
-    --color-line: 218 14% 30%;
-    --color-text-primary: 210 40% 94%;
-    --color-text-muted: 215 13% 66%;
+    /* Graphite dark — near-black ink field, bone-white text, soft slate accent. */
+    --color-background: 220 12% 7%;
+    --color-panel: 220 12% 10%;
+    --color-surface: 220 10% 12%;
+    --color-surface-soft: 220 10% 14%;
+    --color-surface-muted: 220 8% 17%;
+    --color-surface-raised: 220 10% 15%;
+    --color-surface-sunken: 220 14% 5%;
+
+    --color-brand: 36 18% 92%;
+    --color-brand-deep: 36 20% 96%;
+    --color-brand-light: 220 10% 20%;
+    --color-brand-muted: 36 10% 76%;
+
+    --color-accent: 215 12% 72%;
+    --color-accent-light: 220 10% 22%;
+    --color-accent-muted: 215 10% 55%;
+
+    --color-steel: 220 6% 64%;
+    --color-steel-light: 220 6% 36%;
+    --color-steel-muted: 220 4% 52%;
+
+    --color-danger: 358 62% 62%;
+    --color-danger-light: 358 30% 18%;
+
+    --color-line: 220 10% 20%;
+    --color-text-primary: 36 18% 94%;
+    --color-text-muted: 220 6% 64%;
   }
 
   * {
@@ -73,34 +85,7 @@
     overflow-x: hidden;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    background-image:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(221, 233, 251, 0.74) 48%, rgba(240, 246, 255, 1) 100%),
-      linear-gradient(135deg, rgba(201, 222, 255, 0.26) 0%, rgba(91, 155, 213, 0.08) 40%, rgba(96, 125, 139, 0.08) 100%);
-    background-attachment: fixed;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
-      repeating-linear-gradient(135deg, rgba(96, 125, 139, 0.03) 0 1px, transparent 1px 12px);
-    opacity: 0.55;
-  }
-
-  .dark body {
-    background-image:
-      linear-gradient(180deg, rgba(13, 18, 30, 0.98) 0%, rgba(20, 27, 42, 0.94) 52%, rgba(12, 17, 28, 1) 100%),
-      linear-gradient(135deg, rgba(96, 125, 161, 0.10) 0%, rgba(73, 94, 125, 0.08) 44%, rgba(118, 139, 168, 0.08) 100%);
-  }
-
-  .dark body::before {
-    background-image:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
-      repeating-linear-gradient(135deg, rgba(214, 226, 244, 0.035) 0 1px, transparent 1px 12px);
-    opacity: 0.7;
+    font-feature-settings: 'ss01', 'cv11';
   }
 
   #root {
@@ -108,35 +93,30 @@
   }
 
   ::selection {
-    @apply bg-brand/20 text-textPrimary;
+    @apply bg-textPrimary/10 text-textPrimary;
   }
 }
 
 @layer components {
-  .glass-panel {
-    @apply border border-line bg-panel shadow-soft backdrop-blur-panel;
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(238, 243, 251, 0.86));
-  }
-
-  .dark .glass-panel {
-    background-image: linear-gradient(180deg, rgba(26, 38, 61, 0.92), rgba(18, 29, 49, 0.9));
+  .panel {
+    @apply border border-line bg-panel;
   }
 
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-textPrimary/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgba(96, 125, 139, 0.35) transparent;
+    scrollbar-color: hsl(var(--color-steel-muted) / 0.4) transparent;
     scroll-behavior: smooth;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -144,17 +124,12 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(96, 125, 139, 0.28);
+    background: hsl(var(--color-steel-muted) / 0.35);
     border-radius: 999px;
   }
 
   .surface-field {
-    @apply border border-line bg-surface text-textPrimary backdrop-blur-sm;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
-  }
-
-  .dark .surface-field {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    @apply border border-line bg-surface text-textPrimary;
   }
 
   .surface-card {
@@ -162,49 +137,12 @@
   }
 
   .surface-chip {
-    @apply border border-line/80 bg-surface-muted text-textMuted;
+    @apply border border-line bg-surface-muted text-textMuted;
   }
 
-  .auth-page-background {
-    background:
-      radial-gradient(circle at 18% 24%, rgba(201, 222, 255, 0.82) 0%, rgba(201, 222, 255, 0) 30%),
-      radial-gradient(circle at 82% 20%, rgba(91, 155, 213, 0.22) 0%, rgba(91, 155, 213, 0) 28%),
-      radial-gradient(circle at 50% 82%, rgba(96, 125, 139, 0.16) 0%, rgba(96, 125, 139, 0) 30%),
-      linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 246, 255, 0.96) 36%, rgba(221, 233, 251, 0.78) 68%, rgba(246, 248, 255, 0.96) 100%);
-    animation: pulseSoft 8s ease-in-out infinite;
-  }
-
-  .dark .auth-page-background {
-    background:
-      radial-gradient(circle at 18% 24%, rgba(96, 125, 161, 0.16) 0%, rgba(96, 125, 161, 0) 30%),
-      radial-gradient(circle at 82% 20%, rgba(93, 111, 142, 0.14) 0%, rgba(93, 111, 142, 0) 28%),
-      radial-gradient(circle at 50% 82%, rgba(118, 139, 168, 0.12) 0%, rgba(118, 139, 168, 0) 30%),
-      linear-gradient(145deg, rgba(8, 14, 28, 0.96) 0%, rgba(15, 25, 44, 0.98) 44%, rgba(12, 20, 36, 0.96) 100%);
-  }
-
-  .auth-ambient {
-    background:
-      radial-gradient(circle at 20% 30%, rgba(201, 222, 255, 0.7) 0%, rgba(201, 222, 255, 0) 36%),
-      radial-gradient(circle at 78% 28%, rgba(91, 155, 213, 0.22) 0%, rgba(91, 155, 213, 0) 34%),
-      radial-gradient(circle at 50% 78%, rgba(96, 125, 139, 0.18) 0%, rgba(96, 125, 139, 0) 38%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(221, 233, 251, 0.22));
-    filter: blur(14px);
-    animation:
-      float 10s ease-in-out infinite,
-      pulseSoft 4.5s ease-in-out infinite;
-  }
-
-  .dark .auth-ambient {
-    background:
-      radial-gradient(circle at 20% 30%, rgba(96, 125, 161, 0.18) 0%, rgba(96, 125, 161, 0) 36%),
-      radial-gradient(circle at 78% 28%, rgba(93, 111, 142, 0.12) 0%, rgba(93, 111, 142, 0) 34%),
-      radial-gradient(circle at 50% 78%, rgba(118, 139, 168, 0.12) 0%, rgba(118, 139, 168, 0) 38%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(34, 47, 73, 0.12));
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .smooth-scroll-area {
-      scroll-behavior: smooth;
-    }
+  /* Kept for backward compat with classes still present in some markup; */
+  /* renders as a plain panel in the new minimal theme. */
+  .glass-panel {
+    @apply border border-line bg-panel;
   }
 }

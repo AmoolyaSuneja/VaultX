@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-const labels = ['Weak', 'Fair', 'Strong', 'Very strong'];
+const labels = ['Weak', 'Fair', 'Strong', 'Excellent'];
 
 function calculateScore(password: string) {
   let score = 0;
@@ -16,25 +16,19 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
   const label = labels[Math.max(0, score - 1)] ?? 'Weak';
 
   return (
-    <div className="grid gap-2">
-      <div className="flex gap-2">
+    <div className="grid gap-1.5">
+      <div className="flex gap-1.5">
         {[0, 1, 2, 3].map((item) => (
           <span
             key={item}
             className={cn(
-              'h-2 flex-1 rounded-full transition',
-              item < score
-                ? score < 2
-                  ? 'bg-danger'
-                  : score < 3
-                    ? 'bg-accent'
-                    : 'bg-brand'
-                : 'bg-textMuted/15'
+              'h-1 flex-1 rounded-full transition-colors',
+              item < score ? 'bg-textPrimary' : 'bg-line'
             )}
           />
         ))}
       </div>
-      <span className="text-xs font-medium text-textMuted">{label}</span>
+      <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">{label}</span>
     </div>
   );
 }

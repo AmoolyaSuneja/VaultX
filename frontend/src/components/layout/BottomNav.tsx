@@ -9,16 +9,16 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 rounded-full border border-line bg-panel/95 p-1.5 shadow-card backdrop-blur-panel sm:inset-x-6 sm:p-2 lg:hidden">
-      <div className="grid grid-cols-3 gap-2">
+    <nav className="fixed inset-x-4 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 rounded-full border border-line bg-panel/95 p-1 shadow-card backdrop-blur-panel sm:inset-x-auto sm:left-1/2 sm:w-auto sm:-translate-x-1/2 lg:hidden">
+      <div className="grid grid-cols-3 gap-1 sm:flex sm:gap-1">
         {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/vault'}
             className={({ isActive }) =>
-              `focus-ring flex min-h-12 flex-col items-center justify-center gap-1 rounded-full px-2 py-2 text-[11px] font-medium transition sm:px-3 sm:text-xs ${
-                isActive ? 'bg-brand text-background' : 'text-textMuted'
+              `focus-ring flex min-h-10 min-w-[88px] items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                isActive ? 'bg-brand text-background' : 'text-textMuted hover:bg-surface-muted hover:text-textPrimary'
               }`
             }
           >

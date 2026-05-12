@@ -9,7 +9,11 @@ import { appleSpring } from './lib/motion';
 import './features/settings/settings.store';
 import './index.css';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false, retry: 1 }
+  }
+});
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -19,9 +23,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Toaster
           position="top-right"
           toastOptions={{
-            duration: 3000,
+            duration: 2800,
             className:
-              'rounded-lg border border-line bg-panel px-4 py-3 text-sm text-textPrimary shadow-soft backdrop-blur-panel'
+              'rounded-md border border-line bg-panel px-4 py-2.5 text-sm text-textPrimary shadow-card'
           }}
         />
       </QueryClientProvider>

@@ -1,4 +1,17 @@
-import { AlertTriangle, Copy, Download, ExternalLink, Eye, EyeOff, FileImage, FileText, LockKeyhole, Pencil, Share2, ShieldCheck } from 'lucide-react';
+import {
+  AlertTriangle,
+  Copy,
+  Download,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  FileImage,
+  FileText,
+  LockKeyhole,
+  Pencil,
+  Share2,
+  ShieldCheck
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import toast from 'react-hot-toast';
@@ -41,7 +54,9 @@ export function EntryDetailPage() {
   const locked = isUnlockPending(entry?.unlockAt);
   const lockedError = queryError instanceof ApiError && queryError.status === 403;
   const accessPolicy = entry?.accessPolicy;
-  const canSeeSensitive = Boolean(entry?.password || entry?.notes || entry?.data || entry?.url || entry?.username || entry?.filePath?.length);
+  const canSeeSensitive = Boolean(
+    entry?.password || entry?.notes || entry?.data || entry?.url || entry?.username || entry?.filePath?.length
+  );
   const ownerView = accessPolicy?.role === 'owner';
   const nomineeAccess = accessPolicy?.role === 'nominee';
   const ownerLabel = accessPolicy?.owner?.name || accessPolicy?.owner?.email;
@@ -53,7 +68,7 @@ export function EntryDetailPage() {
   const approvalContactLabel =
     accessPolicy?.approvalStatus === 'pending'
       ? accessPolicy.requestedByCurrentUser
-        ? 'Approval sent to'
+        ? 'Sent to'
         : 'Requested by'
       : accessPolicy?.role === 'owner'
         ? 'Second approver'
@@ -80,25 +95,23 @@ export function EntryDetailPage() {
 
   if (entryQuery.isLoading && !entry) {
     return (
-      <Card className="rounded-xl">
-        <p className="text-sm text-textMuted">Loading entry details...</p>
+      <Card>
+        <p className="text-sm text-textMuted">Loading entry...</p>
       </Card>
     );
   }
 
   if (!entry && queryError) {
     return (
-      <div className="space-y-6">
-        <Card className="rounded-xl border border-danger/20 bg-danger/5">
+      <div className="space-y-4">
+        <Card className="border-danger/20 bg-danger-light/30">
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 h-5 w-5 text-danger" />
-            <div className="space-y-2">
+            <div>
               <h1 className="font-heading text-2xl text-textPrimary">
                 {lockedError ? 'Entry is locked' : 'Unable to load this entry'}
               </h1>
-              <p className="text-sm leading-6 text-textMuted">
-                {errorMessage || 'Please try again in a moment.'}
-              </p>
+              <p className="mt-1 text-sm leading-6 text-textMuted">{errorMessage || 'Please try again in a moment.'}</p>
             </div>
           </div>
         </Card>
@@ -109,77 +122,51 @@ export function EntryDetailPage() {
     );
   }
 
-  if (lockedError) {
-    return (
-      <div className="space-y-6">
-        <Card className="rounded-xl border border-danger/20 bg-danger/5">
-          <div className="flex items-start gap-3">
-            <LockKeyhole className="mt-0.5 h-5 w-5 text-danger" />
-            <div className="space-y-2">
-              <h1 className="font-heading text-2xl text-textPrimary">Entry is locked</h1>
-              <p className="text-sm leading-6 text-textMuted">
-                {errorMessage || 'This entry cannot be opened until its scheduled unlock time.'}
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Button variant="ghost" onClick={() => navigate('/vault')}>
-          Back to vault
-        </Button>
-      </div>
-    );
-  }
-
-  if (!entry) {
-    return null;
-  }
+  if (!entry) return null;
 
   if (locked) {
     return (
-      <div className="space-y-5 sm:space-y-6">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge>{entry.category || 'General'}</Badge>
               {nomineeAccess ? (
                 <Badge variant="status" statusTone="archived" className="gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  {ownerLabel ? `Nominee access: ${ownerLabel}` : 'Nominee access'}
+                  <ShieldCheck className="h-3 w-3" />
+                  {ownerLabel ? `Nominee: ${ownerLabel}` : 'Nominee'}
                 </Badge>
               ) : null}
             </div>
-            <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:mt-4 sm:text-4xl">{entry.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-textMuted">
-              This entry is time-locked. Sensitive content and attachments will unlock automatically when the scheduled time arrives.
+            <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:text-[34px]">{entry.title}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-textMuted">
+              Time-locked. Sensitive content and attachments will unlock automatically at the scheduled time.
             </p>
           </div>
           <Button variant="ghost" onClick={() => navigate('/vault')}>
-            Back to vault
+            Back
           </Button>
         </div>
 
-        <Card className="rounded-xl border border-brand/20 bg-brand-light/40">
+        <Card>
           <div className="flex items-start gap-3">
-            <LockKeyhole className="mt-0.5 h-5 w-5 text-brand" />
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Scheduled unlock</p>
-              <h2 className="font-heading text-2xl text-textPrimary">{formatDateTime(entry.unlockAt)}</h2>
-              <p className="text-sm text-textMuted">
-                {lockedError ? errorMessage : `Document is locked until ${formatDateTime(entry.unlockAt)}`}
-              </p>
+            <LockKeyhole className="mt-0.5 h-5 w-5 text-textMuted" />
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Scheduled unlock</p>
+              <h2 className="mt-1 font-heading text-xl text-textPrimary">{formatDateTime(entry.unlockAt)}</h2>
             </div>
           </div>
         </Card>
 
-        <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-          <Card className="space-y-5 rounded-xl">
+        <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+          <Card className="space-y-4">
             <DetailRow label="Status" value="Locked" />
             <DetailRow label="Content" value="Sensitive fields are hidden until the unlock time passes." multiline />
           </Card>
 
-          <Card className="rounded-xl">
-            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Metadata</p>
-            <div className="mt-4 grid gap-4">
+          <Card>
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Metadata</p>
+            <div className="mt-4 grid gap-3">
               <MetaItem label="Created" value={formatDateTime(entry.createdAt)} />
               <MetaItem label="Updated" value={formatDateTime(entry.updatedAt)} />
               <MetaItem label="Unlocks" value={formatDateTime(entry.unlockAt)} />
@@ -193,32 +180,34 @@ export function EntryDetailPage() {
   }
 
   return (
-      <div className="space-y-5 sm:space-y-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge>{entry.category || 'General'}</Badge>
             {nomineeAccess ? (
               <Badge variant="status" statusTone="archived" className="gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                {ownerLabel ? `Nominee access: ${ownerLabel}` : 'Nominee access'}
+                <ShieldCheck className="h-3 w-3" />
+                {ownerLabel ? `Nominee: ${ownerLabel}` : 'Nominee'}
               </Badge>
             ) : null}
           </div>
-          <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:mt-4 sm:text-4xl">{entry.title}</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-textMuted">{entry.notes || entry.data || 'No notes saved yet.'}</p>
+          <h1 className="mt-3 break-words font-heading text-3xl text-textPrimary sm:text-[34px]">{entry.title}</h1>
+          {entry.notes || entry.data ? (
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-textMuted">{entry.notes || entry.data}</p>
+          ) : null}
         </div>
         <Button variant="ghost" onClick={() => navigate('/vault')} className="w-full sm:w-auto">
-          Back to vault
+          Back
         </Button>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <Card className="space-y-6 rounded-xl">
+      <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+        <Card className="space-y-4">
           {accessPolicy?.requiresDualApproval ? (
-            <div className="rounded-xl border border-brand/20 bg-brand-light/30 p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Two-person access</p>
-              <h2 className="mt-2 font-heading text-2xl text-textPrimary">
+            <div className="rounded-md border border-line bg-surface p-4">
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Two-person access</p>
+              <h2 className="mt-1 font-heading text-xl text-textPrimary">
                 {accessPolicy.approvalStatus === 'approved' ? 'Approved access is active' : 'Participant approval required'}
               </h2>
               <p className="mt-2 text-sm leading-6 text-textMuted">
@@ -226,17 +215,17 @@ export function EntryDetailPage() {
                   ? `Sensitive content stays open until ${formatDateTime(accessPolicy.approvalExpiresAt)}.`
                   : accessPolicy.approvalStatus === 'pending'
                     ? accessPolicy.requestedByCurrentUser
-                      ? `Waiting for ${accessPolicy.approvalTarget?.email || 'the other participant'} to approve this access request from the email link.`
-                      : `${accessPolicy.requestedBy?.email || 'The other participant'} requested access. Use the approval email to grant access for 10 minutes.`
-                    : 'Either vault participant must request access, and the other participant must approve before sensitive content and attachments are available.'}
+                      ? `Waiting for ${accessPolicy.approvalTarget?.email || 'the other participant'} to approve.`
+                      : `${accessPolicy.requestedBy?.email || 'The other participant'} requested access.`
+                    : 'Either participant must request access, and the other must approve via email before sensitive content is available.'}
               </p>
               {approvalContact?.email ? (
-                <p className="mt-3 text-xs uppercase tracking-[0.18em] text-textMuted">
-                  {approvalContactLabel}: {approvalContact.email}
+                <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">
+                  {approvalContactLabel}: <span className="normal-case tracking-normal text-textPrimary">{approvalContact.email}</span>
                 </p>
               ) : null}
-              <div className="mt-4 flex flex-wrap gap-3">
-                {accessPolicy.canRequestApproval && accessPolicy.approvalStatus !== 'approved' ? (
+              {accessPolicy.canRequestApproval && accessPolicy.approvalStatus !== 'approved' ? (
+                <div className="mt-3">
                   <Button
                     type="button"
                     loading={requestApprovalMutation.isPending}
@@ -245,66 +234,68 @@ export function EntryDetailPage() {
                       await entryQuery.refetch();
                     }}
                   >
-                    {accessPolicy.approvalStatus === 'pending' && accessPolicy.requestedByCurrentUser ? 'Resend request' : 'Request access approval'}
+                    {accessPolicy.approvalStatus === 'pending' && accessPolicy.requestedByCurrentUser
+                      ? 'Resend request'
+                      : 'Request approval'}
                   </Button>
-                ) : null}
-              </div>
+                </div>
+              ) : null}
             </div>
           ) : null}
-          <DetailRow label="Website" value={entry.url} action={entry.url ? (
-            <button
-              type="button"
-              onClick={() => window.open(normalizeUrl(entry.url || ''), '_blank', 'noopener,noreferrer')}
-              className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
-              aria-label="Open website"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </button>
-          ) : undefined} />
+
+          <DetailRow
+            label="Website"
+            value={entry.url}
+            action={
+              entry.url ? (
+                <IconButton
+                  onClick={() => window.open(normalizeUrl(entry.url || ''), '_blank', 'noopener,noreferrer')}
+                  label="Open website"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </IconButton>
+              ) : undefined
+            }
+          />
           <DetailRow
             label="Username"
             value={entry.username}
             action={
               entry.username ? (
-                <button
-                  type="button"
+                <IconButton
                   onClick={async () => {
                     if (await copyToClipboard(entry.username || '')) toast.success('Username copied');
                   }}
-                  className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
-                  aria-label="Copy username"
+                  label="Copy username"
                 >
                   <Copy className="h-4 w-4" />
-                </button>
+                </IconButton>
               ) : undefined
             }
           />
           <DetailRow
             label="Password"
             value={entry.password ? maskValue(entry.password, revealed) : ''}
+            mono={Boolean(entry.password)}
             action={
               entry.password && ownerView ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
+                <div className="flex items-center gap-1">
+                  <IconButton
                     onClick={() => setRevealed((value) => !value)}
-                    className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
-                    aria-label={revealed ? 'Hide password' : 'Reveal password'}
+                    label={revealed ? 'Hide password' : 'Reveal password'}
                   >
                     {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                  <button
-                    type="button"
+                  </IconButton>
+                  <IconButton
                     onClick={async () => {
                       if (await copyToClipboard(entry.password || '')) toast.success('Password copied');
                     }}
-                    className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
-                    aria-label="Copy password"
+                    label="Copy password"
                   >
                     <Copy className="h-4 w-4" />
-                  </button>
+                  </IconButton>
                   {revealed ? (
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand/20 text-xs font-medium text-brand">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-line text-[11px] font-medium text-textMuted">
                       {secondsLeft}
                     </span>
                   ) : null}
@@ -315,10 +306,10 @@ export function EntryDetailPage() {
           <DetailRow label="Notes" value={entry.notes || entry.data} multiline />
         </Card>
 
-        <div className="space-y-6">
-          <Card className="rounded-xl">
-            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Metadata</p>
-            <div className="mt-4 grid gap-4">
+        <div className="space-y-4">
+          <Card>
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Metadata</p>
+            <div className="mt-4 grid gap-3">
               <MetaItem label="Created" value={formatDateTime(entry.createdAt)} />
               <MetaItem label="Updated" value={formatDateTime(entry.updatedAt)} />
               <MetaItem label="Unlocks" value={formatDateTime(entry.unlockAt)} />
@@ -327,9 +318,9 @@ export function EntryDetailPage() {
             </div>
           </Card>
 
-          <Card className="rounded-xl">
-            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Attachments</p>
-            <div className="mt-4 grid gap-3">
+          <Card>
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Attachments</p>
+            <div className="mt-4 grid gap-2">
               {canSeeSensitive && entry.filePath?.length ? (
                 entry.filePath.map((fileUrl, index) => (
                   <AttachmentCard
@@ -340,8 +331,7 @@ export function EntryDetailPage() {
                     downloading={downloadingIndex === index}
                     onDownloadStateChange={(active) => setDownloadingIndex(active ? index : null)}
                     onShare={() => {
-                      const label = `Attachment ${index + 1}`;
-                      setShareTarget({ filePath: fileUrl, label });
+                      setShareTarget({ filePath: fileUrl, label: `Attachment ${index + 1}` });
                       setSharePassword('');
                       setGeneratedLink('');
                     }}
@@ -349,7 +339,7 @@ export function EntryDetailPage() {
                 ))
               ) : attachmentCount ? (
                 <p className="text-sm text-textMuted">
-                  Attachments are protected until the other vault participant authorizes access.
+                  Attachments are protected until the other participant approves access.
                 </p>
               ) : (
                 <p className="text-sm text-textMuted">No files attached to this entry.</p>
@@ -360,26 +350,26 @@ export function EntryDetailPage() {
       </div>
 
       {ownerView ? (
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="focus-ring fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-background shadow-card transition hover:-translate-y-px sm:right-6 lg:bottom-8"
-      >
-        <Pencil className="h-4 w-4" />
-        Edit
-      </button>
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="focus-ring fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-medium text-background shadow-card transition-colors hover:bg-brand-deep sm:right-6 lg:bottom-8"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit
+        </button>
       ) : null}
 
       {ownerView ? (
-      <EntryForm
-        open={editing}
-        mode="edit"
-        entry={entry}
-        onClose={() => setEditing(false)}
-        onSubmit={async (payload) => {
-          await updateMutation.mutateAsync(payload);
-        }}
-      />
+        <EntryForm
+          open={editing}
+          mode="edit"
+          entry={entry}
+          onClose={() => setEditing(false)}
+          onSubmit={async (payload) => {
+            await updateMutation.mutateAsync(payload);
+          }}
+        />
       ) : null}
 
       <Modal
@@ -390,12 +380,12 @@ export function EntryDetailPage() {
           setGeneratedLink('');
         }}
       >
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Protected share link</p>
-            <h3 className="font-heading text-2xl text-textPrimary">{shareTarget?.label}</h3>
-            <p className="text-sm text-textMuted">
-              Create a protected link for this document only. The recipient will need the password before the download button appears.
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Protected share link</p>
+            <h3 className="mt-1 font-heading text-xl text-textPrimary">{shareTarget?.label}</h3>
+            <p className="mt-1 text-sm text-textMuted">
+              Create a protected link for this document only. The recipient will need the password.
             </p>
           </div>
 
@@ -409,13 +399,13 @@ export function EntryDetailPage() {
 
           {generatedLink ? (
             <Input
-              label="Generated share link"
+              label="Generated link"
               value={generatedLink}
               readOnly
               rightAdornment={
                 <button
                   type="button"
-                  className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
+                  className="focus-ring rounded-full p-1 text-textMuted transition-colors hover:text-textPrimary"
                   aria-label="Copy share link"
                   onClick={async () => {
                     if (await copyToClipboard(generatedLink)) toast.success('Share link copied');
@@ -427,16 +417,19 @@ export function EntryDetailPage() {
             />
           ) : null}
 
-          <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
+          <div className="flex flex-wrap justify-end gap-2">
             {generatedLink ? (
-              <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={() => window.open(generatedLink, '_blank', 'noopener,noreferrer')}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => window.open(generatedLink, '_blank', 'noopener,noreferrer')}
+              >
                 Open link
               </Button>
             ) : null}
             <Button
               type="button"
               variant="ghost"
-              className="w-full sm:w-auto"
               onClick={() => {
                 setShareTarget(null);
                 setSharePassword('');
@@ -447,25 +440,21 @@ export function EntryDetailPage() {
             </Button>
             <Button
               type="button"
-              className="w-full sm:w-auto"
               loading={createShareLinkMutation.isPending}
               onClick={async () => {
                 if (!shareTarget) return;
-
                 try {
                   const payload = await createShareLinkMutation.mutateAsync({
                     filePath: shareTarget.filePath,
                     password: sharePassword
                   });
-
                   setGeneratedLink(payload.data.link);
                 } catch (error) {
-                  const message = error instanceof Error ? error.message : 'Unable to create share link';
-                  toast.error(message);
+                  toast.error(error instanceof Error ? error.message : 'Unable to create share link');
                 }
               }}
             >
-              Generate link
+              Generate
             </Button>
           </div>
         </div>
@@ -474,24 +463,45 @@ export function EntryDetailPage() {
   );
 }
 
+function IconButton({ onClick, label, children }: { onClick: () => void; label: string; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary"
+    >
+      {children}
+    </button>
+  );
+}
+
 function DetailRow({
   label,
   value,
   action,
-  multiline = false
+  multiline = false,
+  mono = false
 }: {
   label: string;
   value?: string;
   action?: ReactNode;
   multiline?: boolean;
+  mono?: boolean;
 }) {
   return (
-    <div className="space-y-2 border-b border-line/70 pb-5 last:border-none last:pb-0">
+    <div className="border-b border-line pb-4 last:border-none last:pb-0">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs uppercase tracking-[0.22em] text-textMuted">{label}</p>
+        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">{label}</p>
         {action}
       </div>
-      <div className={multiline ? 'break-words rounded-lg bg-surface p-4 text-sm leading-7 text-textPrimary' : 'break-words text-base font-medium text-textPrimary sm:text-lg'}>
+      <div
+        className={
+          multiline
+            ? 'mt-2 whitespace-pre-wrap break-words rounded-md border border-line bg-surface p-3 text-sm leading-6 text-textPrimary'
+            : `mt-1.5 break-words text-base ${mono ? 'font-mono' : 'font-medium'} text-textPrimary`
+        }
+      >
         {value || 'Not provided'}
       </div>
     </div>
@@ -500,9 +510,9 @@ function DetailRow({
 
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-surface-soft p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-textMuted">{label}</p>
-      <p className="mt-2 break-words text-sm font-medium text-textPrimary">{value}</p>
+    <div className="rounded-md border border-line bg-surface p-3">
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">{label}</p>
+      <p className="mt-1 break-words text-sm font-medium text-textPrimary">{value}</p>
     </div>
   );
 }
@@ -533,12 +543,9 @@ function AttachmentCard({
   const previewEndpoint = `/api/vault/${entryId}/attachments/${index}/preview`;
 
   async function loadPreview() {
-    if (!token) {
-      throw new Error('Please log in again.');
-    }
+    if (!token) throw new Error('Please log in again.');
 
     setPreviewLoading(true);
-
     try {
       const { contentType, objectUrl } = await fetchProtectedResourceBlobUrl(previewEndpoint, {
         headers: authHeaders(token)
@@ -548,24 +555,17 @@ function AttachmentCard({
       setKind(resolvedKind);
       if (resolvedKind === 'file') {
         setPreviewUrl((current) => {
-          if (current) {
-            URL.revokeObjectURL(current);
-          }
+          if (current) URL.revokeObjectURL(current);
           return '';
         });
       } else {
         setPreviewUrl((current) => {
-          if (current) {
-            URL.revokeObjectURL(current);
-          }
+          if (current) URL.revokeObjectURL(current);
           return objectUrl;
         });
       }
 
-      return {
-        objectUrl,
-        kind: resolvedKind
-      };
+      return { objectUrl, kind: resolvedKind };
     } finally {
       setPreviewLoading(false);
     }
@@ -574,9 +574,7 @@ function AttachmentCard({
   useEffect(() => {
     if (!token) {
       setPreviewUrl((current) => {
-        if (current) {
-          URL.revokeObjectURL(current);
-        }
+        if (current) URL.revokeObjectURL(current);
         return '';
       });
       return;
@@ -591,152 +589,105 @@ function AttachmentCard({
           URL.revokeObjectURL(objectUrl);
           return;
         }
-
         loadedObjectUrl = objectUrl;
-
-        if (resolvedKind === 'file') {
-          URL.revokeObjectURL(objectUrl);
-        }
+        if (resolvedKind === 'file') URL.revokeObjectURL(objectUrl);
       })
       .catch(() => {
         if (!active) return;
         setPreviewUrl((current) => {
-          if (current) {
-            URL.revokeObjectURL(current);
-          }
+          if (current) URL.revokeObjectURL(current);
           return '';
         });
       });
 
     return () => {
       active = false;
-      if (loadedObjectUrl) {
-        URL.revokeObjectURL(loadedObjectUrl);
-      }
+      if (loadedObjectUrl) URL.revokeObjectURL(loadedObjectUrl);
     };
   }, [fileUrl, previewEndpoint, token]);
 
   return (
-    <div className="group rounded-xl border border-line bg-surface-soft p-3 transition hover:border-brand/40 hover:bg-surface-raised">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-light text-brand">
-          {image ? <FileImage className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+    <div className="rounded-md border border-line bg-surface p-3 transition-colors hover:bg-surface-muted">
+      <div className="flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-textMuted">
+          {image ? <FileImage className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-textPrimary">{label}</p>
-          <p className="mt-1 text-xs text-textMuted">
-            {image ? 'Image attachment' : pdf ? 'PDF document' : 'Stored attachment'}
-          </p>
+          <p className="text-xs text-textMuted">{image ? 'Image' : pdf ? 'PDF document' : 'Attachment'}</p>
         </div>
-        <div className="flex items-center justify-end gap-2 sm:justify-start">
-          <button
-            type="button"
+        <div className="flex items-center gap-0.5">
+          <IconButton
+            label={`Open ${label}`}
             onClick={async () => {
               let previewWindow: Window | null = null;
-
               try {
                 if (previewUrl) {
                   window.open(previewUrl, '_blank', 'noopener,noreferrer');
                   return;
                 }
-
                 previewWindow = window.open('', '_blank', 'noopener,noreferrer');
-
-                const loadedPreview = await loadPreview();
-
-                if (loadedPreview.kind === 'file') {
+                const loaded = await loadPreview();
+                if (loaded.kind === 'file') {
                   previewWindow?.close();
                   await downloadProtectedResource(
                     `/api/vault/${entryId}/attachments/${index}/download`,
                     label.toLowerCase().replace(/\s+/g, '-'),
-                    {
-                      headers: authHeaders(token)
-                    }
+                    { headers: authHeaders(token) }
                   );
                   toast.success(`${downloadLabel} ready`);
                   return;
                 }
-
-                if (previewWindow) {
-                  previewWindow.location.href = loadedPreview.objectUrl;
-                } else {
-                  window.open(loadedPreview.objectUrl, '_blank', 'noopener,noreferrer');
-                }
+                if (previewWindow) previewWindow.location.href = loaded.objectUrl;
+                else window.open(loaded.objectUrl, '_blank', 'noopener,noreferrer');
               } catch (error) {
                 previewWindow?.close();
-                const message = error instanceof Error ? error.message : 'Unable to open attachment';
-                toast.error(message);
+                toast.error(error instanceof Error ? error.message : 'Unable to open attachment');
               }
             }}
-            className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
-            aria-label={`Open ${label}`}
           >
             <ExternalLink className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onShare}
-            className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
-            aria-label={`Share ${label}`}
-          >
+          </IconButton>
+          <IconButton label={`Share ${label}`} onClick={onShare}>
             <Share2 className="h-4 w-4" />
-          </button>
+          </IconButton>
           <button
             type="button"
+            disabled={downloading}
+            aria-label={`${downloadLabel} for ${label}`}
             onClick={async () => {
               try {
                 onDownloadStateChange(true);
                 await downloadProtectedResource(
                   `/api/vault/${entryId}/attachments/${index}/download`,
                   label.toLowerCase().replace(/\s+/g, '-'),
-                  {
-                    headers: authHeaders(token)
-                  }
+                  { headers: authHeaders(token) }
                 );
                 toast.success(`${downloadLabel} ready`);
               } catch (error) {
-                const message = error instanceof Error ? error.message : 'Download failed';
-                toast.error(message);
+                toast.error(error instanceof Error ? error.message : 'Download failed');
               } finally {
                 onDownloadStateChange(false);
               }
             }}
-            disabled={downloading}
-            className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label={`${downloadLabel} for ${label}`}
+            className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {image ? (
-        previewUrl ? (
-          <img src={previewUrl} alt={label} className="mt-3 h-32 w-full rounded-lg border border-line/70 object-cover" />
-        ) : (
-          <div className="mt-3 rounded-lg border border-dashed border-line/70 bg-surface-muted px-4 py-6 text-sm text-textMuted">
-            Image preview unavailable.
-          </div>
-        )
+      {image && previewUrl ? (
+        <img src={previewUrl} alt={label} className="mt-3 h-32 w-full rounded-md border border-line object-cover" />
       ) : null}
 
-      {pdf ? (
-        previewUrl ? (
-          <div className="mt-3 overflow-hidden rounded-lg border border-line/70 bg-surface-raised">
-            <iframe src={previewUrl} title={`${label} preview`} className="h-72 w-full" />
-          </div>
-        ) : (
-          <div className="mt-3 rounded-lg border border-dashed border-line/70 bg-surface-muted px-4 py-6 text-sm text-textMuted">
-            PDF preview unavailable.
-          </div>
-        )
+      {pdf && previewUrl ? (
+        <div className="mt-3 overflow-hidden rounded-md border border-line">
+          <iframe src={previewUrl} title={`${label} preview`} className="h-72 w-full" />
+        </div>
       ) : null}
 
-      <div className="mt-3 flex items-center gap-3 text-xs text-textMuted">
-        <span>{downloadLabel}</span>
-        {previewLoading ? <span>Loading preview...</span> : null}
-        {downloading ? <span>Downloading...</span> : null}
-      </div>
+      {previewLoading ? <p className="mt-2 text-xs text-textMuted">Loading preview...</p> : null}
     </div>
   );
 }
