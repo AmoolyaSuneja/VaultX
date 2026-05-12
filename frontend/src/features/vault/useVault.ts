@@ -3,7 +3,6 @@ import toast from 'react-hot-toast';
 import { useMemo } from 'react';
 import { useAuthStore } from '@/features/auth/auth.store';
 import {
-  approveEntryAccess,
   createShareLink,
   createVaultEntry,
   deleteVaultEntry,
@@ -71,19 +70,6 @@ export function useRequestEntryApproval(id: string) {
     mutationFn: () => requestEntryApproval(token, id),
     onSuccess: (data) => {
       toast.success(data.message || 'Approval request sent');
-      queryClient.invalidateQueries({ queryKey: ['vault'] });
-    }
-  });
-}
-
-export function useApproveEntryAccess(id: string) {
-  const token = useAuthStore((state) => state.token);
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => approveEntryAccess(token, id),
-    onSuccess: (data) => {
-      toast.success(data.message || 'Access approved');
       queryClient.invalidateQueries({ queryKey: ['vault'] });
     }
   });

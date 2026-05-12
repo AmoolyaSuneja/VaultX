@@ -547,13 +547,6 @@ const requestVaultAccessApproval = async (req, res) => {
   }
 };
 
-const approveVaultAccessRequest = async (req, res) => {
-  return res.status(400).json({
-    success: false,
-    message: 'Access approval must be granted from the email approval link'
-  });
-};
-
 const approveVaultAccessFromEmail = async (req, res) => {
   try {
     const { token } = req.body;
@@ -730,7 +723,6 @@ module.exports = {
   updateVaultEntry,
   deleteVaultEntry,
   requestVaultAccessApproval,
-  approveVaultAccessRequest,
   approveVaultAccessFromEmail,
   previewVaultAttachment,
   downloadVaultAttachment

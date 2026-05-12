@@ -124,10 +124,3 @@ export async function requestEntryApproval(token: string, id: string) {
     headers: authHeaders(token)
   });
 }
-
-export async function approveEntryAccess(token: string, id: string) {
-  return request<{ data: VaultEntry; message: string }>(`/api/vault/${id}/approve-access`, {
-    method: 'POST',
-    headers: authHeaders(token)
-  });
-}

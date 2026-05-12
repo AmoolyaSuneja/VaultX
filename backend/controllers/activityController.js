@@ -1,26 +1,19 @@
 const ActivityLog = require('../models/activitylog');
+const asyncHandler = require('../Utils/asyncHandler');
 
-const getAllActivities = async (req, res) => {
-  try {
-    const activities = await ActivityLog.find()
-      .populate('user')
-      .populate('vault')
-      .sort({ createdAt: -1 });
+const getMyActivities = asyncHandler(async (req, res) => {
+  const activities = await ActivityLog.find({ user: req.user._id })
+    .populate('vault', '_id')
+    .sort({ createdAt: -1 })
+    .limit(100);
 
-    res.status(200).json({
-      success: true,
-      count: activities.length,
-      data: activities
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+  res.status(200).json({
+    success: true,
+    count: activities.length,
+    data: activities
+  });
+});
 
 module.exports = {
-  getAllActivities
+  getMyActivities
 };
