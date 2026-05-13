@@ -266,15 +266,27 @@ const getVaultEntryById = asyncHandler(async (req, res) => {
 });
 
 const getAllVaultEntries = asyncHandler(async (req, res) => {
+  const { page, limit } = req.validatedQuery || { page: 1, limit: 50 };
+  const safeLimit = Math.max(1, Math.min(100, Number(limit) || 50));
+  const safePage = Math.max(1, Number(page) || 1);
+  const skip = (safePage - 1) * safeLimit;
+
   const nomineeOwnerIds = await getActiveNomineeOwnerIds(req.user);
   const activeNomineeOwnerIds = new Set(nomineeOwnerIds.map((ownerId) => ownerId.toString()));
 
-  const vaults = await Vault.find({
+  const filter = {
     $or: [{ owner: req.user._id }, { secondApprover: req.user._id }, { owner: { $in: nomineeOwnerIds } }]
-  })
-    .populate('owner', 'name email')
-    .populate('secondApprover', 'name email')
-    .sort({ createdAt: -1 });
+  };
+
+  const [vaults, total] = await Promise.all([
+    Vault.find(filter)
+      .populate('owner', 'name email')
+      .populate('secondApprover', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit),
+    Vault.countDocuments(filter)
+  ]);
 
   res.status(200).json({
     success: true,
@@ -285,7 +297,13 @@ const getAllVaultEntries = asyncHandler(async (req, res) => {
         userId: req.user._id,
         activeNomineeOwnerIds
       })
-    )
+    ),
+    pagination: {
+      page: safePage,
+      limit: safeLimit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / safeLimit))
+    }
   });
 });
 

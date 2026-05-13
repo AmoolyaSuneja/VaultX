@@ -9,7 +9,8 @@ const {
   entryIdParams,
   attachmentParams,
   shareLinkBody,
-  approveEmailBody
+  approveEmailBody,
+  listQuery
 } = require('../validation/vaultSchemas');
 const { createSharedLink } = require('../controllers/sharedLinkController');
 const {
@@ -24,7 +25,7 @@ const {
   downloadVaultAttachment
 } = require('../controllers/vaultController');
 
-router.get('/', protect, getAllVaultEntries);
+router.get('/', protect, validate({ query: listQuery }), getAllVaultEntries);
 router.post('/approve-email', validate({ body: approveEmailBody }), approveVaultAccessFromEmail);
 router.get('/:id', protect, validate({ params: entryIdParams }), getVaultEntryById);
 router.get(
@@ -45,7 +46,7 @@ router.post(
   validate({ params: entryIdParams }),
   requestVaultAccessApproval
 );
-router.post('/', protect, upload.array('files', 10), validate({ body: mutateBody }), createVaultEntry);
+router.post('/', protect, upload.arrayGuarded('files', 10), validate({ body: mutateBody }), createVaultEntry);
 router.post(
   '/:id/share-link',
   protect,
@@ -55,7 +56,7 @@ router.post(
 router.put(
   '/:id',
   protect,
-  upload.array('files', 10),
+  upload.arrayGuarded('files', 10),
   validate({ params: entryIdParams, body: mutateBody }),
   updateVaultEntry
 );

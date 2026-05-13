@@ -8,7 +8,7 @@ const { HttpError } = require('../middleware/errorHandler');
 router.post(
   '/',
   protect,
-  upload.single('document'),
+  upload.singleGuarded('document'),
   asyncHandler(async (req, res) => {
     if (!req.file) {
       throw new HttpError('Please upload a file', 400);
@@ -26,10 +26,7 @@ router.post(
       data: {
         fileUrl: uploadedUrl,
         fileName: req.file.filename || req.file.originalname
-      },
-      fileUrl: uploadedUrl,
-      filePath: uploadedUrl,
-      fileName: req.file.filename || req.file.originalname
+      }
     });
   })
 );

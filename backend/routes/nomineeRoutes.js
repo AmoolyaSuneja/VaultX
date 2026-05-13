@@ -26,7 +26,7 @@ router.get('/claims', protect, listNomineeClaims);
 router.post(
   '/claim',
   protect,
-  upload.single('proofDocument'),
+  upload.singleGuarded('proofDocument'),
   validate({ body: claimBody }),
   claimNomineeAccess
 );

@@ -5,7 +5,7 @@ export async function uploadProfileAvatar(token: string, file: File) {
   const formData = new FormData();
   formData.append('document', file);
 
-  const payload = await requestJson<{ fileUrl?: string; filePath?: string; secure_url?: string; url?: string }>(
+  const payload = await requestJson<{ data?: { fileUrl?: string } }>(
     '/api/upload',
     {
       method: 'POST',
@@ -16,7 +16,7 @@ export async function uploadProfileAvatar(token: string, file: File) {
     }
   );
 
-  const uploadedUrl = payload.fileUrl || payload.filePath || payload.secure_url || payload.url;
+  const uploadedUrl = payload.data?.fileUrl;
 
   if (typeof uploadedUrl !== 'string' || !uploadedUrl.trim()) {
     throw new Error('Upload completed but no avatar URL was returned');
