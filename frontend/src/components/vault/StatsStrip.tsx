@@ -18,19 +18,19 @@ function compactRelativeLabel(value: string) {
 export function StatsStrip({ stats }: StatsStripProps) {
   const updatedValue = stats.lastUpdated ? formatRelativeTime(stats.lastUpdated) : 'No changes';
   const items = [
-    { label: 'Entries', value: stats.totalEntries, mobileValue: stats.totalEntries },
-    { label: 'Categories', value: stats.categories, mobileValue: stats.categories },
-    { label: 'Files', value: stats.filesAttached, mobileValue: stats.filesAttached },
-    { label: 'Updated', value: updatedValue, mobileValue: compactRelativeLabel(updatedValue) }
+    { label: 'Entries', value: stats.totalEntries, compact: String(stats.totalEntries) },
+    { label: 'Categories', value: stats.categories, compact: String(stats.categories) },
+    { label: 'Files', value: stats.filesAttached, compact: String(stats.filesAttached) },
+    { label: 'Updated', value: updatedValue, compact: compactRelativeLabel(updatedValue) }
   ];
 
   return (
     <div className="grid grid-cols-2 divide-x divide-y divide-line overflow-hidden rounded-lg border border-line bg-panel sm:grid-cols-4 sm:divide-y-0">
       {items.map((item) => (
-        <div key={item.label} className="px-5 py-4 sm:py-5">
+        <div key={item.label} className="flex flex-col gap-4 px-6 py-6 sm:py-7">
           <p className="text-[11px] font-medium uppercase tracking-label text-textMuted">{item.label}</p>
-          <p className="mt-1.5 font-heading text-xl font-semibold leading-none text-textPrimary tabular sm:text-[22px]">
-            <span className="sm:hidden">{item.mobileValue}</span>
+          <p className="font-heading text-[32px] font-semibold leading-none text-textPrimary tabular sm:text-[36px]">
+            <span className="sm:hidden">{item.compact}</span>
             <span className="hidden sm:inline">{item.value}</span>
           </p>
         </div>

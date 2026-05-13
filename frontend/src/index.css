@@ -6,34 +6,34 @@
 
 @layer base {
   :root {
-    /* Graphite — ink on warm off-white, cool slate accent. */
-    --color-background: 36 22% 97%;
-    --color-panel: 36 22% 98%;
-    --color-surface: 36 20% 96%;
-    --color-surface-soft: 36 18% 94%;
-    --color-surface-muted: 32 14% 91%;
+    /* Graphite — paper warmth, near-black ink, cool slate accent. */
+    --color-background: 38 30% 96%;
+    --color-panel: 38 28% 97%;
+    --color-surface: 38 24% 95%;
+    --color-surface-soft: 36 20% 93%;
+    --color-surface-muted: 34 16% 90%;
     --color-surface-raised: 0 0% 100%;
-    --color-surface-sunken: 32 14% 88%;
+    --color-surface-sunken: 34 14% 87%;
 
-    --color-brand: 220 12% 18%;
-    --color-brand-deep: 220 14% 10%;
+    --color-brand: 220 14% 15%;
+    --color-brand-deep: 220 16% 8%;
     --color-brand-light: 220 12% 92%;
-    --color-brand-muted: 220 8% 35%;
+    --color-brand-muted: 220 8% 34%;
 
-    --color-accent: 215 16% 38%;
-    --color-accent-light: 215 18% 90%;
-    --color-accent-muted: 215 10% 55%;
+    --color-accent: 215 16% 36%;
+    --color-accent-light: 215 18% 89%;
+    --color-accent-muted: 215 10% 54%;
 
-    --color-steel: 220 6% 45%;
-    --color-steel-light: 220 8% 82%;
-    --color-steel-muted: 220 4% 60%;
+    --color-steel: 220 6% 44%;
+    --color-steel-light: 220 8% 80%;
+    --color-steel-muted: 220 4% 58%;
 
-    --color-danger: 358 54% 48%;
-    --color-danger-light: 358 54% 95%;
+    --color-danger: 358 54% 46%;
+    --color-danger-light: 358 54% 94%;
 
-    --color-line: 32 12% 87%;
-    --color-text-primary: 220 14% 12%;
-    --color-text-muted: 220 6% 44%;
+    --color-line: 34 14% 84%;
+    --color-text-primary: 220 16% 10%;
+    --color-text-muted: 220 6% 42%;
   }
 
   .dark {

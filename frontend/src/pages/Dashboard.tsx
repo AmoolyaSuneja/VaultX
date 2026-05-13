@@ -8,6 +8,7 @@ import { StatsStrip } from '@/components/vault/StatsStrip';
 import { VaultGrid } from '@/components/vault/VaultGrid';
 import { useDebouncedValue } from '@/lib/hooks';
 import { defaultCategories, sortOptions } from '@/lib/constants';
+import { useAuthStore } from '@/features/auth/auth.store';
 import {
   useCreateEntry,
   useDeleteEntry,
@@ -23,8 +24,25 @@ interface DashboardPageProps {
   createOpen?: boolean;
 }
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 5) return 'Still up';
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function getTodayLabel() {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  }).format(new Date());
+}
+
 export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const entriesQuery = useVaultEntries();
   const createMutation = useCreateEntry();
   const deleteMutation = useDeleteEntry();
@@ -80,28 +98,35 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   }, []);
 
   const updateMutation = useUpdateEntry(editingEntry?._id ?? '');
-
   const isInitialLoading = entriesQuery.isLoading && !entriesQuery.data;
   const filterActive = Boolean(search || selectedCategories.length);
+  const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-10">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-label text-textMuted">Vault</p>
-          <h1 className="mt-1 font-heading text-[28px] leading-[1.12] text-textPrimary sm:text-[30px]">Your entries</h1>
+          <p className="text-[11px] font-medium uppercase tracking-label text-textMuted tabular">{getTodayLabel()}</p>
+          <h1 className="mt-2 font-heading text-[40px] font-semibold leading-[1.05] tracking-tight text-textPrimary sm:text-[44px]">
+            {getGreeting()}, {firstName}.
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-textMuted">
+            {stats.totalEntries === 0
+              ? 'Start by saving your first credential, note, or document.'
+              : `You have ${stats.totalEntries} ${stats.totalEntries === 1 ? 'entry' : 'entries'} in your vault.`}
+          </p>
         </div>
         <Button onClick={() => navigate('/vault/new')} className="w-full justify-center sm:w-auto">
           <Plus className="h-4 w-4" />
           New entry
         </Button>
-      </div>
+      </header>
 
       <StatsStrip stats={stats} />
 
-      <div className="rounded-lg border border-line bg-panel p-2">
+      <section className="rounded-lg border border-line bg-panel p-2">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 transition-colors duration-180 focus-within:border-textPrimary/60">
+          <label className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-surface px-3 py-2.5 transition-colors duration-180 focus-within:border-textPrimary/60">
             <Search className="h-4 w-4 text-textMuted" />
             <input
               id="vault-search"
@@ -192,7 +217,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {isInitialLoading ? (
         <GridSkeleton count={6} />
