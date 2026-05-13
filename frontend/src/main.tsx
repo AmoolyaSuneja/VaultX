@@ -6,8 +6,11 @@ import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { router } from './router';
 import { pageTransition } from './lib/motion';
+import { startSmoothScroll } from './lib/smoothScroll';
 import './features/settings/settings.store';
 import './index.css';
+
+startSmoothScroll();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,10 +29,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           toastOptions={{
             duration: 2600,
             className:
-              'rounded-md border border-line bg-panel px-4 py-2.5 text-sm text-textPrimary shadow-card',
-            style: {
-              fontFamily: 'var(--font-sans, "Instrument Sans", system-ui, sans-serif)'
-            }
+              'rounded-md border border-line bg-panel px-4 py-2.5 text-sm text-textPrimary shadow-card'
           }}
         />
       </QueryClientProvider>

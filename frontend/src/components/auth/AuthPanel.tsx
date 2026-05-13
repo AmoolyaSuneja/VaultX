@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@/components/ui';
-import { appleSpring, shakeX } from '@/lib/motion';
+import { pageTransition, shakeX } from '@/lib/motion';
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -78,26 +78,18 @@ export function AuthPanel() {
   const resetPasswordValue = resetForm.watch('password') ?? '';
   const heading =
     mode === 'register'
-      ? 'Create your workspace'
+      ? 'Create account'
       : mode === 'forgot'
-        ? 'Recover your account'
+        ? 'Recover account'
         : mode === 'reset'
-          ? 'Set a new password'
-          : 'Welcome back';
-  const subtext =
-    mode === 'register'
-      ? 'Start encrypting in under a minute.'
-      : mode === 'forgot'
-        ? 'Enter your email to receive a recovery code.'
-        : mode === 'reset'
-          ? 'Use the recovery code you received.'
-          : 'Sign in to continue.';
+          ? 'Set new password'
+          : 'Sign in';
 
   const passwordToggle = (
     <button
       type="button"
       aria-label={showPassword ? 'Hide password' : 'Show password'}
-      className="focus-ring rounded-full p-1 text-textMuted transition-colors hover:text-textPrimary"
+      className="focus-ring press rounded-full p-1 text-textMuted hover:text-textPrimary"
       onClick={() => setShowPassword((value) => !value)}
     >
       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -105,20 +97,17 @@ export function AuthPanel() {
   );
 
   return (
-    <div className="panel w-full rounded-lg p-6 shadow-card sm:p-8">
-      <div className="mb-6">
-        <h2 className="font-heading text-[28px] leading-tight text-textPrimary">{heading}</h2>
-        <p className="mt-1 text-sm text-textMuted">{subtext}</p>
-      </div>
+    <div className="panel w-full rounded-lg p-6 shadow-card sm:p-7">
+      <h2 className="mb-6 font-heading text-[22px] leading-tight text-textPrimary">{heading}</h2>
 
       <AnimatePresence mode="wait">
         {mode === 'login' ? (
           <motion.div
             key="login"
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={appleSpring}
+            exit={{ opacity: 0, y: -4 }}
+            transition={pageTransition}
           >
             <form className="grid gap-4" onSubmit={loginForm.handleSubmit(submitLogin)}>
               <Input
@@ -147,7 +136,7 @@ export function AuthPanel() {
                     forgotForm.setValue('email', loginForm.getValues('email'));
                     setMode('forgot');
                   }}
-                  className="text-xs font-medium text-textMuted underline-offset-4 transition hover:text-textPrimary hover:underline"
+                  className="focus-ring press text-xs font-medium text-textMuted underline-offset-4 hover:text-textPrimary hover:underline"
                 >
                   Forgot password?
                 </button>
@@ -162,10 +151,10 @@ export function AuthPanel() {
         {mode === 'register' ? (
           <motion.div
             key="register"
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={appleSpring}
+            exit={{ opacity: 0, y: -4 }}
+            transition={pageTransition}
           >
             <form className="grid gap-4" onSubmit={registerForm.handleSubmit(submitRegister)}>
               <Input
@@ -211,14 +200,14 @@ export function AuthPanel() {
         {mode === 'forgot' ? (
           <motion.div
             key="forgot"
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={appleSpring}
+            exit={{ opacity: 0, y: -4 }}
+            transition={pageTransition}
           >
             <form className="grid gap-4" onSubmit={forgotForm.handleSubmit(submitForgotPassword)}>
               <Input
-                label="Account email"
+                label="Email"
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
@@ -226,7 +215,7 @@ export function AuthPanel() {
                 {...forgotForm.register('email')}
               />
               <Button type="submit" className="w-full" loading={requestResetMutation.isPending}>
-                Send recovery code
+                Send code
               </Button>
             </form>
           </motion.div>
@@ -235,14 +224,14 @@ export function AuthPanel() {
         {mode === 'reset' ? (
           <motion.div
             key="reset"
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={appleSpring}
+            exit={{ opacity: 0, y: -4 }}
+            transition={pageTransition}
           >
             <form className="grid gap-4" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
               <Input
-                label="Account email"
+                label="Email"
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
@@ -250,7 +239,7 @@ export function AuthPanel() {
                 {...resetForm.register('email')}
               />
               <Input
-                label="Recovery code"
+                label="Code"
                 inputMode="numeric"
                 placeholder="6-digit code"
                 error={resetForm.formState.errors.code?.message}
@@ -267,7 +256,7 @@ export function AuthPanel() {
               />
               <PasswordStrengthMeter password={resetPasswordValue} />
               <Input
-                label="Confirm new password"
+                label="Confirm password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repeat password"
                 autoComplete="new-password"
@@ -287,16 +276,16 @@ export function AuthPanel() {
           <button
             type="button"
             onClick={() => setMode('login')}
-            className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
+            className="focus-ring press font-medium text-textPrimary underline-offset-4 hover:underline"
           >
-            Already have an account? Sign in
+            Back to sign in
           </button>
         ) : mode === 'forgot' || mode === 'reset' ? (
           <div className="flex flex-wrap justify-center gap-4">
             <button
               type="button"
               onClick={() => setMode('login')}
-              className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
+              className="focus-ring press font-medium text-textPrimary underline-offset-4 hover:underline"
             >
               Back to sign in
             </button>
@@ -304,9 +293,9 @@ export function AuthPanel() {
               <button
                 type="button"
                 onClick={() => setMode('forgot')}
-                className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
+                className="focus-ring press font-medium text-textPrimary underline-offset-4 hover:underline"
               >
-                Send another code
+                Resend code
               </button>
             ) : null}
           </div>
@@ -314,9 +303,9 @@ export function AuthPanel() {
           <button
             type="button"
             onClick={() => setMode('register')}
-            className="font-medium text-textPrimary underline-offset-4 transition hover:underline"
+            className="focus-ring press font-medium text-textPrimary underline-offset-4 hover:underline"
           >
-            New here? Create an account
+            Create an account
           </button>
         )}
       </div>

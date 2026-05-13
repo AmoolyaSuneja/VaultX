@@ -8,7 +8,6 @@ import { StatsStrip } from '@/components/vault/StatsStrip';
 import { VaultGrid } from '@/components/vault/VaultGrid';
 import { useDebouncedValue } from '@/lib/hooks';
 import { defaultCategories, sortOptions } from '@/lib/constants';
-import { useAuthStore } from '@/features/auth/auth.store';
 import {
   useCreateEntry,
   useDeleteEntry,
@@ -24,25 +23,8 @@ interface DashboardPageProps {
   createOpen?: boolean;
 }
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 5) return 'Still up';
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-
-function getTodayLabel() {
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long'
-  }).format(new Date());
-}
-
 export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
   const entriesQuery = useVaultEntries();
   const createMutation = useCreateEntry();
   const deleteMutation = useDeleteEntry();
@@ -100,27 +82,15 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const updateMutation = useUpdateEntry(editingEntry?._id ?? '');
   const isInitialLoading = entriesQuery.isLoading && !entriesQuery.data;
   const filterActive = Boolean(search || selectedCategories.length);
-  const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-label text-textMuted tabular">{getTodayLabel()}</p>
-          <h1 className="mt-2 font-heading text-[40px] font-semibold leading-[1.05] tracking-tight text-textPrimary sm:text-[44px]">
-            {getGreeting()}, {firstName}.
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-textMuted">
-            {stats.totalEntries === 0
-              ? 'Start by saving your first credential, note, or document.'
-              : `You have ${stats.totalEntries} ${stats.totalEntries === 1 ? 'entry' : 'entries'} in your vault.`}
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-end">
         <Button onClick={() => navigate('/vault/new')} className="w-full justify-center sm:w-auto">
           <Plus className="h-4 w-4" />
           New entry
         </Button>
-      </header>
+      </div>
 
       <StatsStrip stats={stats} />
 
@@ -132,7 +102,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
               id="vault-search"
               value={localSearch}
               onChange={(event) => setLocalSearch(event.target.value)}
-              placeholder="Search titles, usernames, notes, URLs"
+              placeholder="Search"
               className="min-w-0 flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/60"
             />
             <kbd className="hidden rounded border border-line bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-textMuted tabular md:inline">

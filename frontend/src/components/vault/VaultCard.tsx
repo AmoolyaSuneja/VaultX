@@ -160,7 +160,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
         aria-label={`${entry.title} entry`}
         onClick={() => onView(entry._id)}
         style={{ animationDelay: `${animationDelay}ms` }}
-        className="group animate-fadeIn flex cursor-pointer items-center gap-3 rounded-md border border-line bg-panel px-3 py-2.5 transition-colors duration-200 ease-smooth hover:border-textPrimary/20 hover:bg-surface"
+        className="group animate-fadeIn press-card flex cursor-pointer items-center gap-3 rounded-md border border-line bg-panel px-3 py-2.5 hover:border-textPrimary/25 hover:bg-surface"
       >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-line bg-surface-muted text-textMuted">
           <CategoryIcon className="h-4 w-4" />
@@ -184,25 +184,25 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
       aria-label={`${entry.title} entry`}
       onClick={() => onView(entry._id)}
       style={{ animationDelay: `${animationDelay}ms` }}
-      className="group animate-fadeIn flex cursor-pointer flex-col rounded-lg border border-line bg-panel transition-all duration-280 ease-smooth hover:border-textPrimary/20 hover:shadow-card"
+      className="group animate-fadeIn press-card flex cursor-pointer flex-col rounded-lg border border-line bg-panel hover:border-textPrimary/25 hover:shadow-card"
     >
-      <div className="flex items-start gap-4 p-5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-muted text-textMuted transition-colors duration-200 ease-smooth group-hover:border-textPrimary/20 group-hover:text-textPrimary">
-          <CategoryIcon className="h-5 w-5" />
+      <div className="flex items-start gap-3 p-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-line bg-surface-muted text-textMuted transition-colors duration-200 ease-smooth group-hover:border-textPrimary/25 group-hover:text-textPrimary">
+          <CategoryIcon className="h-4 w-4" />
         </div>
-        <div className="min-w-0 flex-1 pt-0.5">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-[10.5px] font-medium uppercase tracking-label text-textMuted">
             {entry.category || 'General'}
           </p>
-          <h3 className="mt-1 truncate font-heading text-[19px] font-semibold leading-[1.15] text-textPrimary">
+          <h3 className="mt-0.5 truncate font-heading text-[17px] font-semibold leading-[1.2] text-textPrimary">
             {entry.title}
           </h3>
-          <p className="mt-1.5 line-clamp-1 text-[13px] text-textMuted">{subtitle || 'No details'}</p>
+          <p className="mt-1 line-clamp-1 text-xs text-textMuted">{subtitle || 'No details'}</p>
         </div>
         {menu}
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-line px-5 py-3">
+      <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
         {meta}
         {showPasswordRow ? (
           <div className="flex items-center gap-1">
