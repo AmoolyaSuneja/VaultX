@@ -10,7 +10,7 @@ import { VaultGrid } from '@/components/vault/VaultGrid';
 import { VaultEntranceOverlay } from '@/components/vault/VaultEntranceOverlay';
 import { useDebouncedValue } from '@/lib/hooks';
 import { defaultCategories, sortOptions } from '@/lib/constants';
-import { consumeVaultEntrance } from '@/features/auth/useAuth';
+import { markVaultEntranceConsumed, shouldShowVaultEntrance } from '@/features/auth/useAuth';
 import {
   useCreateEntry,
   useDeleteEntry,
@@ -26,7 +26,8 @@ interface DashboardPageProps {
   createOpen?: boolean;
 }
 
-const ENTRANCE_OVERLAY_DURATION_MS = 1550;
+const OVERLAY_DURATION_MS = 1550;
+const CONTENT_REVEAL_DELAY_MS = 200;
 
 export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const navigate = useNavigate();
@@ -41,25 +42,47 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
     return (window.localStorage.getItem('vaultx-view') as 'grid' | 'list') || 'grid';
   });
 
-  // Entrance overlay: fires once after login, then never replays this session.
-  const [showEntranceOverlay, setShowEntranceOverlay] = useState(() => {
-    if (prefersReducedMotion) {
-      consumeVaultEntrance();
-      return false;
-    }
-    return consumeVaultEntrance();
-  });
-  const [entranceFinished, setEntranceFinished] = useState(!showEntranceOverlay);
+  // Entrance animation state. We lean on the module-level latch in useAuth so
+  // that React Strict Mode's double-invocation doesn't clear the flag early.
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [contentRevealed, setContentRevealed] = useState(true);
+  const [entrancePlaying, setEntrancePlaying] = useState(false);
 
   useEffect(() => {
-    if (!showEntranceOverlay) return;
-    const hideTimer = window.setTimeout(() => setShowEntranceOverlay(false), ENTRANCE_OVERLAY_DURATION_MS);
-    const finishTimer = window.setTimeout(() => setEntranceFinished(true), ENTRANCE_OVERLAY_DURATION_MS + 900);
+    if (prefersReducedMotion) {
+      // Users who opted out of motion skip the folder entirely.
+      if (shouldShowVaultEntrance()) markVaultEntranceConsumed();
+      return;
+    }
+
+    if (!shouldShowVaultEntrance()) return;
+
+    setShowOverlay(true);
+    setContentRevealed(false);
+    setEntrancePlaying(true);
+
+    const hideOverlayTimer = window.setTimeout(() => {
+      setShowOverlay(false);
+      // Reveal content just after overlay begins fading so the card stagger
+      // feels like it's coming out of the folder.
+      window.setTimeout(() => setContentRevealed(true), CONTENT_REVEAL_DELAY_MS);
+    }, OVERLAY_DURATION_MS);
+
+    const endEntranceTimer = window.setTimeout(
+      () => {
+        setEntrancePlaying(false);
+        markVaultEntranceConsumed();
+      },
+      OVERLAY_DURATION_MS + 1400
+    );
+
     return () => {
-      window.clearTimeout(hideTimer);
-      window.clearTimeout(finishTimer);
+      window.clearTimeout(hideOverlayTimer);
+      window.clearTimeout(endEntranceTimer);
     };
-  }, [showEntranceOverlay]);
+    // We intentionally only want this to run on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -108,16 +131,13 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const updateMutation = useUpdateEntry(editingEntry?._id ?? '');
   const isInitialLoading = entriesQuery.isLoading && !entriesQuery.data;
   const filterActive = Boolean(search || selectedCategories.length);
-  // During the overlay, keep the grid hidden so the reveal feels intentional.
-  const contentHidden = showEntranceOverlay;
-  const entrancePlaying = !entranceFinished && !showEntranceOverlay;
 
   return (
     <>
-      <VaultEntranceOverlay show={showEntranceOverlay} />
+      <VaultEntranceOverlay show={showOverlay} />
 
       <AnimatePresence>
-        {!contentHidden ? (
+        {contentRevealed ? (
           <motion.div
             key="dashboard-content"
             initial={{ opacity: 0 }}
