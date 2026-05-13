@@ -25,15 +25,15 @@ function errorHandler(err, req, res, next) {
   const isClientError = statusCode >= 400 && statusCode < 500;
 
   if (!isProduction) {
-    console.error('[error]', req.method, req.originalUrl, err);
+    console.error(`[error] [${req.id || '-'}]`, req.method, req.originalUrl, err);
   } else if (!isClientError) {
-    console.error('[error]', req.method, req.originalUrl, err?.message || err);
+    console.error(`[error] [${req.id || '-'}]`, req.method, req.originalUrl, err?.message || err);
   }
 
   const fallback = isClientError ? err.message : 'Something went wrong. Please try again.';
   const message = typeof err?.message === 'string' && err.message ? (isClientError ? err.message : fallback) : fallback;
 
-  res.status(statusCode).json({ success: false, message });
+  res.status(statusCode).json({ success: false, message, requestId: req.id });
 }
 
 module.exports = {

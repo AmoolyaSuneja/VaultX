@@ -1,8 +1,14 @@
 require('dotenv').config();
+const { validateEnv } = require('./config/env');
+
+validateEnv();
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
@@ -12,15 +18,26 @@ const activityRoutes = require('./routes/activityRoutes');
 const sharedLinkRoutes = require('./routes/sharedLinkRoutes');
 const nomineeRoutes = require('./routes/nomineeRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const requestContext = require('./middleware/requestContext');
 const { generalLimiter } = require('./middleware/rateLimiters');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 const frontendDistDir = path.join(__dirname, '..', 'frontend', 'dist');
 
 app.set('trust proxy', true);
 app.disable('x-powered-by');
+
+app.use(requestContext);
+
+morgan.token('id', (req) => req.id || '-');
+app.use(
+  morgan(isProduction ? ':id :method :url :status :res[content-length] - :response-time ms' : 'dev', {
+    skip: (req) => req.originalUrl === '/api/health'
+  })
+);
 
 app.use(
   helmet({
@@ -34,9 +51,22 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.static(frontendDistDir));
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api', generalLimiter);
 
 app.use('/api', async (req, res, next) => {
+  if (req.path === '/health') {
+    return next();
+  }
+
   try {
     await connectDB();
     next();
@@ -48,7 +78,7 @@ app.use('/api', async (req, res, next) => {
 app.get('/api', (req, res) => {
   res.status(200).json({
     message: 'Secure Vault API is running',
-    version: '3.1.0',
+    version: '3.2.0',
     endpoints: {
       auth: '/api/auth',
       users: '/api/users',
@@ -56,7 +86,8 @@ app.get('/api', (req, res) => {
       activity: '/api/activity',
       shared: '/api/shared',
       nominee: '/api/nominee',
-      upload: '/api/upload'
+      upload: '/api/upload',
+      health: '/api/health'
     }
   });
 });
@@ -82,15 +113,61 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(frontendDistDir, 'index.html'));
 });
 
+function registerGracefulShutdown(server) {
+  let shuttingDown = false;
+
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+
+    console.log(`Received ${signal}. Shutting down gracefully...`);
+
+    const forceExitTimer = setTimeout(() => {
+      console.error('Graceful shutdown timed out. Forcing exit.');
+      process.exit(1);
+    }, 10_000);
+    forceExitTimer.unref();
+
+    server.close(async (closeError) => {
+      if (closeError) {
+        console.error('Error closing HTTP server:', closeError.message);
+      }
+
+      try {
+        await mongoose.connection.close();
+        console.log('MongoDB connection closed.');
+      } catch (dbError) {
+        console.error('Error closing MongoDB connection:', dbError.message);
+      }
+
+      clearTimeout(forceExitTimer);
+      process.exit(closeError ? 1 : 0);
+    });
+  }
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled promise rejection:', reason);
+  });
+  process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+    shutdown('uncaughtException');
+  });
+}
+
 async function startServer() {
   try {
     const dbConnection = await connectDB();
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Connected database: ${dbConnection.name}`);
       console.log(`VaultX Home: http://localhost:${PORT}/`);
+      console.log(`Health:      http://localhost:${PORT}/api/health`);
     });
+
+    registerGracefulShutdown(server);
   } catch (error) {
     console.error('Server failed to start:', error.message);
     process.exit(1);
