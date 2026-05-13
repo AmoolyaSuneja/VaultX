@@ -11,7 +11,7 @@
     --color-panel: 36 22% 98%;
     --color-surface: 36 20% 96%;
     --color-surface-soft: 36 18% 94%;
-    --color-surface-muted: 32 14% 90%;
+    --color-surface-muted: 32 14% 91%;
     --color-surface-raised: 0 0% 100%;
     --color-surface-sunken: 32 14% 88%;
 
@@ -28,43 +28,43 @@
     --color-steel-light: 220 8% 82%;
     --color-steel-muted: 220 4% 60%;
 
-    --color-danger: 358 58% 48%;
-    --color-danger-light: 358 60% 94%;
+    --color-danger: 358 54% 48%;
+    --color-danger-light: 358 54% 95%;
 
-    --color-line: 32 12% 86%;
+    --color-line: 32 12% 87%;
     --color-text-primary: 220 14% 12%;
-    --color-text-muted: 220 6% 42%;
+    --color-text-muted: 220 6% 44%;
   }
 
   .dark {
-    /* Graphite dark — near-black ink field, bone-white text, soft slate accent. */
-    --color-background: 220 12% 7%;
-    --color-panel: 220 12% 10%;
-    --color-surface: 220 10% 12%;
-    --color-surface-soft: 220 10% 14%;
-    --color-surface-muted: 220 8% 17%;
-    --color-surface-raised: 220 10% 15%;
-    --color-surface-sunken: 220 14% 5%;
+    /* Graphite dark — near-black ink field with a 2% warm tint, bone-white text. */
+    --color-background: 30 8% 8%;
+    --color-panel: 30 8% 11%;
+    --color-surface: 30 7% 13%;
+    --color-surface-soft: 30 7% 15%;
+    --color-surface-muted: 30 6% 18%;
+    --color-surface-raised: 30 7% 16%;
+    --color-surface-sunken: 30 8% 6%;
 
-    --color-brand: 36 18% 92%;
-    --color-brand-deep: 36 20% 96%;
-    --color-brand-light: 220 10% 20%;
-    --color-brand-muted: 36 10% 76%;
+    --color-brand: 36 18% 94%;
+    --color-brand-deep: 36 20% 98%;
+    --color-brand-light: 30 7% 20%;
+    --color-brand-muted: 36 10% 78%;
 
-    --color-accent: 215 12% 72%;
-    --color-accent-light: 220 10% 22%;
-    --color-accent-muted: 215 10% 55%;
+    --color-accent: 215 12% 74%;
+    --color-accent-light: 30 7% 22%;
+    --color-accent-muted: 215 10% 58%;
 
-    --color-steel: 220 6% 64%;
-    --color-steel-light: 220 6% 36%;
-    --color-steel-muted: 220 4% 52%;
+    --color-steel: 220 6% 66%;
+    --color-steel-light: 220 6% 38%;
+    --color-steel-muted: 220 4% 54%;
 
-    --color-danger: 358 62% 62%;
-    --color-danger-light: 358 30% 18%;
+    --color-danger: 358 62% 64%;
+    --color-danger-light: 358 30% 20%;
 
-    --color-line: 220 10% 20%;
-    --color-text-primary: 36 18% 94%;
-    --color-text-muted: 220 6% 64%;
+    --color-line: 30 6% 21%;
+    --color-text-primary: 36 18% 95%;
+    --color-text-muted: 220 6% 66%;
   }
 
   * {
@@ -85,6 +85,7 @@
     overflow-x: hidden;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'ss01', 'cv11';
   }
 
@@ -95,6 +96,33 @@
   ::selection {
     @apply bg-textPrimary/10 text-textPrimary;
   }
+
+  /* Numeric characters align to the same advance width — no jitter on animated counters, timestamps, and monospaced values. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Smoother momentum feel on scroll containers without overriding user prefs. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+
+    * {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -102,21 +130,27 @@
     @apply border border-line bg-panel;
   }
 
+  /* Layout-stable focus: outline doesn't push layout, fades in smoothly. */
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-textPrimary/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 120ms ease-out;
+  }
+
+  .focus-ring:focus-visible {
+    outline-color: hsl(var(--color-text-primary) / 0.35);
   }
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--color-steel-muted) / 0.4) transparent;
-    scroll-behavior: smooth;
+    scrollbar-color: hsl(var(--color-steel-muted) / 0.28) transparent;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -124,12 +158,20 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--color-steel-muted) / 0.35);
+    background: hsl(var(--color-steel-muted) / 0.22);
     border-radius: 999px;
+    transition: background-color 180ms ease-out;
+  }
+
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--color-steel-muted) / 0.38);
   }
 
   .surface-field {
     @apply border border-line bg-surface text-textPrimary;
+    transition:
+      border-color 180ms ease-out,
+      background-color 180ms ease-out;
   }
 
   .surface-card {
@@ -140,9 +182,76 @@
     @apply border border-line bg-surface-muted text-textMuted;
   }
 
-  /* Kept for backward compat with classes still present in some markup; */
-  /* renders as a plain panel in the new minimal theme. */
   .glass-panel {
     @apply border border-line bg-panel;
+  }
+
+  /* Tactile press feedback without color shift. */
+  .press {
+    transition:
+      transform 120ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 180ms ease-out,
+      border-color 180ms ease-out,
+      color 180ms ease-out;
+  }
+
+  .press:active:not(:disabled) {
+    transform: translateY(0.5px) scale(0.985);
+  }
+
+  /* Hairline dividers inside cards sit under section labels. */
+  .section-label {
+    @apply mb-3 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.14em] text-textMuted;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: hsl(var(--color-line) / 0.9);
+  }
+
+  /* Subtle page enter animation — noticeable in peripheral vision, not overt. */
+  .page-enter {
+    animation: pageEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes pageEnter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 4px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  /* Skeleton shimmer — flat, no color flash. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: hsl(var(--color-surface-muted));
+    border-radius: 6px;
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--color-surface-raised) / 0.35) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+  }
+
+  @keyframes skeletonShimmer {
+    100% {
+      transform: translateX(100%);
+    }
   }
 }

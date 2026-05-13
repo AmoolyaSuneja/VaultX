@@ -29,7 +29,8 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
     (entry.notes || entry.data ? truncate(entry.notes || entry.data || '', 64) : '');
   const attachmentCount = entry.attachmentCount ?? entry.filePath?.length ?? 0;
   const showPasswordRow = Boolean(entry.password) && !locked && role === 'owner';
-  void index;
+  // Subtle staggered fade-in on first render
+  const animationDelay = Math.min(index * 24, 160);
 
   useEffect(() => {
     if (!revealed) return;
@@ -41,7 +42,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
     <Menu as="div" className="relative">
       <MenuButton
         onClick={(event) => event.stopPropagation()}
-        className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary"
+        className="focus-ring press rounded-full p-1.5 text-textMuted hover:bg-surface-muted hover:text-textPrimary"
         aria-label="Entry actions"
       >
         <Ellipsis className="h-4 w-4" />
@@ -58,7 +59,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
                 event.stopPropagation();
                 onView(entry._id);
               }}
-              className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
+              className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
             >
               <Eye className="h-4 w-4" />
               {locked ? 'View status' : 'View'}
@@ -74,7 +75,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
                   event.stopPropagation();
                   onEdit(entry);
                 }}
-                className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
+                className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
               >
                 <Pencil className="h-4 w-4" />
                 Edit
@@ -92,7 +93,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
                   const copied = await copyToClipboard(entry.password || '');
                   if (copied) toast.success('Password copied');
                 }}
-                className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
+                className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
               >
                 <Copy className="h-4 w-4" />
                 Copy password
@@ -111,7 +112,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
                     event.stopPropagation();
                     onDelete(entry);
                   }}
-                  className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-danger ${focus ? 'bg-danger-light/40' : ''}`}
+                  className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-danger transition-colors duration-150 ${focus ? 'bg-danger-light/30' : ''}`}
                 >
                   <Trash2 className="h-4 w-4" />
                   Delete
@@ -125,7 +126,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
   );
 
   const meta = (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-textMuted">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-textMuted tabular">
       {locked ? (
         <span className="inline-flex items-center gap-1">
           <LockKeyhole className="h-3 w-3" />
@@ -148,7 +149,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
         <FileText className="h-3 w-3" />
         {attachmentCount}
       </span>
-      <span>·</span>
+      <span className="opacity-60">·</span>
       <span>{formatRelativeTime(entry.updatedAt || entry.createdAt)}</span>
     </div>
   );
@@ -159,14 +160,15 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
         role="article"
         aria-label={`${entry.title} entry`}
         onClick={() => onView(entry._id)}
-        className="group flex cursor-pointer items-center gap-3 rounded-md border border-line bg-panel px-3 py-2.5 transition-colors duration-150 ease-out hover:border-textPrimary/25 hover:bg-surface"
+        style={{ animationDelay: `${animationDelay}ms` }}
+        className="group animate-fadeIn flex cursor-pointer items-center gap-3 rounded-md border border-line bg-panel px-3 py-2.5 transition-colors duration-200 ease-smooth hover:border-textPrimary/20 hover:bg-surface"
       >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface-muted text-textMuted">
           <CategoryIcon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate font-heading text-[15px] font-semibold text-textPrimary">{entry.title}</h3>
+            <h3 className="truncate font-heading text-[15px] font-semibold leading-tight text-textPrimary">{entry.title}</h3>
             <span className="truncate text-xs text-textMuted">{entry.category || 'General'}</span>
           </div>
           <p className="mt-0.5 truncate text-xs text-textMuted">{subtitle || 'No details'}</p>
@@ -182,20 +184,21 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
       role="article"
       aria-label={`${entry.title} entry`}
       onClick={() => onView(entry._id)}
-      className="group flex cursor-pointer flex-col rounded-lg border border-line bg-panel transition-colors duration-150 ease-out hover:border-textPrimary/25"
+      style={{ animationDelay: `${animationDelay}ms` }}
+      className="group animate-fadeIn flex cursor-pointer flex-col rounded-lg border border-line bg-panel transition-all duration-280 ease-smooth hover:border-textPrimary/20 hover:shadow-card"
     >
       <div className="flex items-start gap-3 p-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-line bg-surface-muted text-textMuted transition-colors group-hover:border-textPrimary/25 group-hover:text-textPrimary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-line bg-surface-muted text-textMuted transition-colors duration-200 ease-smooth group-hover:border-textPrimary/20 group-hover:text-textPrimary">
           <CategoryIcon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="truncate text-[11px] font-medium uppercase tracking-[0.14em] text-textMuted">
-              {entry.category || 'General'}
-            </p>
-          </div>
-          <h3 className="mt-0.5 truncate font-heading text-lg font-semibold text-textPrimary">{entry.title}</h3>
-          <p className="mt-0.5 line-clamp-1 text-xs text-textMuted">{subtitle || 'No details'}</p>
+          <p className="truncate text-[10.5px] font-medium uppercase tracking-label text-textMuted">
+            {entry.category || 'General'}
+          </p>
+          <h3 className="mt-0.5 truncate font-heading text-[17px] font-semibold leading-tight text-textPrimary">
+            {entry.title}
+          </h3>
+          <p className="mt-1 line-clamp-1 text-xs text-textMuted">{subtitle || 'No details'}</p>
         </div>
         {menu}
       </div>
@@ -204,7 +207,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
         {meta}
         {showPasswordRow ? (
           <div className="flex items-center gap-1">
-            <span className="truncate font-mono text-xs text-textPrimary">
+            <span className="truncate font-mono text-xs text-textPrimary tabular">
               {maskValue(entry.password || '', revealed)}
             </span>
             <button
@@ -213,7 +216,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
                 event.stopPropagation();
                 setRevealed((value) => !value);
               }}
-              className="focus-ring rounded-full p-1 text-textMuted hover:text-textPrimary"
+              className="focus-ring press rounded-full p-1 text-textMuted hover:text-textPrimary"
               aria-label={revealed ? 'Hide password' : 'Reveal password'}
             >
               <Eye className="h-3.5 w-3.5" />
@@ -222,7 +225,7 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
               <button
                 type="button"
                 aria-label="Copy revealed password"
-                className="focus-ring rounded-full p-1 text-textMuted hover:text-textPrimary"
+                className="focus-ring press rounded-full p-1 text-textMuted hover:text-textPrimary"
                 onClick={async (event) => {
                   event.stopPropagation();
                   const copied = await copyToClipboard(entry.password || '');

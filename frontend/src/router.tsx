@@ -1,15 +1,30 @@
+import { lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { AuthPage } from '@/pages/Auth';
-import { DashboardPage } from '@/pages/Dashboard';
-import { EntryDetailPage } from '@/pages/EntryDetail';
-import { ProfilePage } from '@/pages/Profile';
-import { SettingsPage } from '@/pages/Settings';
-import { ApproveAccessPage } from '@/pages/ApproveAccess';
-import { SharedLinkPage } from '@/pages/SharedLink';
-import { appleSpring } from '@/lib/motion';
+import { pageTransition } from '@/lib/motion';
+
+const DashboardPage = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.DashboardPage })));
+const EntryDetailPage = lazy(() => import('@/pages/EntryDetail').then((m) => ({ default: m.EntryDetailPage })));
+const ProfilePage = lazy(() => import('@/pages/Profile').then((m) => ({ default: m.ProfilePage })));
+const SettingsPage = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.SettingsPage })));
+const ApproveAccessPage = lazy(() =>
+  import('@/pages/ApproveAccess').then((m) => ({ default: m.ApproveAccessPage }))
+);
+const SharedLinkPage = lazy(() => import('@/pages/SharedLink').then((m) => ({ default: m.SharedLinkPage })));
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[30vh] items-center justify-center">
+      <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-label text-textMuted">
+        <span className="h-1 w-1 animate-pulse rounded-full bg-textMuted" />
+        Loading
+      </div>
+    </div>
+  );
+}
 
 function AnimatedRouteOutlet() {
   const location = useLocation();
@@ -18,13 +33,14 @@ function AnimatedRouteOutlet() {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 4 }}
-        transition={appleSpring}
-        className="transform-gpu will-change-transform"
+        exit={{ opacity: 0, y: -2 }}
+        transition={pageTransition}
       >
-        <Outlet />
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );
@@ -47,11 +63,19 @@ export const router = createBrowserRouter([
   },
   {
     path: '/shared/:shareId',
-    element: <SharedLinkPage />
+    element: (
+      <Suspense fallback={<RouteFallback />}>
+        <SharedLinkPage />
+      </Suspense>
+    )
   },
   {
     path: '/approve-access/:token',
-    element: <ApproveAccessPage />
+    element: (
+      <Suspense fallback={<RouteFallback />}>
+        <ApproveAccessPage />
+      </Suspense>
+    )
   },
   {
     element: <ProtectedLayout />,

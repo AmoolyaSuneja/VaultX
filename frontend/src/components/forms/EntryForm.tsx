@@ -170,7 +170,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-background/75 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-textPrimary/20 backdrop-blur-[2px]" />
         </TransitionChild>
 
         <div className="fixed inset-0 overflow-hidden">
@@ -179,22 +179,22 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
               <DialogPanel className="pointer-events-auto h-full w-full sm:max-w-lg lg:max-w-2xl">
                 <motion.div
                   {...slideRight}
-                  className="relative flex h-full w-full transform-gpu flex-col border-l border-line bg-panel shadow-card backdrop-blur-panel will-change-transform"
+                  className="relative flex h-full w-full flex-col border-l border-line bg-panel"
                 >
                   <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-4 sm:px-6 sm:py-5">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.22em] text-textMuted">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">
                         {mode === 'create' ? 'Create entry' : 'Edit entry'}
                       </p>
-                      <h3 className="mt-2 font-heading text-2xl text-textPrimary sm:text-3xl">
-                        {mode === 'create' ? 'Capture something important' : 'Refine vault details'}
+                      <h3 className="mt-1.5 font-heading text-2xl text-textPrimary">
+                        {mode === 'create' ? 'New vault entry' : 'Refine vault entry'}
                       </h3>
                     </div>
                     <button
                       type="button"
                       onClick={closePanel}
                       disabled={isSubmitting}
-                      className="focus-ring rounded-full p-2 text-textMuted transition hover:bg-surface-raised hover:text-brand"
+                      className="focus-ring rounded-full p-2 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary"
                       aria-label="Close panel"
                     >
                       <X className="h-5 w-5" />
@@ -202,20 +202,20 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                   </div>
 
                   <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
-                    <div className="scrollbar-thin flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:space-y-8 sm:px-6 sm:py-6">
-                      <section className="space-y-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Basic info</p>
+                    <div className="scrollbar-thin flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:space-y-7 sm:px-6 sm:py-6">
+                      <section className="space-y-3">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Basic info</p>
                         <Input
                           label="Title"
                           placeholder="Acme workspace"
                           error={form.formState.errors.title?.message}
                           {...form.register('title')}
                         />
-                        <label className="grid gap-2 text-sm text-textMuted">
-                          <span className="text-xs font-medium uppercase tracking-[0.22em]">Category</span>
+                        <label className="grid gap-1.5 text-sm text-textMuted">
+                          <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Category</span>
                           <input
                             list="vault-categories"
-                            className="focus-ring rounded-md border border-line bg-surface px-3 py-2.5 text-sm text-textPrimary transition placeholder:text-textMuted/70 focus:border-brand focus:shadow-focus"
+                            className="focus-ring surface-field rounded-md px-3 py-2.5 text-sm text-textPrimary transition-colors duration-200 placeholder:text-textMuted/70 focus:border-textPrimary/60"
                             placeholder="Choose or create a category"
                             {...form.register('category')}
                           />
@@ -232,7 +232,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                           rightAdornment={
                             <button
                               type="button"
-                              className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
+                              className="focus-ring rounded-full p-1 text-textMuted transition-colors hover:text-textPrimary"
                               aria-label="Visit website"
                               onClick={() => {
                                 const url = form.getValues('url');
@@ -247,8 +247,8 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                         />
                       </section>
 
-                      <section className="space-y-4 border-t border-line pt-6">
-                        <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Credentials</p>
+                      <section className="space-y-3 border-t border-line pt-5">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Credentials</p>
                         <Input
                           label="Username"
                           placeholder="alex@example.com"
@@ -276,11 +276,11 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                         </div>
                       </section>
 
-                      <section className="space-y-4 border-t border-line pt-6">
-                        <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Notes</p>
+                      <section className="space-y-3 border-t border-line pt-5">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Notes</p>
                         <Textarea
                           label="Secure notes"
-                          placeholder="Markdown-style notes, recovery steps, context, or internal documentation."
+                          placeholder="Recovery steps, context, internal documentation."
                           error={form.formState.errors.notes?.message}
                           {...form.register('notes')}
                         />
@@ -300,8 +300,8 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                         />
                       </section>
 
-                      <section className="space-y-4 border-t border-line pt-6">
-                        <p className="text-xs uppercase tracking-[0.22em] text-textMuted">Dual approval</p>
+                      <section className="space-y-3 border-t border-line pt-5">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Dual approval</p>
                         <Toggle
                           label="Require a second user to approve access"
                           checked={dualApprovalEnabled}
@@ -314,22 +314,22 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                             label="Second approver email"
                             placeholder="teammate@company.com"
                             error={form.formState.errors.secondApproverEmail?.message}
-                            hint="This user will receive an approval email before sensitive content can be opened."
+                            hint="They will receive an approval email before sensitive content can be opened."
                             {...form.register('secondApproverEmail')}
                           />
                         ) : null}
                       </section>
 
-                      <section className="space-y-4 border-t border-line pt-6">
+                      <section className="space-y-3 border-t border-line pt-5">
                         <div className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-accent" />
-                          <p className="text-xs uppercase tracking-[0.22em] text-textMuted">File attachments</p>
+                          <Sparkles className="h-4 w-4 text-textMuted" />
+                          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Attachments</p>
                         </div>
                         <FileUpload files={files} onChange={setFiles} existingFiles={entry?.filePath} />
                       </section>
                     </div>
 
-                    <div className="sticky bottom-0 grid gap-3 border-t border-line bg-panel/95 px-4 py-4 backdrop-blur-panel sm:flex sm:items-center sm:justify-end sm:px-6">
+                    <div className="sticky bottom-0 grid gap-2 border-t border-line bg-panel px-4 py-3 sm:flex sm:items-center sm:justify-end sm:px-6">
                       <Button type="button" variant="ghost" className="w-full sm:w-auto" onClick={closePanel} disabled={isSubmitting}>
                         Cancel
                       </Button>

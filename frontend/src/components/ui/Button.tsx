@@ -6,13 +6,13 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'border border-brand/90 bg-brand text-background hover:bg-brand-deep',
+    'border border-brand bg-brand text-background hover:bg-brand-deep hover:border-brand-deep',
   secondary:
     'border border-line bg-surface text-textPrimary hover:bg-surface-muted',
   ghost:
     'border border-transparent bg-transparent text-textMuted hover:bg-surface-muted hover:text-textPrimary',
   danger:
-    'border border-danger/30 bg-transparent text-danger hover:bg-danger/10'
+    'border border-danger/30 bg-transparent text-danger hover:bg-danger/8'
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,7 +25,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        'focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50',
+        'focus-ring press inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium tabular',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         variants[variant],
         className
       )}

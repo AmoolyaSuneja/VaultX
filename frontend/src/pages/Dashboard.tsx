@@ -2,7 +2,7 @@ import { Listbox } from '@headlessui/react';
 import { Check, ChevronDown, LayoutGrid, List, Plus, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, EmptyState } from '@/components/ui';
+import { Button, EmptyState, GridSkeleton } from '@/components/ui';
 import { EntryForm } from '@/components/forms/EntryForm';
 import { StatsStrip } from '@/components/vault/StatsStrip';
 import { VaultGrid } from '@/components/vault/VaultGrid';
@@ -81,12 +81,15 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
 
   const updateMutation = useUpdateEntry(editingEntry?._id ?? '');
 
+  const isInitialLoading = entriesQuery.isLoading && !entriesQuery.data;
+  const filterActive = Boolean(search || selectedCategories.length);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted">Vault</p>
-          <h1 className="mt-1 font-heading text-3xl text-textPrimary sm:text-[34px]">Your entries</h1>
+          <p className="text-[11px] font-medium uppercase tracking-label text-textMuted">Vault</p>
+          <h1 className="mt-1 font-heading text-[28px] leading-[1.12] text-textPrimary sm:text-[30px]">Your entries</h1>
         </div>
         <Button onClick={() => navigate('/vault/new')} className="w-full justify-center sm:w-auto">
           <Plus className="h-4 w-4" />
@@ -96,18 +99,18 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
 
       <StatsStrip stats={stats} />
 
-      <div className="rounded-lg border border-line bg-panel p-2 sm:p-3">
+      <div className="rounded-lg border border-line bg-panel p-2">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 transition-colors focus-within:border-textPrimary/60">
+          <label className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 transition-colors duration-180 focus-within:border-textPrimary/60">
             <Search className="h-4 w-4 text-textMuted" />
             <input
               id="vault-search"
               value={localSearch}
               onChange={(event) => setLocalSearch(event.target.value)}
               placeholder="Search titles, usernames, notes, URLs"
-              className="min-w-0 flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/70"
+              className="min-w-0 flex-1 bg-transparent text-sm text-textPrimary outline-none placeholder:text-textMuted/60"
             />
-            <kbd className="hidden rounded border border-line bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-textMuted md:inline">
+            <kbd className="hidden rounded border border-line bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-textMuted tabular md:inline">
               ⌘K
             </kbd>
           </label>
@@ -115,16 +118,16 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
           <div className="flex items-center gap-2">
             <Listbox value={selectedCategories} onChange={setSelectedCategories} multiple>
               <div className="relative">
-                <Listbox.Button className="focus-ring flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-textPrimary transition-colors hover:bg-surface-muted">
+                <Listbox.Button className="focus-ring press flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-textPrimary transition-colors duration-180 hover:bg-surface-muted">
                   Category
                   {selectedCategories.length ? (
-                    <span className="rounded-full bg-brand/10 px-1.5 text-[11px] font-medium text-textPrimary">
+                    <span className="rounded-full bg-brand/10 px-1.5 text-[11px] font-medium text-textPrimary tabular">
                       {selectedCategories.length}
                     </span>
                   ) : null}
                   <ChevronDown className="h-4 w-4 text-textMuted" />
                 </Listbox.Button>
-                <Listbox.Options className="absolute right-0 z-40 mt-2 max-h-72 w-[min(18rem,calc(100vw-2rem))] overflow-auto rounded-md border border-line bg-panel p-1 shadow-card">
+                <Listbox.Options className="absolute right-0 z-40 mt-2 max-h-72 w-[min(18rem,calc(100vw-2rem))] overflow-auto rounded-md border border-line bg-panel p-1 shadow-card animate-fadeIn scrollbar-thin">
                   {categories.map((category) => {
                     const selected = selectedCategories.includes(category);
                     return (
@@ -132,7 +135,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                         key={category}
                         value={category}
                         as="button"
-                        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-textPrimary transition-colors hover:bg-surface-muted"
+                        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-textPrimary transition-colors duration-150 hover:bg-surface-muted"
                       >
                         <span>{category}</span>
                         {selected ? <Check className="h-4 w-4 text-textPrimary" /> : null}
@@ -145,16 +148,16 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
 
             <Listbox value={sort} onChange={setSort}>
               <div className="relative">
-                <Listbox.Button className="focus-ring flex min-h-10 items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-textPrimary transition-colors hover:bg-surface-muted">
+                <Listbox.Button className="focus-ring press flex min-h-10 items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-textPrimary transition-colors duration-180 hover:bg-surface-muted">
                   {sortOptions.find((option) => option.value === sort)?.label}
                   <ChevronDown className="h-4 w-4 text-textMuted" />
                 </Listbox.Button>
-                <Listbox.Options className="absolute right-0 z-40 mt-2 w-40 rounded-md border border-line bg-panel p-1 shadow-card">
+                <Listbox.Options className="absolute right-0 z-40 mt-2 w-40 rounded-md border border-line bg-panel p-1 shadow-card animate-fadeIn">
                   {sortOptions.map((option) => (
                     <Listbox.Option
                       key={option.value}
                       value={option.value}
-                      className="cursor-pointer rounded px-3 py-2 text-sm text-textPrimary transition-colors hover:bg-surface-muted"
+                      className="cursor-pointer rounded px-3 py-2 text-sm text-textPrimary transition-colors duration-150 hover:bg-surface-muted"
                     >
                       {option.label}
                     </Listbox.Option>
@@ -172,7 +175,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                 type="button"
                 onClick={() => setView('grid')}
                 aria-pressed={view === 'grid'}
-                className={`focus-ring flex h-9 w-9 items-center justify-center rounded transition-colors ${view === 'grid' ? 'bg-surface-muted text-textPrimary' : 'text-textMuted hover:text-textPrimary'}`}
+                className={`focus-ring press flex h-9 w-9 items-center justify-center rounded transition-colors duration-180 ${view === 'grid' ? 'bg-surface-muted text-textPrimary' : 'text-textMuted hover:text-textPrimary'}`}
                 aria-label="Grid view"
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -181,7 +184,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                 type="button"
                 onClick={() => setView('list')}
                 aria-pressed={view === 'list'}
-                className={`focus-ring flex h-9 w-9 items-center justify-center rounded transition-colors ${view === 'list' ? 'bg-surface-muted text-textPrimary' : 'text-textMuted hover:text-textPrimary'}`}
+                className={`focus-ring press flex h-9 w-9 items-center justify-center rounded transition-colors duration-180 ${view === 'list' ? 'bg-surface-muted text-textPrimary' : 'text-textMuted hover:text-textPrimary'}`}
                 aria-label="List view"
               >
                 <List className="h-4 w-4" />
@@ -191,17 +194,19 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
         </div>
       </div>
 
-      {filteredEntries.length === 0 ? (
+      {isInitialLoading ? (
+        <GridSkeleton count={6} />
+      ) : filteredEntries.length === 0 ? (
         <EmptyState
-          title={search || selectedCategories.length ? 'Nothing matches' : 'Your vault is empty'}
+          title={filterActive ? 'Nothing matches' : 'Your vault is empty'}
           copy={
-            search || selectedCategories.length
+            filterActive
               ? 'No entries match your search and category filters.'
               : 'Create your first entry to save credentials, notes, and files.'
           }
-          actionLabel={search || selectedCategories.length ? 'New entry' : 'Create first entry'}
+          actionLabel={filterActive ? 'New entry' : 'Create first entry'}
           onAction={() => navigate('/vault/new')}
-          secondaryLabel={search || selectedCategories.length ? 'Clear filters' : undefined}
+          secondaryLabel={filterActive ? 'Clear filters' : undefined}
           onSecondaryAction={clearFilters}
         />
       ) : (

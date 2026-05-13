@@ -42,23 +42,36 @@ module.exports = {
         sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
         heading: ['"Fraunces"', 'Georgia', 'serif']
       },
+      fontSize: {
+        'xs-plus': ['0.8125rem', { lineHeight: '1.35' }]
+      },
+      letterSpacing: {
+        label: '0.14em'
+      },
       borderRadius: {
-        xl: '20px',
-        lg: '14px',
-        md: '10px',
-        sm: '8px'
+        xl: '14px',
+        lg: '12px',
+        md: '8px',
+        sm: '6px'
       },
       boxShadow: {
-        card: '0 1px 2px rgba(16, 18, 22, 0.04), 0 10px 30px -12px rgba(16, 18, 22, 0.12)',
+        card: '0 1px 2px rgba(16, 18, 22, 0.04), 0 8px 24px -12px rgba(16, 18, 22, 0.10)',
         soft: '0 1px 2px rgba(16, 18, 22, 0.04)',
-        focus: '0 0 0 3px hsl(var(--color-brand) / 0.18)'
+        focus: '0 0 0 3px hsl(var(--color-text-primary) / 0.14)'
       },
       backdropBlur: {
-        panel: '12px'
+        panel: '10px'
+      },
+      transitionTimingFunction: {
+        smooth: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      },
+      transitionDuration: {
+        180: '180ms',
+        280: '280ms'
       },
       animation: {
-        fadeIn: 'fadeIn 0.35s ease-out both',
-        riseIn: 'riseIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both'
+        fadeIn: 'fadeIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        riseIn: 'riseIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both'
       },
       keyframes: {
         fadeIn: {
@@ -66,7 +79,7 @@ module.exports = {
           '100%': { opacity: '1' }
         },
         riseIn: {
-          '0%': { opacity: '0', transform: 'translate3d(0, 6px, 0)' },
+          '0%': { opacity: '0', transform: 'translate3d(0, 4px, 0)' },
           '100%': { opacity: '1', transform: 'translate3d(0, 0, 0)' }
         }
       }

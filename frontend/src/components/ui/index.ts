@@ -4,6 +4,7 @@ export * from './Card';
 export * from './EmptyState';
 export * from './Input';
 export * from './Modal';
+export * from './Skeleton';
 export * from './Textarea';
 export * from './Toggle';
 export * from './Tooltip';

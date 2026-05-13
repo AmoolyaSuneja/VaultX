@@ -14,11 +14,11 @@ export function TopBar() {
   const toggleTheme = useSettingsStore((state) => state.toggleTheme);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-panel/90 backdrop-blur-panel">
-      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center gap-3 px-4 sm:px-8">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-panel/80 backdrop-blur-panel transition-colors duration-280 ease-smooth">
+      <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center gap-3 px-5 sm:px-8">
         <Link
           to="/vault"
-          className="font-heading text-[22px] font-semibold tracking-tight text-textPrimary"
+          className="focus-ring press font-heading text-[20px] font-semibold tracking-tight text-textPrimary"
         >
           {APP_NAME}
         </Link>
@@ -27,14 +27,14 @@ export function TopBar() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="focus-ring flex h-9 w-9 items-center justify-center rounded-full text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary"
+            className="focus-ring press flex h-9 w-9 items-center justify-center rounded-full text-textMuted transition-colors duration-180 hover:bg-surface-muted hover:text-textPrimary"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
           <Menu as="div" className="relative">
-            <MenuButton className="focus-ring flex items-center gap-2 rounded-full p-1 pr-3 transition-colors hover:bg-surface-muted">
+            <MenuButton className="focus-ring press flex items-center gap-2 rounded-full p-1 pr-3 transition-colors duration-180 hover:bg-surface-muted">
               <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand text-xs font-semibold text-background">
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt={user?.name ?? 'Profile'} className="h-full w-full object-cover" />
@@ -47,14 +47,14 @@ export function TopBar() {
 
             <MenuItems
               anchor="bottom end"
-              className="z-[70] mt-2 min-w-[180px] rounded-md border border-line bg-panel p-1 shadow-card"
+              className="z-[70] mt-2 min-w-[180px] overflow-hidden rounded-md border border-line bg-panel p-1 shadow-card animate-fadeIn"
             >
               <MenuItem>
                 {({ focus }) => (
                   <button
                     type="button"
                     onClick={() => navigate('/vault/profile')}
-                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors ${
+                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${
                       focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'
                     }`}
                   >
@@ -68,7 +68,7 @@ export function TopBar() {
                   <button
                     type="button"
                     onClick={() => navigate('/vault/settings')}
-                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors ${
+                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${
                       focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'
                     }`}
                   >
@@ -83,7 +83,7 @@ export function TopBar() {
                   <button
                     type="button"
                     onClick={logout}
-                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors ${
+                    className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${
                       focus ? 'bg-surface-muted text-danger' : 'text-textPrimary'
                     }`}
                   >

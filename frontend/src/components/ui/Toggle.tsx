@@ -13,19 +13,19 @@ export function Toggle({ checked, onChange, label }: ToggleProps) {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="focus-ring flex w-full items-center justify-between gap-4 rounded-md border border-line bg-surface px-3 py-2.5 text-left transition-colors hover:bg-surface-muted"
+      className="focus-ring press flex w-full items-center justify-between gap-4 rounded-md border border-line bg-surface px-3 py-2.5 text-left hover:bg-surface-muted"
     >
       <span className="text-sm text-textPrimary">{label}</span>
       <span
         className={cn(
-          'flex h-5 w-9 items-center rounded-full p-0.5 transition-colors',
+          'flex h-[18px] w-8 items-center rounded-full p-[2px] transition-colors duration-200 ease-smooth',
           checked ? 'bg-brand' : 'bg-surface-sunken'
         )}
       >
         <span
           className={cn(
-            'h-4 w-4 rounded-full bg-background shadow-sm transition-transform duration-200',
-            checked ? 'translate-x-4' : 'translate-x-0'
+            'h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform duration-200 ease-smooth',
+            checked ? 'translate-x-[14px]' : 'translate-x-0'
           )}
         />
       </span>
