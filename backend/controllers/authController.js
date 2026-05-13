@@ -42,22 +42,13 @@ function toPublicUser(user) {
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    throw new HttpError('Name, email, and password are required', 400);
-  }
-
-  if (password.length < 8) {
-    throw new HttpError('Password must be at least 8 characters', 400);
-  }
-
-  const normalizedEmail = String(email).trim().toLowerCase();
-  const userExists = await User.findOne({ email: normalizedEmail });
+  const userExists = await User.findOne({ email });
 
   if (userExists) {
     throw new HttpError('An account with that email already exists', 400);
   }
 
-  const user = await User.create({ name: String(name).trim(), email: normalizedEmail, password });
+  const user = await User.create({ name, email, password });
 
   res.status(201).json({
     success: true,
@@ -68,12 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw new HttpError('Please provide email and password', 400);
-  }
-
-  const user = await User.findOne({ email: String(email).trim().toLowerCase() }).select('+password');
+  const user = await User.findOne({ email }).select('+password');
   const isMatch = user && user.password ? await bcrypt.compare(password, user.password) : false;
 
   if (!isMatch) {
@@ -91,11 +77,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const requestPasswordReset = asyncHandler(async (req, res) => {
-  const email = req.body.email?.trim().toLowerCase();
-
-  if (!email) {
-    throw new HttpError('Email is required', 400);
-  }
+  const { email } = req.body;
 
   const genericResponse = {
     success: true,
@@ -151,22 +133,7 @@ const requestPasswordReset = asyncHandler(async (req, res) => {
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
-  const email = req.body.email?.trim().toLowerCase();
-  const code = req.body.code?.trim();
-  const { password } = req.body;
-
-  if (!email || !code || !password) {
-    throw new HttpError('Email, recovery code, and new password are required', 400);
-  }
-
-  if (!/^\d{6}$/.test(code)) {
-    throw new HttpError('Enter a valid 6-digit recovery code', 400);
-  }
-
-  if (password.length < 8) {
-    throw new HttpError('Password must be at least 8 characters', 400);
-  }
-
+  const { email, code, password } = req.body;
   const user = await User.findOne({ email }).select('+password +passwordResetCodeHash +passwordResetExpiresAt');
 
   if (!user || !user.passwordResetCodeHash || !user.passwordResetExpiresAt) {

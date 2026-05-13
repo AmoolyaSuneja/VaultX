@@ -1,9 +1,16 @@
 const express = require('express');
 const router = express.Router();
 
-const validateVaultInput = require('../middleware/validateVaultInput');
 const protect = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const validate = require('../middleware/validate');
+const {
+  mutateBody,
+  entryIdParams,
+  attachmentParams,
+  shareLinkBody,
+  approveEmailBody
+} = require('../validation/vaultSchemas');
 const { createSharedLink } = require('../controllers/sharedLinkController');
 const {
   createVaultEntry,
@@ -18,14 +25,40 @@ const {
 } = require('../controllers/vaultController');
 
 router.get('/', protect, getAllVaultEntries);
-router.post('/approve-email', approveVaultAccessFromEmail);
-router.get('/:id', protect, getVaultEntryById);
-router.get('/:id/attachments/:attachmentIndex/preview', protect, previewVaultAttachment);
-router.get('/:id/attachments/:attachmentIndex/download', protect, downloadVaultAttachment);
-router.post('/:id/request-approval', protect, requestVaultAccessApproval);
-router.post('/', protect, upload.array('files', 10), validateVaultInput, createVaultEntry);
-router.post('/:id/share-link', protect, createSharedLink);
-router.put('/:id', protect, upload.array('files', 10), validateVaultInput, updateVaultEntry);
-router.delete('/:id', protect, deleteVaultEntry);
+router.post('/approve-email', validate({ body: approveEmailBody }), approveVaultAccessFromEmail);
+router.get('/:id', protect, validate({ params: entryIdParams }), getVaultEntryById);
+router.get(
+  '/:id/attachments/:attachmentIndex/preview',
+  protect,
+  validate({ params: attachmentParams }),
+  previewVaultAttachment
+);
+router.get(
+  '/:id/attachments/:attachmentIndex/download',
+  protect,
+  validate({ params: attachmentParams }),
+  downloadVaultAttachment
+);
+router.post(
+  '/:id/request-approval',
+  protect,
+  validate({ params: entryIdParams }),
+  requestVaultAccessApproval
+);
+router.post('/', protect, upload.array('files', 10), validate({ body: mutateBody }), createVaultEntry);
+router.post(
+  '/:id/share-link',
+  protect,
+  validate({ params: entryIdParams, body: shareLinkBody }),
+  createSharedLink
+);
+router.put(
+  '/:id',
+  protect,
+  upload.array('files', 10),
+  validate({ params: entryIdParams, body: mutateBody }),
+  updateVaultEntry
+);
+router.delete('/:id', protect, validate({ params: entryIdParams }), deleteVaultEntry);
 
 module.exports = router;

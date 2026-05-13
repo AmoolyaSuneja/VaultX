@@ -469,10 +469,6 @@ const requestVaultAccessApproval = asyncHandler(async (req, res) => {
 const approveVaultAccessFromEmail = asyncHandler(async (req, res) => {
   const { token } = req.body;
 
-  if (!token || typeof token !== 'string') {
-    throw new HttpError('Approval token is required', 400);
-  }
-
   let decoded;
 
   try {

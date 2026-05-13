@@ -59,15 +59,6 @@ async function loadVaultForSharedLink(vaultId) {
 
 const createSharedLink = asyncHandler(async (req, res) => {
   const { filePath, password } = req.body;
-
-  if (!filePath || typeof filePath !== 'string') {
-    throw new HttpError('Document reference is required', 400);
-  }
-
-  if (!password || typeof password !== 'string' || password.trim().length < 4) {
-    throw new HttpError('Password must be at least 4 characters long', 400);
-  }
-
   const vaultEntry = await Vault.findById(req.params.id);
 
   if (!vaultEntry) {
@@ -123,11 +114,6 @@ const getSharedLinkInfo = asyncHandler(async (req, res) => {
 
 const verifySharedLinkPassword = asyncHandler(async (req, res) => {
   const { password } = req.body;
-
-  if (!password || typeof password !== 'string') {
-    throw new HttpError('Password is required', 400);
-  }
-
   const sharedLink = await loadSharedLink(req.params.shareId, { withPassword: true });
   const matches = await bcrypt.compare(password.trim(), sharedLink.passwordHash);
 

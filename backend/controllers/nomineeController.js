@@ -53,32 +53,26 @@ async function logNomineeEvent(userId, action, metadata = {}) {
 
 function resolveOwnerQuery({ ownerId, ownerEmail }) {
   if (ownerId) return { _id: ownerId };
-  const email = typeof ownerEmail === 'string' ? ownerEmail.trim().toLowerCase() : '';
-  return { email };
+  return { email: ownerEmail };
 }
 
 const registerNominee = asyncHandler(async (req, res) => {
   const { name, email, relationship, condition } = req.body;
-  const nomineeEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-
-  if (!name?.trim() || !nomineeEmail || !relationship?.trim() || !condition) {
-    throw new HttpError('Name, email, relationship, and condition are required', 400);
-  }
 
   ensureCondition(condition);
 
-  if (nomineeEmail === req.user.email) {
+  if (email === req.user.email) {
     throw new HttpError('Nominee must be a different user', 400);
   }
 
-  const nomineeUser = await User.findOne({ email: nomineeEmail }).select('_id');
+  const nomineeUser = await User.findOne({ email }).select('_id');
   const owner = await User.findById(req.user._id);
 
   owner.nominee = {
     user: nomineeUser?._id || null,
-    name: name.trim(),
-    email: nomineeEmail,
-    relationship: relationship.trim(),
+    name,
+    email,
+    relationship,
     condition,
     status: 'pending',
     requestedAt: new Date(),
@@ -98,7 +92,7 @@ const registerNominee = asyncHandler(async (req, res) => {
   };
 
   await owner.save();
-  await logNomineeEvent(owner._id, 'NOMINEE_REGISTERED', { nomineeEmail, condition });
+  await logNomineeEvent(owner._id, 'NOMINEE_REGISTERED', { nomineeEmail: email, condition });
 
   res.status(201).json({
     success: true,
@@ -130,12 +124,6 @@ const getNomineeStatus = asyncHandler(async (req, res) => {
 
 const claimNomineeAccess = asyncHandler(async (req, res) => {
   const { ownerEmail, proofType, proofNotes } = req.body;
-  const normalizedOwnerEmail = typeof ownerEmail === 'string' ? ownerEmail.trim().toLowerCase() : '';
-
-  if (!normalizedOwnerEmail || !proofType?.trim() || !proofNotes?.trim()) {
-    throw new HttpError('Owner email, proof type, and proof notes are required', 400);
-  }
-
   const uploadedUrl = req.file?.secure_url || req.file?.path || req.file?.url || '';
 
   if (!uploadedUrl) {
@@ -143,7 +131,7 @@ const claimNomineeAccess = asyncHandler(async (req, res) => {
   }
 
   const owner = await User.findOne({
-    email: normalizedOwnerEmail,
+    email: ownerEmail,
     'nominee.email': req.user.email,
     'nominee.status': { $in: ['pending', 'approved'] }
   });
@@ -156,8 +144,8 @@ const claimNomineeAccess = asyncHandler(async (req, res) => {
   owner.nominee.claim = {
     ...owner.nominee.claim,
     submittedAt: new Date(),
-    proofType: proofType.trim(),
-    proofNotes: proofNotes.trim(),
+    proofType,
+    proofNotes,
     proofDocumentUrl: uploadedUrl,
     proofDocumentName: req.file?.originalname || req.file?.filename || 'Proof document',
     reviewedBy: null,
@@ -170,7 +158,7 @@ const claimNomineeAccess = asyncHandler(async (req, res) => {
   await logNomineeEvent(req.user._id, 'NOMINEE_CLAIMED', {
     ownerId: owner._id,
     ownerEmail: owner.email,
-    proofType: proofType.trim()
+    proofType
   });
 
   res.status(200).json({
@@ -254,8 +242,8 @@ const activateNomineeAccess = asyncHandler(async (req, res) => {
     throw new HttpError('Nominees cannot activate their own access', 403);
   }
 
-  if (!owner.nominee.claim?.submittedAt || !verificationNotes?.trim()) {
-    throw new HttpError('Claim proof and final verification notes are required', 400);
+  if (!owner.nominee.claim?.submittedAt) {
+    throw new HttpError('Claim proof must be submitted before activation', 400);
   }
 
   if (!owner.nominee.claim.proofDocumentUrl) {
@@ -277,7 +265,7 @@ const activateNomineeAccess = asyncHandler(async (req, res) => {
   owner.nominee.status = 'active';
   owner.nominee.activatedAt = new Date();
   owner.nominee.claim.activatedBy = req.user._id;
-  owner.nominee.claim.activationNotes = verificationNotes.trim();
+  owner.nominee.claim.activationNotes = verificationNotes;
 
   await owner.save();
   await logNomineeEvent(req.user._id, 'NOMINEE_ACTIVATED', {
