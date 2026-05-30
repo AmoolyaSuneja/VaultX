@@ -57,6 +57,11 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
 
     if (!shouldShowVaultEntrance()) return;
 
+    // Mark consumed immediately so a fast navigation away (e.g. clicking
+    // "New entry" while the overlay is still on screen) does not re-trigger
+    // the animation when the Dashboard remounts.
+    markVaultEntranceConsumed();
+
     setShowOverlay(true);
     setContentRevealed(false);
     setEntrancePlaying(true);
@@ -71,7 +76,6 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
     const endEntranceTimer = window.setTimeout(
       () => {
         setEntrancePlaying(false);
-        markVaultEntranceConsumed();
       },
       OVERLAY_DURATION_MS + 1400
     );
@@ -79,6 +83,11 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
     return () => {
       window.clearTimeout(hideOverlayTimer);
       window.clearTimeout(endEntranceTimer);
+      // If the user navigates away mid-animation, snap content visible so the
+      // remount does not show a blank page.
+      setContentRevealed(true);
+      setShowOverlay(false);
+      setEntrancePlaying(false);
     };
     // We intentionally only want this to run on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
