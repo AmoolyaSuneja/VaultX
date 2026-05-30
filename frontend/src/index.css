@@ -198,6 +198,22 @@
     @apply border border-line bg-panel;
   }
 
+  .glass-card {
+    background: hsl(var(--color-surface) / 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--color-line) / 0.5);
+  }
+
+  .bg-mesh-gradient {
+    background-color: hsl(var(--color-background));
+    background-image: 
+        radial-gradient(at 0% 0%, hsl(var(--color-surface-soft)) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsl(var(--color-surface)) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsl(var(--color-surface-muted)) 0, transparent 50%);
+  }
+
+
   /* Tactile press feedback without color shift. */
   .press {
     transition:

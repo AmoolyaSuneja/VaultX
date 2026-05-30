@@ -97,8 +97,13 @@ export function AuthPanel() {
   );
 
   return (
-    <div className="panel w-full rounded-lg p-6 shadow-card sm:p-7">
-      <h2 className="mb-6 font-heading text-[22px] leading-tight text-textPrimary">{heading}</h2>
+    <div className="flex w-full flex-col rounded-[2rem] border border-line bg-panel p-8 shadow-2xl sm:p-10">
+      <div className="mb-8 flex flex-col gap-2">
+        <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.15em] text-brand-muted">
+          {mode === 'login' ? 'Authentication Required' : mode === 'register' ? 'New Account' : 'Account Recovery'}
+        </p>
+        <h2 className="font-heading text-[1.75rem] leading-tight tracking-tight text-textPrimary">{heading}</h2>
+      </div>
 
       <AnimatePresence mode="wait">
         {mode === 'login' ? (
@@ -109,7 +114,7 @@ export function AuthPanel() {
             exit={{ opacity: 0, y: -4 }}
             transition={pageTransition}
           >
-            <form className="grid gap-4" onSubmit={loginForm.handleSubmit(submitLogin)}>
+            <form className="flex flex-col gap-5" onSubmit={loginForm.handleSubmit(submitLogin)}>
               <Input
                 label="Email"
                 type="email"
@@ -156,7 +161,7 @@ export function AuthPanel() {
             exit={{ opacity: 0, y: -4 }}
             transition={pageTransition}
           >
-            <form className="grid gap-4" onSubmit={registerForm.handleSubmit(submitRegister)}>
+            <form className="flex flex-col gap-5" onSubmit={registerForm.handleSubmit(submitRegister)}>
               <Input
                 label="Name"
                 placeholder="Alex Morgan"
@@ -205,7 +210,7 @@ export function AuthPanel() {
             exit={{ opacity: 0, y: -4 }}
             transition={pageTransition}
           >
-            <form className="grid gap-4" onSubmit={forgotForm.handleSubmit(submitForgotPassword)}>
+            <form className="flex flex-col gap-5" onSubmit={forgotForm.handleSubmit(submitForgotPassword)}>
               <Input
                 label="Email"
                 type="email"
@@ -229,7 +234,7 @@ export function AuthPanel() {
             exit={{ opacity: 0, y: -4 }}
             transition={pageTransition}
           >
-            <form className="grid gap-4" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
+            <form className="flex flex-col gap-5" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
               <Input
                 label="Email"
                 type="email"
@@ -271,7 +276,7 @@ export function AuthPanel() {
         ) : null}
       </AnimatePresence>
 
-      <div className="mt-6 border-t border-line pt-4 text-center text-sm text-textMuted">
+      <div className="mt-8 border-t border-line/60 pt-6 text-center text-sm text-textMuted">
         {mode === 'register' ? (
           <button
             type="button"

@@ -6,7 +6,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'border border-brand bg-brand text-background hover:bg-brand-deep hover:border-brand-deep',
+    'border border-brand bg-brand text-background hover:bg-brand-deep hover:border-brand-deep shadow-lg shadow-black/10',
   secondary:
     'border border-line bg-surface text-textPrimary hover:bg-surface-muted',
   ghost:
@@ -25,7 +25,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        'focus-ring press inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium tabular',
+        'focus-ring press inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 py-3 text-[1rem] font-medium tabular',
         'disabled:cursor-not-allowed disabled:opacity-50',
         variants[variant],
         className
