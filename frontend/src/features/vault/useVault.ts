@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useMemo } from 'react';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -14,11 +14,38 @@ import {
 import { useVaultStore } from './vault.store';
 import type { EntryPayload, VaultEntry, VaultStats } from './vault.types';
 
+const ENTRIES_KEY = ['vault', 'entries'] as const;
+
+function entryKey(id: string) {
+  return ['vault', 'entry', id] as const;
+}
+
+function upsertEntry(queryClient: QueryClient, entry: VaultEntry) {
+  queryClient.setQueryData<VaultEntry[]>(ENTRIES_KEY, (existing) => {
+    if (!existing) return [entry];
+    const index = existing.findIndex((item) => item._id === entry._id);
+    if (index === -1) return [entry, ...existing];
+    const next = existing.slice();
+    next[index] = entry;
+    return next;
+  });
+
+  queryClient.setQueryData(entryKey(entry._id), entry);
+}
+
+function removeEntry(queryClient: QueryClient, id: string) {
+  queryClient.setQueryData<VaultEntry[]>(ENTRIES_KEY, (existing) => {
+    if (!existing) return existing;
+    return existing.filter((entry) => entry._id !== id);
+  });
+  queryClient.removeQueries({ queryKey: entryKey(id) });
+}
+
 export function useVaultEntries() {
   const token = useAuthStore((state) => state.token);
 
   return useQuery({
-    queryKey: ['vault', 'entries'],
+    queryKey: ENTRIES_KEY,
     queryFn: () => getVaultEntries(token),
     enabled: Boolean(token)
   });
@@ -28,7 +55,7 @@ export function useVaultEntry(id?: string) {
   const token = useAuthStore((state) => state.token);
 
   return useQuery({
-    queryKey: ['vault', 'entry', id],
+    queryKey: id ? entryKey(id) : ['vault', 'entry', '__none__'],
     queryFn: () => getVaultEntry(token, id as string),
     enabled: Boolean(token && id)
   });
@@ -40,9 +67,14 @@ export function useCreateEntry() {
 
   return useMutation({
     mutationFn: (payload: EntryPayload) => createVaultEntry(token, payload),
-    onSuccess: () => {
-      toast.success('Vault entry saved');
+    onSuccess: (newEntry) => {
+      // Write directly into the cache so the list updates immediately, even if
+      // the dashboard remounts during the post-save navigation. The invalidate
+      // below is a safety net to refresh server-derived fields (timestamps,
+      // attachment counts, encrypted blobs decrypted to canonical form).
+      upsertEntry(queryClient, newEntry);
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+      toast.success('Vault entry saved');
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Unable to save vault entry';
@@ -69,8 +101,11 @@ export function useRequestEntryApproval(id: string) {
   return useMutation({
     mutationFn: () => requestEntryApproval(token, id),
     onSuccess: (data) => {
-      toast.success(data.message || 'Approval request sent');
+      if (data.data) {
+        upsertEntry(queryClient, data.data);
+      }
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+      toast.success(data.message || 'Approval request sent');
     }
   });
 }
@@ -81,9 +116,10 @@ export function useUpdateEntry(id: string) {
 
   return useMutation({
     mutationFn: (payload: EntryPayload) => updateVaultEntry(token, id, payload),
-    onSuccess: () => {
-      toast.success('Vault entry updated');
+    onSuccess: (updatedEntry) => {
+      upsertEntry(queryClient, updatedEntry);
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+      toast.success('Vault entry updated');
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Unable to update vault entry';
@@ -98,9 +134,10 @@ export function useDeleteEntry() {
 
   return useMutation({
     mutationFn: (id: string) => deleteVaultEntry(token, id),
-    onSuccess: () => {
-      toast.success('Vault entry deleted');
+    onSuccess: (_response, deletedId) => {
+      removeEntry(queryClient, deletedId);
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+      toast.success('Vault entry deleted');
     }
   });
 }

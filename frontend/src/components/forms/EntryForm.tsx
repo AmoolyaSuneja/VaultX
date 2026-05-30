@@ -202,7 +202,10 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                   </div>
 
                   <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
-                    <div className="scrollbar-thin flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:space-y-7 sm:px-6 sm:py-6">
+                    <div
+                      data-lenis-prevent
+                      className="scrollbar-thin flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-5 sm:space-y-7 sm:px-6 sm:py-6"
+                    >
                       <section className="space-y-3">
                         <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Basic info</p>
                         <Input
