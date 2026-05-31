@@ -5,6 +5,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 const baseOptions = {
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  // The app sets `trust proxy` to a single hop on serverless (see server.js).
+  // Disable the permissive-trust-proxy validator so a misread of the platform's
+  // proxy chain can never crash a request inside the limiter's keyGenerator.
+  validate: { trustProxy: false, xForwardedForHeader: false },
   message: { success: false, message: 'Too many requests. Please slow down and try again shortly.' }
 };
 
