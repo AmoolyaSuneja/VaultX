@@ -13,7 +13,11 @@ const emailSchema = z
 const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
-  .max(128, 'Password must be at most 128 characters');
+  .max(128, 'Password must be at most 128 characters')
+  .regex(/[A-Z]/, 'Password must include an uppercase letter')
+  .regex(/[a-z]/, 'Password must include a lowercase letter')
+  .regex(/\d/, 'Password must include a number')
+  .regex(/[^A-Za-z0-9]/, 'Password must include a special character');
 
 const sixDigitCodeSchema = z
   .string()

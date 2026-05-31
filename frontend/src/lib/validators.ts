@@ -1,14 +1,26 @@
 import { z } from 'zod';
 
+// Strong password policy for account creation and reset:
+// min 8 chars, at least one uppercase, one lowercase, one number, one special char.
+export const strongPasswordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[A-Z]/, 'Add at least one uppercase letter')
+  .regex(/[a-z]/, 'Add at least one lowercase letter')
+  .regex(/\d/, 'Add at least one number')
+  .regex(/[^A-Za-z0-9]/, 'Add at least one special character');
+
 export const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters')
+  password: z.string().min(1, 'Enter your password')
 });
 
-export const registerSchema = loginSchema
-  .extend({
+export const registerSchema = z
+  .object({
+    email: z.string().email('Enter a valid email address'),
     name: z.string().min(2, 'Name must be at least 2 characters'),
-    confirmPassword: z.string().min(8, 'Confirm your password')
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, 'Confirm your password')
   })
   .refine((value) => value.password === value.confirmPassword, {
     path: ['confirmPassword'],
@@ -22,8 +34,8 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   email: z.string().email('Enter a valid email address'),
   code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit recovery code'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string().min(8, 'Confirm your password')
+  password: strongPasswordSchema,
+  confirmPassword: z.string().min(1, 'Confirm your password')
 }).refine((value) => value.password === value.confirmPassword, {
   path: ['confirmPassword'],
   message: 'Passwords do not match'
