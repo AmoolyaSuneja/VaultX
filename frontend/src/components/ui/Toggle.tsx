@@ -18,14 +18,16 @@ export function Toggle({ checked, onChange, label }: ToggleProps) {
       <span className="text-sm text-textPrimary">{label}</span>
       <span
         className={cn(
-          'flex h-[18px] w-8 items-center rounded-full p-[2px] transition-colors duration-200 ease-smooth',
-          checked ? 'bg-brand' : 'bg-surface-sunken'
+          'flex h-[20px] w-9 items-center rounded-full border p-[2px] transition-colors duration-200 ease-smooth',
+          checked ? 'border-brand bg-brand' : 'border-steel/50 bg-surface-muted'
         )}
       >
         <span
           className={cn(
-            'h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform duration-200 ease-smooth',
-            checked ? 'translate-x-[14px]' : 'translate-x-0'
+            // Knob keeps a surface tone + border + shadow so it stays visible on
+            // any track colour in both light and dark themes.
+            'h-[14px] w-[14px] rounded-full border border-line bg-surface-raised shadow-sm transition-transform duration-200 ease-smooth',
+            checked ? 'translate-x-[16px]' : 'translate-x-0'
           )}
         />
       </span>
