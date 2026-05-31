@@ -47,7 +47,11 @@ export function useVaultEntries() {
   return useQuery({
     queryKey: ENTRIES_KEY,
     queryFn: () => getVaultEntries(token),
-    enabled: Boolean(token)
+    enabled: Boolean(token),
+    // Always refetch when the dashboard mounts (e.g. returning from /vault/new)
+    // so newly created entries are guaranteed to appear without a manual reload.
+    refetchOnMount: 'always',
+    staleTime: 0
   });
 }
 

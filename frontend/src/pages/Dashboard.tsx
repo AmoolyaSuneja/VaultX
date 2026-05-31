@@ -1,5 +1,5 @@
 import { Listbox } from '@headlessui/react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
 import { Check, ChevronDown, LayoutGrid, List, Plus, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +27,6 @@ interface DashboardPageProps {
 }
 
 const OVERLAY_DURATION_MS = 1550;
-const CONTENT_REVEAL_DELAY_MS = 200;
 
 export function DashboardPage({ createOpen = false }: DashboardPageProps) {
   const navigate = useNavigate();
@@ -42,54 +41,39 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
     return (window.localStorage.getItem('vaultx-view') as 'grid' | 'list') || 'grid';
   });
 
-  // Entrance animation state. We lean on the module-level latch in useAuth so
-  // that React Strict Mode's double-invocation doesn't clear the flag early.
+  // Entrance animation: the overlay floats above the dashboard (fixed, z-90) and
+  // fades out. The content underneath is ALWAYS rendered so a route remount can
+  // never leave the dashboard blank.
   const [showOverlay, setShowOverlay] = useState(false);
-  const [contentRevealed, setContentRevealed] = useState(true);
   const [entrancePlaying, setEntrancePlaying] = useState(false);
 
   useEffect(() => {
     if (prefersReducedMotion) {
-      // Users who opted out of motion skip the folder entirely.
       if (shouldShowVaultEntrance()) markVaultEntranceConsumed();
       return;
     }
 
     if (!shouldShowVaultEntrance()) return;
 
-    // Mark consumed immediately so a fast navigation away (e.g. clicking
-    // "New entry" while the overlay is still on screen) does not re-trigger
-    // the animation when the Dashboard remounts.
+    // Consume immediately so a fast remount doesn't replay the animation.
     markVaultEntranceConsumed();
 
     setShowOverlay(true);
-    setContentRevealed(false);
     setEntrancePlaying(true);
 
-    const hideOverlayTimer = window.setTimeout(() => {
-      setShowOverlay(false);
-      // Reveal content just after overlay begins fading so the card stagger
-      // feels like it's coming out of the folder.
-      window.setTimeout(() => setContentRevealed(true), CONTENT_REVEAL_DELAY_MS);
-    }, OVERLAY_DURATION_MS);
-
+    const hideOverlayTimer = window.setTimeout(() => setShowOverlay(false), OVERLAY_DURATION_MS);
     const endEntranceTimer = window.setTimeout(
-      () => {
-        setEntrancePlaying(false);
-      },
+      () => setEntrancePlaying(false),
       OVERLAY_DURATION_MS + 1400
     );
 
     return () => {
       window.clearTimeout(hideOverlayTimer);
       window.clearTimeout(endEntranceTimer);
-      // If the user navigates away mid-animation, snap content visible so the
-      // remount does not show a blank page.
-      setContentRevealed(true);
       setShowOverlay(false);
       setEntrancePlaying(false);
     };
-    // We intentionally only want this to run on mount.
+    // Run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -145,15 +129,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
     <>
       <VaultEntranceOverlay show={showOverlay} />
 
-      <AnimatePresence>
-        {contentRevealed ? (
-          <motion.div
-            key="dashboard-content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="space-y-6"
-          >
+      <div className="space-y-6">
             <div className="flex items-center justify-end">
               <Button onClick={() => navigate('/vault/new')} className="w-full justify-center sm:w-auto">
                 <Plus className="h-4 w-4" />
@@ -286,9 +262,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                 onDelete={(entry) => deleteMutation.mutate(entry._id)}
               />
             )}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      </div>
 
       <EntryForm
         open={createOpen}
