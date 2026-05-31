@@ -73,6 +73,10 @@
 
   html {
     color-scheme: light;
+    /* Always reserve the scrollbar gutter so short pages (e.g. Profile) don't
+       widen the viewport and shift the fixed navbar to the right. */
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
   }
 
   html.dark {
