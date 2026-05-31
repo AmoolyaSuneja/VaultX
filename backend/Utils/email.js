@@ -48,16 +48,21 @@ function getTransporter() {
   }
 
   if (!cachedTransporter) {
+    const isServerless = Boolean(process.env.VERCEL || process.env.AWS_REGION || process.env.LAMBDA_TASK_ROOT);
+
     cachedTransporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
       secure: config.secure,
-      pool: true,
-      maxConnections: 1,
-      maxMessages: 25,
-      connectionTimeout: 15_000,
-      greetingTimeout: 15_000,
-      socketTimeout: 20_000,
+      // Pooling assumes a long-lived process. On serverless each invocation may
+      // be a fresh, short-lived container, so a single non-pooled connection is
+      // more reliable and avoids a stalled pool on cold starts.
+      pool: !isServerless,
+      // Keep handshakes well under the platform's function timeout (Vercel Hobby
+      // kills functions at ~10s, so a 20s socket timeout never gets to fire).
+      connectionTimeout: isServerless ? 8_000 : 15_000,
+      greetingTimeout: isServerless ? 7_000 : 15_000,
+      socketTimeout: isServerless ? 8_000 : 20_000,
       auth: {
         user: config.user,
         pass: config.pass

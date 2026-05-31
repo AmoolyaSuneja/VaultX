@@ -155,7 +155,13 @@ const requestPasswordReset = asyncHandler(async (req, res) => {
       throw new HttpError('Email is not configured on the server.', 500);
     }
   } catch (emailError) {
-    console.error('Password reset email failed:', emailError.message);
+    console.error('Password reset email failed:', {
+      code: emailError?.code,
+      command: emailError?.command,
+      responseCode: emailError?.responseCode,
+      response: emailError?.response,
+      message: emailError?.message
+    });
 
     if (process.env.NODE_ENV !== 'production') {
       console.warn(`Development password reset fallback for ${user.email}: ${code}`);

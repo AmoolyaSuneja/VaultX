@@ -25,9 +25,14 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_REGION || process.env.LAMBDA_TASK_ROOT);
 const frontendDistDir = path.join(__dirname, '..', 'frontend', 'dist');
 
-app.set('trust proxy', true);
+// Trust exactly one proxy hop on managed platforms (Vercel/Lambda sit behind a
+// single proxy). Setting `true` makes express-rate-limit refuse to start because
+// a spoofed X-Forwarded-For could bypass IP-based limits. `1` reads the real
+// client IP from the platform's proxy while staying safe. Locally we trust none.
+app.set('trust proxy', isServerless ? 1 : false);
 app.disable('x-powered-by');
 
 app.use(requestContext);
