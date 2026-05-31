@@ -44,9 +44,6 @@ export const resetPasswordSchema = z.object({
 export const entrySchema = z.object({
   title: z.string().min(2, 'Title is required'),
   category: z.string().min(2, 'Category is required'),
-  url: z.string().optional().or(z.literal('')),
-  username: z.string().optional().or(z.literal('')),
-  password: z.string().optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
   tagsText: z.string().optional().or(z.literal('')),
   requiresDualApproval: z.boolean().default(false),

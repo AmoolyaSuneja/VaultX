@@ -1,17 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Eye, EyeOff, Globe, Link2, Sparkles, X } from 'lucide-react';
+import { CheckCircle2, Link2, Sparkles, X } from 'lucide-react';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { Button, Input, Textarea, Toggle } from '@/components/ui';
 import { defaultCategories } from '@/lib/constants';
 import { slideRight } from '@/lib/motion';
-import { normalizeUrl, parseTags, toDateTimeInputValue } from '@/lib/utils';
+import { parseTags, toDateTimeInputValue } from '@/lib/utils';
 import { entrySchema, type EntryValues } from '@/lib/validators';
 import type { VaultEntry } from '@/features/vault/vault.types';
 import { FileUpload } from './FileUpload';
-import { PasswordGenerator } from './PasswordGenerator';
 
 interface EntryFormProps {
   open: boolean;
@@ -21,9 +20,6 @@ interface EntryFormProps {
   onSubmit: (payload: {
     title: string;
     category: string;
-    url?: string;
-    username?: string;
-    password?: string;
     notes?: string;
     data?: string;
     tags?: string[];
@@ -37,7 +33,6 @@ interface EntryFormProps {
 export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [submitState, setSubmitState] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const [showPassword, setShowPassword] = useState(false);
   const submitLockedRef = useRef(false);
 
   const form = useForm<EntryValues>({
@@ -45,9 +40,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
     defaultValues: {
       title: '',
       category: 'General',
-      url: '',
-      username: '',
-      password: '',
       notes: '',
       tagsText: '',
       requiresDualApproval: false,
@@ -60,7 +52,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
     if (!open) {
       submitLockedRef.current = false;
       setSubmitState('idle');
-      setShowPassword(false);
     }
   }, [open]);
 
@@ -69,9 +60,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
       form.reset({
         title: '',
         category: 'General',
-        url: '',
-        username: '',
-        password: '',
         notes: '',
         tagsText: '',
         requiresDualApproval: false,
@@ -85,9 +73,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
     form.reset({
       title: entry.title,
       category: entry.category || 'General',
-      url: entry.url || '',
-      username: entry.username || '',
-      password: entry.password || '',
       notes: entry.notes || entry.data || '',
       tagsText: entry.tags?.join(', ') || '',
       requiresDualApproval: entry.requiresDualApproval || false,
@@ -112,9 +97,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
       await onSubmit({
         title: values.title,
         category: values.category,
-        url: values.url || '',
-        username: values.username || '',
-        password: values.password || '',
         notes: values.notes || '',
         data: values.notes || '',
         tags: parseTags(values.tagsText || ''),
@@ -147,16 +129,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
       onClose();
     }
   };
-  const passwordToggle = (
-    <button
-      type="button"
-      aria-label={showPassword ? 'Hide password' : 'Show password'}
-      className="focus-ring rounded-full p-1 text-textMuted transition hover:text-brand"
-      onClick={() => setShowPassword((value) => !value)}
-    >
-      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-    </button>
-  );
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -228,55 +200,6 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                             ))}
                           </datalist>
                         </label>
-                        <Input
-                          label="URL / website"
-                          placeholder="https://"
-                          error={form.formState.errors.url?.message}
-                          rightAdornment={
-                            <button
-                              type="button"
-                              className="focus-ring rounded-full p-1 text-textMuted transition-colors hover:text-textPrimary"
-                              aria-label="Visit website"
-                              onClick={() => {
-                                const url = form.getValues('url');
-                                if (!url) return;
-                                window.open(normalizeUrl(url), '_blank', 'noopener,noreferrer');
-                              }}
-                            >
-                              <Globe className="h-4 w-4" />
-                            </button>
-                          }
-                          {...form.register('url')}
-                        />
-                      </section>
-
-                      <section className="space-y-3 border-t border-line pt-5">
-                        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Credentials</p>
-                        <Input
-                          label="Username"
-                          placeholder="alex@example.com"
-                          autoComplete="off"
-                          error={form.formState.errors.username?.message}
-                          {...form.register('username')}
-                        />
-                        <div className="grid gap-2">
-                          <Input
-                            label="Password"
-                            type={showPassword ? 'text' : 'password'}
-                            autoComplete="new-password"
-                            placeholder="Strong, unique password"
-                            error={form.formState.errors.password?.message}
-                            rightAdornment={passwordToggle}
-                            {...form.register('password')}
-                          />
-                          <div className="flex justify-end">
-                            <PasswordGenerator
-                              onUse={(password) =>
-                                form.setValue('password', password, { shouldDirty: true, shouldValidate: true })
-                              }
-                            />
-                          </div>
-                        </div>
                       </section>
 
                       <section className="space-y-3 border-t border-line pt-5">

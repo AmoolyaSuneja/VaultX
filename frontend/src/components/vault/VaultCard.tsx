@@ -1,8 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { Copy, Ellipsis, Eye, FileText, LockKeyhole, Pencil, ShieldCheck, Trash2, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import { copyToClipboard, formatRelativeTime, isUnlockPending, maskValue, truncate } from '@/lib/utils';
+import { Ellipsis, Eye, FileText, LockKeyhole, Pencil, ShieldCheck, Trash2, Users } from 'lucide-react';
+import { formatRelativeTime, isUnlockPending, truncate } from '@/lib/utils';
 import { getCategoryIcon } from '@/lib/categoryIcons';
 import type { VaultEntry } from '@/features/vault/vault.types';
 
@@ -16,26 +14,15 @@ interface VaultCardProps {
 }
 
 export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelete }: VaultCardProps) {
-  const [revealed, setRevealed] = useState(false);
   const locked = isUnlockPending(entry.unlockAt);
   const role = entry.accessPolicy?.role || 'owner';
   const dualApproval = entry.accessPolicy?.requiresDualApproval;
   const nomineeAccess = role === 'nominee';
   const ownerLabel = entry.accessPolicy?.owner?.name || entry.accessPolicy?.owner?.email;
   const CategoryIcon = getCategoryIcon(entry.category);
-  const subtitle =
-    entry.username ||
-    entry.url ||
-    (entry.notes || entry.data ? truncate(entry.notes || entry.data || '', 72) : '');
+  const subtitle = entry.notes || entry.data ? truncate(entry.notes || entry.data || '', 72) : '';
   const attachmentCount = entry.attachmentCount ?? entry.filePath?.length ?? 0;
-  const showPasswordRow = Boolean(entry.password) && !locked && role === 'owner';
   const animationDelay = Math.min(index * 24, 160);
-
-  useEffect(() => {
-    if (!revealed) return;
-    const timer = window.setTimeout(() => setRevealed(false), 15000);
-    return () => window.clearTimeout(timer);
-  }, [revealed]);
 
   const menu = (
     <Menu as="div" className="relative">
@@ -78,24 +65,6 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
               >
                 <Pencil className="h-4 w-4" />
                 Edit
-              </button>
-            )}
-          </MenuItem>
-        ) : null}
-        {!locked && role === 'owner' && entry.password ? (
-          <MenuItem>
-            {({ focus }) => (
-              <button
-                type="button"
-                onClick={async (event) => {
-                  event.stopPropagation();
-                  const copied = await copyToClipboard(entry.password || '');
-                  if (copied) toast.success('Password copied');
-                }}
-                className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors duration-150 ${focus ? 'bg-surface-muted text-textPrimary' : 'text-textPrimary'}`}
-              >
-                <Copy className="h-4 w-4" />
-                Copy password
               </button>
             )}
           </MenuItem>
@@ -202,40 +171,8 @@ export function VaultCard({ entry, index, view = 'grid', onView, onEdit, onDelet
         {menu}
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
+      <div className="flex items-center gap-3 border-t border-line px-4 py-2.5">
         {meta}
-        {showPasswordRow ? (
-          <div className="flex items-center gap-1">
-            <span className="truncate font-mono text-xs text-textPrimary tabular">
-              {maskValue(entry.password || '', revealed)}
-            </span>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                setRevealed((value) => !value);
-              }}
-              className="focus-ring press rounded-full p-1 text-textMuted hover:text-textPrimary"
-              aria-label={revealed ? 'Hide password' : 'Reveal password'}
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            {revealed ? (
-              <button
-                type="button"
-                aria-label="Copy revealed password"
-                className="focus-ring press rounded-full p-1 text-textMuted hover:text-textPrimary"
-                onClick={async (event) => {
-                  event.stopPropagation();
-                  const copied = await copyToClipboard(entry.password || '');
-                  if (copied) toast.success('Password copied');
-                }}
-              >
-                <Copy className="h-3.5 w-3.5" />
-              </button>
-            ) : null}
-          </div>
-        ) : null}
       </div>
     </article>
   );

@@ -4,7 +4,6 @@ import {
   Download,
   ExternalLink,
   Eye,
-  EyeOff,
   FileImage,
   FileText,
   LockKeyhole,
@@ -29,8 +28,6 @@ import {
   getAttachmentKind,
   getAttachmentKindFromContentType,
   isUnlockPending,
-  maskValue,
-  normalizeUrl,
   type AttachmentKind
 } from '@/lib/utils';
 
@@ -41,8 +38,6 @@ export function EntryDetailPage() {
   const updateMutation = useUpdateEntry(id);
   const createShareLinkMutation = useCreateShareLink(id);
   const requestApprovalMutation = useRequestEntryApproval(id);
-  const [revealed, setRevealed] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(30);
   const [editing, setEditing] = useState(false);
   const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
   const [shareTarget, setShareTarget] = useState<{ filePath: string; label: string } | null>(null);
@@ -55,7 +50,7 @@ export function EntryDetailPage() {
   const lockedError = queryError instanceof ApiError && queryError.status === 403;
   const accessPolicy = entry?.accessPolicy;
   const canSeeSensitive = Boolean(
-    entry?.password || entry?.notes || entry?.data || entry?.url || entry?.username || entry?.filePath?.length
+    entry?.notes || entry?.data || entry?.filePath?.length
   );
   const ownerView = accessPolicy?.role === 'owner';
   const nomineeAccess = accessPolicy?.role === 'nominee';
@@ -73,25 +68,6 @@ export function EntryDetailPage() {
       : accessPolicy?.role === 'owner'
         ? 'Second approver'
         : 'Approval partner';
-
-  useEffect(() => {
-    if (!revealed) {
-      setSecondsLeft(30);
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setSecondsLeft((value) => {
-        if (value <= 1) {
-          setRevealed(false);
-          return 30;
-        }
-        return value - 1;
-      });
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [revealed]);
 
   if (entryQuery.isLoading && !entry) {
     return (
@@ -243,66 +219,6 @@ export function EntryDetailPage() {
             </div>
           ) : null}
 
-          <DetailRow
-            label="Website"
-            value={entry.url}
-            action={
-              entry.url ? (
-                <IconButton
-                  onClick={() => window.open(normalizeUrl(entry.url || ''), '_blank', 'noopener,noreferrer')}
-                  label="Open website"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </IconButton>
-              ) : undefined
-            }
-          />
-          <DetailRow
-            label="Username"
-            value={entry.username}
-            action={
-              entry.username ? (
-                <IconButton
-                  onClick={async () => {
-                    if (await copyToClipboard(entry.username || '')) toast.success('Username copied');
-                  }}
-                  label="Copy username"
-                >
-                  <Copy className="h-4 w-4" />
-                </IconButton>
-              ) : undefined
-            }
-          />
-          <DetailRow
-            label="Password"
-            value={entry.password ? maskValue(entry.password, revealed) : ''}
-            mono={Boolean(entry.password)}
-            action={
-              entry.password && ownerView ? (
-                <div className="flex items-center gap-1">
-                  <IconButton
-                    onClick={() => setRevealed((value) => !value)}
-                    label={revealed ? 'Hide password' : 'Reveal password'}
-                  >
-                    {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </IconButton>
-                  <IconButton
-                    onClick={async () => {
-                      if (await copyToClipboard(entry.password || '')) toast.success('Password copied');
-                    }}
-                    label="Copy password"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </IconButton>
-                  {revealed ? (
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-line text-[11px] font-medium text-textMuted">
-                      {secondsLeft}
-                    </span>
-                  ) : null}
-                </div>
-              ) : undefined
-            }
-          />
           <DetailRow label="Notes" value={entry.notes || entry.data} multiline />
         </Card>
 
