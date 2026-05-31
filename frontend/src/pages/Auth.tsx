@@ -15,10 +15,14 @@ export function AuthPage() {
       <AuthShowcase />
       <section
         data-lenis-prevent
-        className="flex max-h-screen w-full items-start justify-center overflow-y-auto bg-surface-soft p-5 md:w-1/2 md:items-center md:p-8 lg:p-10"
+        className="h-screen w-full overflow-y-auto bg-surface-soft md:w-1/2"
       >
-        <div className="my-auto w-full max-w-[26rem] animate-fadeIn py-6">
-          <AuthPanel />
+        {/* min-h-full + flex centers the card when it fits, and lets it scroll
+            from the top (no clipping) when the form is taller than the viewport. */}
+        <div className="flex min-h-full items-center justify-center p-5 md:p-8 lg:p-10">
+          <div className="w-full max-w-[26rem] animate-fadeIn">
+            <AuthPanel />
+          </div>
         </div>
       </section>
     </div>

@@ -24,7 +24,7 @@ export function PasswordRequirements({ password }: PasswordRequirementsProps) {
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="grid gap-1.5 overflow-hidden"
+          className="grid grid-cols-1 gap-x-4 gap-y-1.5 overflow-hidden sm:grid-cols-2"
         >
           {RULES.map((rule) => {
             const met = rule.test(password);

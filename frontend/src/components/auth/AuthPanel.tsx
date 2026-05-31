@@ -16,7 +16,6 @@ import {
   type ResetPasswordValues
 } from '@/lib/validators';
 import { useLogin, useRegister, useRequestPasswordReset, useResetPassword } from '@/features/auth/useAuth';
-import { PasswordStrengthMeter } from './PasswordStrengthMeter';
 import { PasswordRequirements } from './PasswordRequirements';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset';
@@ -162,7 +161,7 @@ export function AuthPanel() {
             exit={{ opacity: 0, y: -4 }}
             transition={pageTransition}
           >
-            <form className="flex flex-col gap-5" onSubmit={registerForm.handleSubmit(submitRegister)}>
+            <form className="flex flex-col gap-4" onSubmit={registerForm.handleSubmit(submitRegister)}>
               <Input
                 label="Name"
                 placeholder="Alex Morgan"
@@ -187,7 +186,6 @@ export function AuthPanel() {
                 rightAdornment={passwordToggle}
                 {...registerForm.register('password')}
               />
-              <PasswordStrengthMeter password={registerPassword} />
               <PasswordRequirements password={registerPassword} />
               <Input
                 label="Confirm password"
@@ -236,7 +234,7 @@ export function AuthPanel() {
             exit={{ opacity: 0, y: -4 }}
             transition={pageTransition}
           >
-            <form className="flex flex-col gap-5" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
+            <form className="flex flex-col gap-4" onSubmit={resetForm.handleSubmit(submitResetPassword)}>
               <Input
                 label="Email"
                 type="email"
@@ -261,7 +259,6 @@ export function AuthPanel() {
                 rightAdornment={passwordToggle}
                 {...resetForm.register('password')}
               />
-              <PasswordStrengthMeter password={resetPasswordValue} />
               <PasswordRequirements password={resetPasswordValue} />
               <Input
                 label="Confirm password"
