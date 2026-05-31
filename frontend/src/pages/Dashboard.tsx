@@ -191,7 +191,10 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                         ) : null}
                         <ChevronDown className="h-4 w-4 text-textMuted" />
                       </Listbox.Button>
-                      <Listbox.Options className="absolute right-0 z-40 mt-2 max-h-72 w-[min(18rem,calc(100vw-2rem))] overflow-auto rounded-md border border-line bg-panel p-1 shadow-card animate-fadeIn scrollbar-thin">
+                      <Listbox.Options
+                        data-lenis-prevent
+                        className="absolute right-0 z-40 mt-2 max-h-72 w-[min(18rem,calc(100vw-2rem))] overflow-auto rounded-md border border-line bg-panel p-1 shadow-card animate-fadeIn scrollbar-thin"
+                      >
                         {categories.map((category) => {
                           const selected = selectedCategories.includes(category);
                           return (

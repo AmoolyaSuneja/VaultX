@@ -22,7 +22,7 @@ Field-level **AES-256-GCM** encryption, bcrypt-hashed passwords, per-account log
 ## Feature overview
 
 ### Vault
-- Encrypted entries: title, username, password, notes, URLs, tags, and up to 10 attachments (images/PDF, 10 MB each)
+- Encrypted entries: title, data, username, password, notes, URLs, tags, and up to 10 attachments (images/PDF, 10 MB each)
 - Categorization, multi-select filters, sort, search, grid/list toggle
 - Dual-approval workflow with email-based approver links
 - Time-locked entries with server-enforced unlock gate
@@ -81,9 +81,9 @@ Field-level **AES-256-GCM** encryption, bcrypt-hashed passwords, per-account log
 
 ### Tech stack
 
-**Frontend** — React 18, TypeScript, Vite, Tailwind, Framer Motion, TanStack Query, Zustand, Radix UI, React Hook Form, Zod, Lenis
+**Frontend** — React 18, TypeScript, Vite, Tailwind, Framer Motion, TanStack Query, Zustand, Radix UI, React Hook Form, Zod, Lenis, React Router DOM, React Hot Toast
 
-**Backend** — Node.js, Express, Mongoose, JWT, bcryptjs, Helmet, express-rate-limit, Multer, Nodemailer, Cloudinary
+**Backend** — Node.js, Express, Mongoose, JWT, bcryptjs, Helmet, express-rate-limit, Multer, Nodemailer, Cloudinary, Morgan
 
 **Infra** — MongoDB Atlas, Cloudinary, Vercel (serverless), Brevo (SMTP)
 
@@ -259,7 +259,7 @@ secure-vault/
         ├── pages/             # Auth · Dashboard · EntryDetail · Profile · Settings · SharedLink · ApproveAccess
         ├── components/        # auth · forms · layout · vault · ui
         ├── features/          # auth · vault · user · nominee · settings
-        ├── lib/               # request · utils · motion · smoothScroll · categoryIcons · validators
+        ├── lib/               # request · utils · motion · smoothScroll · categoryIcons · validators · constants · hooks
         ├── router.tsx         # Code-split routes
         ├── main.tsx
         └── index.css          # Graphite design system

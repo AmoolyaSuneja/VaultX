@@ -18,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       ) : null}
       <span
         className={cn(
-          'surface-field flex items-center gap-2 rounded-md px-3 py-2.5',
+          'surface-field flex items-center gap-2 rounded-full px-5 py-3 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.1)]',
           error ? 'border-danger/50' : 'focus-within:border-textPrimary/60',
           className
         )}
