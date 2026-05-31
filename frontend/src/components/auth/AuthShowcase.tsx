@@ -2,17 +2,17 @@ import { Users, Clock, ShieldCheck } from 'lucide-react';
 
 export function AuthShowcase() {
   return (
-    <section className="relative hidden w-1/2 items-center justify-center overflow-hidden border-r border-line bg-mesh-gradient p-10 md:flex lg:p-12">
-      <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-brand/5 blur-[120px]" />
-      <div className="absolute bottom-[-5%] right-[-5%] h-[30%] w-[30%] rounded-full bg-brand/3 blur-[80px]" />
+    <section className="relative hidden w-1/2 overflow-hidden border-r border-line bg-mesh-gradient md:flex md:items-center md:justify-center">
+      <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-brand/5 blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-[-5%] right-[-5%] h-[30%] w-[30%] rounded-full bg-brand/3 blur-[80px]" />
 
-      <div className="glass-card z-10 flex w-full max-w-[32rem] flex-col gap-[2rem] rounded-[1.5rem] p-[2rem]">
+      <div className="glass-card relative z-10 mx-auto flex w-full max-w-[32rem] flex-col gap-8 rounded-[1.5rem] p-8 lg:p-10">
         <div>
           <h1 className="mb-4 font-heading text-[2rem] font-bold tracking-tight text-textPrimary">VaultX</h1>
           <div className="h-px w-[3rem] bg-textPrimary/30" />
         </div>
 
-        <div className="flex flex-col gap-[1.5rem]">
+        <div className="flex flex-col gap-6">
           <div className="group flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] border border-line bg-surface-raised text-textPrimary transition-transform duration-300 group-hover:scale-110">
               <Users size={24} />
@@ -43,12 +43,6 @@ export function AuthShowcase() {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="absolute bottom-10 left-10 hidden lg:block">
-        <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-textMuted/40">
-          HERITAGE SECURITY SYSTEMS
-        </p>
       </div>
     </section>
   );

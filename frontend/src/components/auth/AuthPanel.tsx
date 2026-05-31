@@ -97,12 +97,12 @@ export function AuthPanel() {
   );
 
   return (
-    <div className="flex w-full flex-col rounded-[2rem] border border-line bg-panel p-8 shadow-2xl sm:p-10">
-      <div className="mb-8 flex flex-col gap-2">
+    <div className="flex w-full flex-col rounded-[1.75rem] border border-line bg-panel p-6 shadow-2xl sm:p-8">
+      <div className="mb-6 flex flex-col gap-2">
         <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.15em] text-brand-muted">
           {mode === 'login' ? 'Authentication Required' : mode === 'register' ? 'New Account' : 'Account Recovery'}
         </p>
-        <h2 className="font-heading text-[1.75rem] leading-tight tracking-tight text-textPrimary">{heading}</h2>
+        <h2 className="font-heading text-[1.625rem] leading-tight tracking-tight text-textPrimary">{heading}</h2>
       </div>
 
       <AnimatePresence mode="wait">
@@ -276,7 +276,7 @@ export function AuthPanel() {
         ) : null}
       </AnimatePresence>
 
-      <div className="mt-8 border-t border-line/60 pt-6 text-center text-sm text-textMuted">
+      <div className="mt-6 border-t border-line/60 pt-4 text-center text-sm text-textMuted">
         {mode === 'register' ? (
           <button
             type="button"

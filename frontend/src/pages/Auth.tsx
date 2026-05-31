@@ -11,10 +11,13 @@ export function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col overflow-hidden bg-background md:flex-row">
+    <div className="flex min-h-screen w-full overflow-hidden bg-background md:flex-row">
       <AuthShowcase />
-      <section className="flex w-full items-center justify-center bg-surface-soft p-5 md:w-1/2 md:p-10">
-        <div className="w-full max-w-[28rem] animate-fadeIn">
+      <section
+        data-lenis-prevent
+        className="flex max-h-screen w-full items-start justify-center overflow-y-auto bg-surface-soft p-5 md:w-1/2 md:items-center md:p-8 lg:p-10"
+      >
+        <div className="my-auto w-full max-w-[26rem] animate-fadeIn py-6">
           <AuthPanel />
         </div>
       </section>
