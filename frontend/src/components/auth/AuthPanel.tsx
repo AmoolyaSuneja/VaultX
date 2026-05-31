@@ -17,6 +17,7 @@ import {
 } from '@/lib/validators';
 import { useLogin, useRegister, useRequestPasswordReset, useResetPassword } from '@/features/auth/useAuth';
 import { PasswordStrengthMeter } from './PasswordStrengthMeter';
+import { PasswordRequirements } from './PasswordRequirements';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset';
 
@@ -187,6 +188,7 @@ export function AuthPanel() {
                 {...registerForm.register('password')}
               />
               <PasswordStrengthMeter password={registerPassword} />
+              <PasswordRequirements password={registerPassword} />
               <Input
                 label="Confirm password"
                 type={showPassword ? 'text' : 'password'}
@@ -260,6 +262,7 @@ export function AuthPanel() {
                 {...resetForm.register('password')}
               />
               <PasswordStrengthMeter password={resetPasswordValue} />
+              <PasswordRequirements password={resetPasswordValue} />
               <Input
                 label="Confirm password"
                 type={showPassword ? 'text' : 'password'}
