@@ -80,7 +80,7 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
       unlockAt: toDateTimeInputValue(entry.unlockAt)
     });
     setFiles([]);
-  }, [entry, form, open]);
+  }, [entry, entry?.updatedAt, form, open]);
 
   const categories = useMemo(() => {
     const current = form.watch('category');

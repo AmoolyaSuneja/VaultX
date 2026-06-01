@@ -66,15 +66,15 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
+    <div className="mx-auto w-full min-w-0 max-w-2xl space-y-5 pb-2 sm:space-y-6">
+      <div className="min-w-0">
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted">Profile</p>
-        <h1 className="mt-1 font-heading text-3xl text-textPrimary sm:text-[34px]">Your account</h1>
+        <h1 className="mt-1 font-heading text-2xl text-textPrimary sm:text-3xl lg:text-[34px]">Your account</h1>
       </div>
 
-      <Card>
+      <Card className="min-w-0 p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="grid gap-5">
-          <div className="flex items-center gap-5">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-muted text-base font-semibold text-textPrimary">
               {previewUrl ? (
                 <img src={previewUrl} alt="Profile" className="h-full w-full object-cover" />
@@ -82,14 +82,14 @@ export function ProfilePage() {
                 <span>{user?.name?.[0]?.toUpperCase() ?? 'U'}</span>
               )}
             </div>
-            <div className="grid gap-1 text-sm">
+            <div className="grid w-full min-w-0 gap-1.5 text-sm">
               <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Photo</span>
               <input
                 type="file"
                 accept="image/*"
                 disabled={isSaving}
                 onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                className="text-xs text-textMuted file:mr-3 file:rounded-md file:border file:border-line file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-textPrimary"
+                className="w-full max-w-full text-xs text-textMuted file:mr-3 file:max-w-[55%] file:truncate file:rounded-md file:border file:border-line file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-textPrimary"
               />
             </div>
           </div>
@@ -102,7 +102,7 @@ export function ProfilePage() {
           />
           <Input label="Email" value={user?.email ?? ''} disabled />
 
-          <div className="flex justify-end">
+          <div className="flex justify-stretch sm:justify-end">
             <Button type="submit" className="w-full sm:w-auto" loading={isSaving} disabled={isSaving}>
               Save profile
             </Button>
@@ -110,14 +110,21 @@ export function ProfilePage() {
         </form>
       </Card>
 
-      <Card>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Nominee access</p>
-            <h2 className="mt-1 font-heading text-xl text-textPrimary">Emergency succession</h2>
-            <p className="mt-1 text-sm text-textMuted">Designate a trusted person who can claim vault access under defined conditions.</p>
+      <Card className="min-w-0 p-4 sm:p-6">
+        <div className="flex flex-col gap-4">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted">Nominee access</p>
+            <h2 className="mt-1 font-heading text-lg text-textPrimary sm:text-xl">Emergency succession</h2>
+            <p className="mt-1 text-sm leading-6 text-textMuted">
+              Designate a trusted person who can claim vault access under defined conditions.
+            </p>
           </div>
-          <Button type="button" className="w-full sm:w-auto" variant="secondary" onClick={() => navigate('/vault/settings')}>
+          <Button
+            type="button"
+            className="w-full shrink-0 sm:w-auto sm:self-end"
+            variant="secondary"
+            onClick={() => navigate('/vault/settings')}
+          >
             <ShieldCheck className="h-4 w-4" />
             Manage nominee
           </Button>

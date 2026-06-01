@@ -280,7 +280,8 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
         onClose={() => setEditingEntry(undefined)}
         onSubmit={async (payload) => {
           if (!editingEntry?._id) return;
-          await updateMutation.mutateAsync(payload);
+          const updated = await updateMutation.mutateAsync(payload);
+          setEditingEntry(updated);
         }}
       />
     </>

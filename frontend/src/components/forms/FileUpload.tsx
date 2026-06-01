@@ -54,7 +54,7 @@ export function FileUpload({ files, onChange, existingFiles = [], entryId }: Fil
         {existingFiles.map((file, index) =>
           entryId ? (
             <ProtectedAttachmentPreview
-              key={`${file}-${index}`}
+              key={`${entryId}-${index}-${file}`}
               compact
               label={`Saved attachment ${index + 1}`}
               fileUrl={file}

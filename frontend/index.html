@@ -3,9 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <meta name="description" content="VaultX — private by default. Encrypt credentials, notes, and documents with fine-grained access control." />
     <title>VaultX</title>
+    <script>
+      (function () {
+        var themeKey = 'vaultx-theme';
+        var versionKey = 'vaultx-theme-version';
+        var version = '6';
+        var theme = 'light';
+
+        try {
+          if (localStorage.getItem(versionKey) === version) {
+            var stored = localStorage.getItem(themeKey);
+            if (stored === 'dark' || stored === 'light') {
+              theme = stored;
+            }
+          } else {
+            localStorage.removeItem(themeKey);
+            localStorage.setItem(versionKey, version);
+            localStorage.setItem(themeKey, 'light');
+          }
+        } catch (error) {
+          theme = 'light';
+        }
+
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

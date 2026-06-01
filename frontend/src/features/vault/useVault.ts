@@ -41,6 +41,18 @@ function removeEntry(queryClient: QueryClient, id: string) {
   queryClient.removeQueries({ queryKey: entryKey(id) });
 }
 
+async function refreshVaultQueries(queryClient: QueryClient, entryId?: string) {
+  await queryClient.refetchQueries({ queryKey: ENTRIES_KEY });
+  if (entryId) {
+    await queryClient.refetchQueries({ queryKey: entryKey(entryId) });
+  }
+}
+
+const vaultQueryDefaults = {
+  refetchOnMount: 'always' as const,
+  staleTime: 0
+};
+
 export function useVaultEntries() {
   const token = useAuthStore((state) => state.token);
 
@@ -48,10 +60,7 @@ export function useVaultEntries() {
     queryKey: ENTRIES_KEY,
     queryFn: () => getVaultEntries(token),
     enabled: Boolean(token),
-    // Always refetch when the dashboard mounts (e.g. returning from /vault/new)
-    // so newly created entries are guaranteed to appear without a manual reload.
-    refetchOnMount: 'always',
-    staleTime: 0
+    ...vaultQueryDefaults
   });
 }
 
@@ -61,7 +70,8 @@ export function useVaultEntry(id?: string) {
   return useQuery({
     queryKey: id ? entryKey(id) : ['vault', 'entry', '__none__'],
     queryFn: () => getVaultEntry(token, id as string),
-    enabled: Boolean(token && id)
+    enabled: Boolean(token && id),
+    ...vaultQueryDefaults
   });
 }
 
@@ -71,13 +81,9 @@ export function useCreateEntry() {
 
   return useMutation({
     mutationFn: (payload: EntryPayload) => createVaultEntry(token, payload),
-    onSuccess: (newEntry) => {
-      // Write directly into the cache so the list updates immediately, even if
-      // the dashboard remounts during the post-save navigation. The invalidate
-      // below is a safety net to refresh server-derived fields (timestamps,
-      // attachment counts, encrypted blobs decrypted to canonical form).
+    onSuccess: async (newEntry) => {
       upsertEntry(queryClient, newEntry);
-      queryClient.invalidateQueries({ queryKey: ['vault'] });
+      await refreshVaultQueries(queryClient, newEntry._id);
       toast.success('Vault entry saved');
     },
     onError: (error) => {
@@ -104,11 +110,11 @@ export function useRequestEntryApproval(id: string) {
 
   return useMutation({
     mutationFn: () => requestEntryApproval(token, id),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.data) {
         upsertEntry(queryClient, data.data);
+        await refreshVaultQueries(queryClient, data.data._id);
       }
-      queryClient.invalidateQueries({ queryKey: ['vault'] });
       toast.success(data.message || 'Approval request sent');
     }
   });
@@ -120,9 +126,9 @@ export function useUpdateEntry(id: string) {
 
   return useMutation({
     mutationFn: (payload: EntryPayload) => updateVaultEntry(token, id, payload),
-    onSuccess: (updatedEntry) => {
+    onSuccess: async (updatedEntry) => {
       upsertEntry(queryClient, updatedEntry);
-      queryClient.invalidateQueries({ queryKey: ['vault'] });
+      await refreshVaultQueries(queryClient, updatedEntry._id);
       toast.success('Vault entry updated');
     },
     onError: (error) => {
@@ -138,9 +144,9 @@ export function useDeleteEntry() {
 
   return useMutation({
     mutationFn: (id: string) => deleteVaultEntry(token, id),
-    onSuccess: (_response, deletedId) => {
+    onSuccess: async (_response, deletedId) => {
       removeEntry(queryClient, deletedId);
-      queryClient.invalidateQueries({ queryKey: ['vault'] });
+      await refreshVaultQueries(queryClient);
       toast.success('Vault entry deleted');
     }
   });

@@ -240,7 +240,7 @@ export function EntryDetailPage() {
               {canSeeSensitive && entry.filePath?.length ? (
                 entry.filePath.map((fileUrl, index) => (
                   <AttachmentCard
-                    key={fileUrl}
+                    key={`${fileUrl}-${index}-${entry.updatedAt ?? entry.createdAt ?? ''}`}
                     entryId={entry._id}
                     fileUrl={fileUrl}
                     index={index}
