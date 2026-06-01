@@ -50,7 +50,16 @@ export function AuthPanel() {
   });
 
   async function submitLogin(values: LoginValues) {
-    await loginMutation.mutateAsync(values);
+    loginForm.clearErrors('password');
+    try {
+      await loginMutation.mutateAsync(values);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Incorrect Email/Password. Please try again.';
+        loginForm.setError('password',{
+          type : 'server',
+          message
+        });
+    }
   }
 
   async function submitRegister(values: RegisterValues) {
@@ -126,14 +135,20 @@ export function AuthPanel() {
               <motion.div animate={loginForm.formState.errors.password ? shakeX : undefined}>
                 <Input
                   label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Your password"
-                  autoComplete="current-password"
-                  error={loginForm.formState.errors.password?.message}
-                  rightAdornment={passwordToggle}
-                  {...loginForm.register('password')}
-                />
-              </motion.div>
+                 type={showPassword ? 'text' : 'password'}
+                 placeholder="Your password"
+                 autoComplete="current-password"
+                error={loginForm.formState.errors.password?.message}
+                rightAdornment={passwordToggle}
+                {...loginForm.register('password', {
+                 onChange: () => {
+               if (loginForm.formState.errors.password?.type === 'server') {
+              loginForm.clearErrors('password');
+                  }
+               }
+          })}
+  />
+</motion.div>
               <div className="flex justify-end">
                 <button
                   type="button"
