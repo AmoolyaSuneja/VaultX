@@ -3,7 +3,6 @@ const ActivityLog = require('../models/activitylog');
 const asyncHandler = require('../Utils/asyncHandler');
 const { HttpError } = require('../middleware/errorHandler');
 const { pipeRemoteDocument } = require('../Utils/remoteDocument');
-const { pipeRemoteDocument } = require('../Utils/remoteDocument');
 
 const ALLOWED_CONDITIONS = ['death', 'incapacity', 'inactivity', 'courtOrder'];
 const LEGAL_CONDITIONS = ['death', 'incapacity', 'courtOrder'];
@@ -312,44 +311,6 @@ const downloadNomineeProofDocument = asyncHandler(async (req, res) => {
   const proxied = await pipeRemoteDocument(req, res, proof.filePath, {
     disposition: 'attachment',
     fileName: proof.fileName
-  });
-
-  if (!proxied.ok) {
-    throw new HttpError('Unable to fetch proof document', 502);
-  }
-});
-
-const previewNomineeProofDocument = asyncHandler(async (req, res) => {
-  requireAdminReviewer(req.user);
-
-  const owner = await User.findById(req.params.ownerId).select('nominee');
-
-  if (!owner?.nominee?.claim?.proofDocumentUrl) {
-    throw new HttpError('Proof document not found', 404);
-  }
-
-  const proxied = await pipeRemoteDocument(req, res, owner.nominee.claim.proofDocumentUrl, {
-    disposition: 'inline',
-    fileName: owner.nominee.claim.proofDocumentName || 'proof-document'
-  });
-
-  if (!proxied.ok) {
-    throw new HttpError('Unable to fetch proof document preview', 502);
-  }
-});
-
-const downloadNomineeProofDocument = asyncHandler(async (req, res) => {
-  requireAdminReviewer(req.user);
-
-  const owner = await User.findById(req.params.ownerId).select('nominee');
-
-  if (!owner?.nominee?.claim?.proofDocumentUrl) {
-    throw new HttpError('Proof document not found', 404);
-  }
-
-  const proxied = await pipeRemoteDocument(req, res, owner.nominee.claim.proofDocumentUrl, {
-    disposition: 'attachment',
-    fileName: owner.nominee.claim.proofDocumentName || 'proof-document'
   });
 
   if (!proxied.ok) {
