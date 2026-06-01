@@ -147,11 +147,11 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex w-screen max-w-full justify-end">
-              <DialogPanel className="pointer-events-auto h-full w-full sm:max-w-lg lg:max-w-2xl">
+            <div className="pointer-events-none fixed inset-0 flex items-end justify-center sm:inset-y-0 sm:left-auto sm:right-0 sm:items-stretch sm:justify-end">
+              <DialogPanel className="pointer-events-auto flex max-h-[min(92dvh,100%)] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-panel sm:h-full sm:max-h-none sm:max-w-lg sm:rounded-none sm:border-l sm:border-t-0 lg:max-w-2xl">
                 <motion.div
                   {...slideRight}
-                  className="relative flex h-full w-full flex-col border-l border-line bg-panel"
+                  className="relative flex min-h-0 flex-1 flex-col bg-panel"
                 >
                   <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-4 sm:px-6 sm:py-5">
                     <div>
@@ -251,7 +251,12 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                           <Sparkles className="h-4 w-4 text-textMuted" />
                           <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Attachments</p>
                         </div>
-                        <FileUpload files={files} onChange={setFiles} existingFiles={entry?.filePath} />
+                        <FileUpload
+                          files={files}
+                          onChange={setFiles}
+                          existingFiles={entry?.filePath}
+                          entryId={entry?._id}
+                        />
                       </section>
                     </div>
 

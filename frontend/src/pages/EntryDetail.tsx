@@ -269,7 +269,7 @@ export function EntryDetailPage() {
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="focus-ring fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-medium text-background shadow-card transition-colors hover:bg-brand-deep sm:right-6 lg:bottom-8"
+          className="focus-ring fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-3 z-40 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-background shadow-card transition-colors hover:bg-brand-deep sm:right-6 lg:bottom-8"
         >
           <Pencil className="h-4 w-4" />
           Edit
@@ -532,7 +532,7 @@ function AttachmentCard({
           <p className="truncate text-sm font-medium text-textPrimary">{label}</p>
           <p className="text-xs text-textMuted">{image ? 'Image' : pdf ? 'PDF document' : 'Attachment'}</p>
         </div>
-        <div className="flex items-center gap-0.5">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-0.5">
           <IconButton
             label={`Open ${label}`}
             onClick={async () => {
@@ -599,7 +599,7 @@ function AttachmentCard({
 
       {pdf && previewUrl ? (
         <div className="mt-3 overflow-hidden rounded-md border border-line">
-          <iframe src={previewUrl} title={`${label} preview`} className="h-72 w-full" />
+          <iframe src={previewUrl} title={`${label} preview`} className="h-52 w-full sm:h-72" />
         </div>
       ) : null}
 

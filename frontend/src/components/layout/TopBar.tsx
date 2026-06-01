@@ -15,7 +15,7 @@ export function TopBar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-panel/80 backdrop-blur-panel transition-colors duration-280 ease-smooth">
-      <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center gap-3 px-5 sm:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center gap-3 px-4 sm:px-6 md:px-8">
         <Link
           to="/vault"
           className="focus-ring press font-heading text-[20px] font-semibold tracking-tight text-textPrimary"

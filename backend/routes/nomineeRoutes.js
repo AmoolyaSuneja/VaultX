@@ -15,6 +15,8 @@ const {
   listNomineeClaims,
   approveNomineeClaim,
   activateNomineeAccess,
+  previewNomineeProofDocument,
+  downloadNomineeProofDocument,
   revokeNominee
 } = require('../controllers/nomineeController');
 
@@ -23,6 +25,8 @@ const router = express.Router();
 router.post('/', protect, validate({ body: registerBody }), registerNominee);
 router.get('/', protect, getNomineeStatus);
 router.get('/claims', protect, listNomineeClaims);
+router.get('/claims/:ownerId/proof/preview', protect, previewNomineeProofDocument);
+router.get('/claims/:ownerId/proof/download', protect, downloadNomineeProofDocument);
 router.post(
   '/claim',
   protect,

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import toast from 'react-hot-toast';
-import { ExternalLink, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
+import { ProtectedAttachmentPreview } from '@/components/attachments/ProtectedAttachmentPreview';
 import { Badge, Button, Card, Input, Textarea } from '@/components/ui';
 import { useAuthStore } from '@/features/auth/auth.store';
 import {
@@ -156,7 +157,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6">
       <div>
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-textMuted">Nominee</p>
         <h1 className="mt-1 font-heading text-3xl text-textPrimary sm:text-[34px]">Emergency succession</h1>
@@ -346,16 +347,15 @@ export function SettingsPage() {
                     <p className="mt-1">{item.nominee.claim?.proofNotes}</p>
                   </div>
                   {item.nominee.claim?.proofDocumentUrl ? (
-                    <a
-                      href={item.nominee.claim.proofDocumentUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-2 text-xs font-medium text-textPrimary underline-offset-4 hover:underline"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      Open proof document
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
+                    <div className="mt-3" onClick={(event) => event.stopPropagation()}>
+                      <ProtectedAttachmentPreview
+                        compact
+                        label={item.nominee.claim.proofDocumentName || 'Proof document'}
+                        fileUrl={item.nominee.claim.proofDocumentUrl}
+                        previewEndpoint={`/api/nominee/claims/${item.ownerId}/proof/preview`}
+                        downloadEndpoint={`/api/nominee/claims/${item.ownerId}/proof/download`}
+                      />
+                    </div>
                   ) : null}
                   <Button
                     type="button"

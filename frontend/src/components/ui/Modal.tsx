@@ -21,7 +21,7 @@ export function Modal({ open, onClose, children }: ModalProps) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           />
           <div data-lenis-prevent className="fixed inset-0 overflow-y-auto px-3 py-4 sm:p-4">
-            <div className="mx-auto flex min-h-full max-w-md items-end justify-center sm:items-start sm:pt-28">
+            <div className="mx-auto flex min-h-full w-full max-w-md items-end justify-center sm:items-start sm:pt-28">
               <DialogPanel className="w-full">
                 <motion.div
                   {...scaleIn}

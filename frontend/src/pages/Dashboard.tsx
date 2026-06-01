@@ -155,9 +155,9 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                   </kbd>
                 </label>
 
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
                   <Listbox value={selectedCategories} onChange={setSelectedCategories} multiple>
-                    <div className="relative">
+                    <div className="relative col-span-2 sm:col-span-1">
                       <Listbox.Button className="focus-ring press flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-textPrimary transition-colors duration-180 hover:bg-surface-muted">
                         Category
                         {selectedCategories.length ? (
@@ -190,7 +190,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                   </Listbox>
 
                   <Listbox value={sort} onChange={setSort}>
-                    <div className="relative">
+                    <div className="relative min-w-0">
                       <Listbox.Button className="focus-ring press flex min-h-10 items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-textPrimary transition-colors duration-180 hover:bg-surface-muted">
                         {sortOptions.find((option) => option.value === sort)?.label}
                         <ChevronDown className="h-4 w-4 text-textMuted" />
