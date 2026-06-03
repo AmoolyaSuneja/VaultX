@@ -3,7 +3,6 @@ import {
   Copy,
   Download,
   ExternalLink,
-  Eye,
   FileImage,
   FileText,
   LockKeyhole,
@@ -245,6 +244,7 @@ export function EntryDetailPage() {
                     fileUrl={fileUrl}
                     index={index}
                     downloading={downloadingIndex === index}
+                    requiresDualApproval={Boolean(accessPolicy?.requiresDualApproval)}
                     onDownloadStateChange={(active) => setDownloadingIndex(active ? index : null)}
                     onShare={() => {
                       setShareTarget({ filePath: fileUrl, label: `Attachment ${index + 1}` });
@@ -438,6 +438,7 @@ function AttachmentCard({
   fileUrl,
   index,
   downloading,
+  requiresDualApproval,
   onDownloadStateChange,
   onShare
 }: {
@@ -445,6 +446,7 @@ function AttachmentCard({
   fileUrl: string;
   index: number;
   downloading: boolean;
+  requiresDualApproval: boolean;
   onDownloadStateChange: (active: boolean) => void;
   onShare: () => void;
 }) {
@@ -564,32 +566,36 @@ function AttachmentCard({
           >
             <ExternalLink className="h-4 w-4" />
           </IconButton>
-          <IconButton label={`Share ${label}`} onClick={onShare}>
-            <Share2 className="h-4 w-4" />
-          </IconButton>
-          <button
-            type="button"
-            disabled={downloading}
-            aria-label={`${downloadLabel} for ${label}`}
-            onClick={async () => {
-              try {
-                onDownloadStateChange(true);
-                await downloadProtectedResource(
-                  `/api/vault/${entryId}/attachments/${index}/download`,
-                  label.toLowerCase().replace(/\s+/g, '-'),
-                  { headers: authHeaders(token) }
-                );
-                toast.success(`${downloadLabel} ready`);
-              } catch (error) {
-                toast.error(error instanceof Error ? error.message : 'Download failed');
-              } finally {
-                onDownloadStateChange(false);
-              }
-            }}
-            className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Download className="h-4 w-4" />
-          </button>
+          {!requiresDualApproval ? (
+            <IconButton label={`Share ${label}`} onClick={onShare}>
+              <Share2 className="h-4 w-4" />
+            </IconButton>
+          ) : null}
+          {!requiresDualApproval ? (
+            <button
+              type="button"
+              disabled={downloading}
+              aria-label={`${downloadLabel} for ${label}`}
+              onClick={async () => {
+                try {
+                  onDownloadStateChange(true);
+                  await downloadProtectedResource(
+                    `/api/vault/${entryId}/attachments/${index}/download`,
+                    label.toLowerCase().replace(/\s+/g, '-'),
+                    { headers: authHeaders(token) }
+                  );
+                  toast.success(`${downloadLabel} ready`);
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Download failed');
+                } finally {
+                  onDownloadStateChange(false);
+                }
+              }}
+              className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
       </div>
 
