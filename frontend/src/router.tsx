@@ -89,7 +89,7 @@ export const router = createBrowserRouter([
           },
           {
             path: '/vault/new',
-            element: <DashboardPage createOpen />
+            element: <Navigate to="/vault?new=1" replace />
           },
           {
             path: '/vault/:id',

@@ -2,7 +2,7 @@ import { Listbox } from '@headlessui/react';
 import { useReducedMotion } from 'framer-motion';
 import { Check, ChevronDown, LayoutGrid, List, Plus, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, EmptyState, GridSkeleton } from '@/components/ui';
 import { EntryForm } from '@/components/forms/EntryForm';
 import { StatsStrip } from '@/components/vault/StatsStrip';
@@ -28,8 +28,14 @@ interface DashboardPageProps {
 
 const OVERLAY_DURATION_MS = 1550;
 
-export function DashboardPage({ createOpen = false }: DashboardPageProps) {
+export function DashboardPage({ createOpen: createOpenProp = false }: DashboardPageProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Support both the legacy prop (from /vault/new route) and a ?new=1 search param.
+  // Driving it from search params avoids the Dialog onClose / unmount race that caused
+  // the blank dashboard: the form now lives on the same /vault route so there is no
+  // page-level unmount when the panel closes.
+  const createOpen = createOpenProp || searchParams.get('new') === '1';
   const prefersReducedMotion = useReducedMotion();
   const entriesQuery = useVaultEntries();
   const createMutation = useCreateEntry();
@@ -131,7 +137,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
 
       <div className="space-y-6">
             <div className="flex items-center justify-end">
-              <Button onClick={() => navigate('/vault/new')} className="w-full justify-center sm:w-auto">
+              <Button onClick={() => navigate('/vault?new=1')} className="w-full justify-center sm:w-auto">
                 <Plus className="h-4 w-4" />
                 New entry
               </Button>
@@ -248,7 +254,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
                     : 'Create your first entry to save credentials, notes, and files.'
                 }
                 actionLabel={filterActive ? 'New entry' : 'Create first entry'}
-                onAction={() => navigate('/vault/new')}
+                onAction={() => navigate('/vault?new=1')}
                 secondaryLabel={filterActive ? 'Clear filters' : undefined}
                 onSecondaryAction={clearFilters}
               />
@@ -267,7 +273,7 @@ export function DashboardPage({ createOpen = false }: DashboardPageProps) {
       <EntryForm
         open={createOpen}
         mode="create"
-        onClose={() => navigate('/vault')}
+        onClose={() => navigate('/vault', { replace: true })}
         onSubmit={async (payload) => {
           await createMutation.mutateAsync(payload);
         }}
