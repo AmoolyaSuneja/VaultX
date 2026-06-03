@@ -30,6 +30,14 @@ export interface VaultAccessPolicy {
   approvalExpiresAt?: string | null;
   canRequestApproval: boolean;
   canApprove: boolean;
+  actionRequest?: {
+    action: 'download' | 'share' | null;
+    attachmentIndex: number | null;
+    requestedByCurrentUser: boolean;
+    approvedAt: string | null;
+    expiresAt: string | null;
+    isActive: boolean;
+  } | null;
 }
 
 export interface VaultFile {

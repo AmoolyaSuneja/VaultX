@@ -9,6 +9,7 @@ import {
   getVaultEntries,
   getVaultEntry,
   requestEntryApproval,
+  requestEntryActionApproval,
   updateVaultEntry
 } from './vault.service';
 import { useVaultStore } from './vault.store';
@@ -117,6 +118,26 @@ export function useRequestEntryApproval(id: string) {
         await refreshVaultQueries(queryClient, data.data._id);
       }
       toast.success(data.message || 'Approval request sent');
+    }
+  });
+}
+
+export function useRequestEntryActionApproval(id: string) {
+  const token = useAuthStore((state) => state.token);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: { action: 'download' | 'share'; attachmentIndex?: number | null }) =>
+      requestEntryActionApproval(token, id, payload),
+    onSuccess: async (data) => {
+      if (data.data) {
+        upsertEntry(queryClient, data.data);
+        await refreshVaultQueries(queryClient, data.data._id);
+      }
+      toast.success(data.message || 'Action approval request sent');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Unable to send approval request');
     }
   });
 }

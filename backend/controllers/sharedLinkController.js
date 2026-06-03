@@ -11,14 +11,14 @@ const { pipeRemoteDocument, resolveDocumentKind } = require('../Utils/remoteDocu
 const { buildAppUrl } = require('../Utils/appUrl');
 
 /**
- * Returns true if dual-approval is required AND the active approval window
- * has not been granted (or has expired). Used to block share/download actions
- * that should only be possible while both participants have consented.
+ * Returns true if the requester has an active per-action share approval
+ * from their counterparty for this vault entry.
  */
-function isDualApprovalBlocked(vaultEntry) {
-  if (!vaultEntry.requiresDualApproval) return false;
-  const expiresAt = vaultEntry?.dualAccess?.expiresAt;
-  return !expiresAt || new Date(expiresAt).getTime() <= Date.now();
+function hasActiveShareActionApproval(vaultEntry, userId) {
+  if (!vaultEntry?.actionRequest?.expiresAt) return false;
+  if (vaultEntry.actionRequest.action !== 'share') return false;
+  if (new Date(vaultEntry.actionRequest.expiresAt).getTime() <= Date.now()) return false;
+  return vaultEntry.actionRequest.requestedBy?.toString() === userId?.toString();
 }
 
 const DOWNLOAD_TOKEN_SCOPE = 'shared-document-download';
@@ -80,9 +80,11 @@ const createSharedLink = asyncHandler(async (req, res) => {
     throw new HttpError('Not authorized to share documents from this entry', 401);
   }
 
-  if (isDualApprovalBlocked(vaultEntry)) {
+  // For dual-approval entries the owner must have obtained explicit per-action
+  // share approval from their counterparty before a link can be created.
+  if (vaultEntry.requiresDualApproval && !hasActiveShareActionApproval(vaultEntry, req.user._id)) {
     throw new HttpError(
-      'Both participants must approve access before a share link can be created for this entry',
+      'The other participant must approve this share request before a link can be created',
       403
     );
   }
@@ -161,13 +163,6 @@ async function serveSharedDocument(req, res, disposition) {
 
   const sharedLink = await loadSharedLink(req.params.shareId);
   const vaultEntry = await loadVaultForSharedLink(sharedLink.vault);
-
-  if (isDualApprovalBlocked(vaultEntry)) {
-    throw new HttpError(
-      'Active dual-approval is required to access this shared document',
-      403
-    );
-  }
 
   if (await enforceVaultUnlock(req, res, vaultEntry, `preview or download a shared document`)) {
     return;

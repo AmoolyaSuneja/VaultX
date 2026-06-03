@@ -110,6 +110,42 @@ const vaultSchema = new mongoose.Schema(
         default: null
       }
     },
+    // Tracks a pending per-action approval (download / share) requested by one
+    // participant that the other participant must approve via email before the
+    // action can proceed.
+    actionRequest: {
+      action: {
+        type: String,
+        enum: ['download', 'share'],
+        default: null
+      },
+      attachmentIndex: {
+        type: Number,
+        default: null
+      },
+      requestedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+      },
+      requestedAt: {
+        type: Date,
+        default: null
+      },
+      approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+      },
+      approvedAt: {
+        type: Date,
+        default: null
+      },
+      expiresAt: {
+        type: Date,
+        default: null
+      }
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

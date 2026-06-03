@@ -134,6 +134,58 @@ async function sendDualApprovalRequestEmail({ to, approverName, ownerName, entry
   return { sent: true, skipped: false };
 }
 
+async function sendActionApprovalRequestEmail({ to, approverName, requesterName, entryTitle, action, approvalUrl }) {
+  const mailer = getTransporter();
+
+  if (!mailer) {
+    console.warn('Action approval email skipped: SMTP credentials are not configured.');
+    return { sent: false, skipped: true };
+  }
+
+  const safeApproverName = approverName || 'there';
+  const safeRequesterName = requesterName || 'A VaultX user';
+  const actionLabel = action === 'share' ? 'share' : 'download';
+  const subject = `VaultX ${actionLabel} approval requested by ${safeRequesterName}`;
+  const htmlApproverName = escapeHtml(safeApproverName);
+  const htmlRequesterName = escapeHtml(safeRequesterName);
+  const htmlEntryTitle = escapeHtml(entryTitle);
+  const htmlApprovalUrl = escapeHtml(approvalUrl);
+  const text = [
+    `Hi ${safeApproverName},`,
+    '',
+    `${safeRequesterName} is requesting your approval to ${actionLabel} an attachment from "${entryTitle}".`,
+    `Open this link to approve: ${approvalUrl}`,
+    '',
+    `This approval allows the ${actionLabel} for 10 minutes after you approve it.`,
+    '',
+    'VaultX'
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6">
+      <p>Hi ${htmlApproverName},</p>
+      <p><strong>${htmlRequesterName}</strong> is requesting your approval to <strong>${actionLabel}</strong> an attachment from <strong>${htmlEntryTitle}</strong>.</p>
+      <p>
+        <a href="${htmlApprovalUrl}" style="display:inline-block;border-radius:8px;background:#2563eb;color:#ffffff;padding:10px 16px;text-decoration:none">
+          Approve ${actionLabel}
+        </a>
+      </p>
+      <p>This approval allows the ${actionLabel} for 10 minutes after you approve it.</p>
+      <p>VaultX</p>
+    </div>
+  `;
+
+  await mailer.transporter.sendMail({
+    from: mailer.from,
+    to,
+    subject,
+    text,
+    html
+  });
+
+  return { sent: true, skipped: false };
+}
+
 async function sendPasswordResetCodeEmail({ to, name, code }) {
   const mailer = getTransporter();
 
@@ -194,5 +246,6 @@ async function sendPasswordResetCodeEmail({ to, name, code }) {
 
 module.exports = {
   sendDualApprovalRequestEmail,
-  sendPasswordResetCodeEmail
+  sendPasswordResetCodeEmail,
+  sendActionApprovalRequestEmail
 };

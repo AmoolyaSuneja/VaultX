@@ -75,6 +75,14 @@ const approveEmailBody = z.object({
   token: z.string().min(10, 'Approval token is required').max(4096)
 });
 
+const actionRequestBody = z.object({
+  action: z.enum(['download', 'share']),
+  attachmentIndex: z.preprocess(
+    (v) => (v === undefined || v === null ? null : Number(v)),
+    z.number().int().nonnegative().nullable()
+  ).optional()
+});
+
 const listQuery = z.object({
   page: z.preprocess((value) => (value === undefined ? 1 : Number(value)), z.number().int().min(1).max(1000)).optional(),
   limit: z.preprocess((value) => (value === undefined ? 50 : Number(value)), z.number().int().min(1).max(100)).optional()
@@ -86,5 +94,6 @@ module.exports = {
   attachmentParams,
   shareLinkBody,
   approveEmailBody,
+  actionRequestBody,
   listQuery
 };

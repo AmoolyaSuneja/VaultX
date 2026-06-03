@@ -6,6 +6,7 @@ import {
   FileImage,
   FileText,
   LockKeyhole,
+  Mail,
   Pencil,
   Share2,
   ShieldCheck
@@ -18,7 +19,8 @@ import { EntryForm } from '@/components/forms/EntryForm';
 import { Badge, Button, Card, Input, Modal } from '@/components/ui';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { ApiError, authHeaders } from '@/features/vault/vault.service';
-import { useCreateShareLink, useRequestEntryApproval, useVaultEntry, useUpdateEntry } from '@/features/vault/useVault';
+import { useCreateShareLink, useRequestEntryApproval, useRequestEntryActionApproval, useVaultEntry, useUpdateEntry } from '@/features/vault/useVault';
+import type { VaultAccessPolicy } from '@/features/vault/vault.types';
 import {
   copyToClipboard,
   downloadProtectedResource,
@@ -37,6 +39,7 @@ export function EntryDetailPage() {
   const updateMutation = useUpdateEntry(id);
   const createShareLinkMutation = useCreateShareLink(id);
   const requestApprovalMutation = useRequestEntryApproval(id);
+  const requestActionApprovalMutation = useRequestEntryActionApproval(id);
   const [editing, setEditing] = useState(false);
   const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
   const [shareTarget, setShareTarget] = useState<{ filePath: string; label: string } | null>(null);
@@ -51,9 +54,14 @@ export function EntryDetailPage() {
 
   // Poll every 5 s while approval is pending so the UI reflects the change as
   // soon as the other participant clicks their email link — no manual refresh needed.
+  // Also poll while an action request (download/share) is pending and not yet approved.
   const isPendingApproval =
     accessPolicy?.requiresDualApproval && accessPolicy?.approvalStatus === 'pending';
-  useVaultEntry(id, { refetchInterval: isPendingApproval ? 5000 : false });
+  const isPendingAction =
+    accessPolicy?.requiresDualApproval &&
+    accessPolicy?.actionRequest?.requestedByCurrentUser &&
+    !accessPolicy?.actionRequest?.isActive;
+  useVaultEntry(id, { refetchInterval: isPendingApproval || isPendingAction ? 5000 : false });
   const canSeeSensitive = Boolean(
     entry?.notes || entry?.data || entry?.filePath?.length
   );
@@ -251,6 +259,11 @@ export function EntryDetailPage() {
                     index={index}
                     downloading={downloadingIndex === index}
                     requiresDualApproval={Boolean(accessPolicy?.requiresDualApproval)}
+                    actionRequest={accessPolicy?.actionRequest ?? null}
+                    onRequestAction={(action) =>
+                      requestActionApprovalMutation.mutate({ action, attachmentIndex: index })
+                    }
+                    requestingAction={requestActionApprovalMutation.isPending}
                     onDownloadStateChange={(active) => setDownloadingIndex(active ? index : null)}
                     onShare={() => {
                       setShareTarget({ filePath: fileUrl, label: `Attachment ${index + 1}` });
@@ -445,6 +458,9 @@ function AttachmentCard({
   index,
   downloading,
   requiresDualApproval,
+  actionRequest,
+  onRequestAction,
+  requestingAction,
   onDownloadStateChange,
   onShare
 }: {
@@ -453,6 +469,9 @@ function AttachmentCard({
   index: number;
   downloading: boolean;
   requiresDualApproval: boolean;
+  actionRequest: VaultAccessPolicy['actionRequest'];
+  onRequestAction: (action: 'download' | 'share') => void;
+  requestingAction: boolean;
   onDownloadStateChange: (active: boolean) => void;
   onShare: () => void;
 }) {
@@ -572,36 +591,99 @@ function AttachmentCard({
           >
             <ExternalLink className="h-4 w-4" />
           </IconButton>
-          {!requiresDualApproval ? (
-            <IconButton label={`Share ${label}`} onClick={onShare}>
-              <Share2 className="h-4 w-4" />
-            </IconButton>
-          ) : null}
-          {!requiresDualApproval ? (
-            <button
-              type="button"
-              disabled={downloading}
-              aria-label={`${downloadLabel} for ${label}`}
-              onClick={async () => {
-                try {
-                  onDownloadStateChange(true);
-                  await downloadProtectedResource(
-                    `/api/vault/${entryId}/attachments/${index}/download`,
-                    label.toLowerCase().replace(/\s+/g, '-'),
-                    { headers: authHeaders(token) }
-                  );
-                  toast.success(`${downloadLabel} ready`);
-                } catch (error) {
-                  toast.error(error instanceof Error ? error.message : 'Download failed');
-                } finally {
-                  onDownloadStateChange(false);
-                }
-              }}
-              className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Download className="h-4 w-4" />
-            </button>
-          ) : null}
+
+          {requiresDualApproval ? (
+            // Dual-approval: show action-request buttons or active action buttons
+            <>
+              {actionRequest?.isActive && actionRequest.action === 'share' ? (
+                // Share approval is active — show the real share button
+                <IconButton label={`Share ${label}`} onClick={onShare}>
+                  <Share2 className="h-4 w-4" />
+                </IconButton>
+              ) : (
+                // No active share approval — show request button
+                <button
+                  type="button"
+                  disabled={requestingAction}
+                  aria-label={`Request share approval for ${label}`}
+                  title="Request approval to share"
+                  onClick={() => onRequestAction('share')}
+                  className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Share2 className="h-4 w-4 opacity-50" />
+                </button>
+              )}
+
+              {actionRequest?.isActive && actionRequest.action === 'download' ? (
+                // Download approval is active — show the real download button
+                <button
+                  type="button"
+                  disabled={downloading}
+                  aria-label={`${downloadLabel} for ${label}`}
+                  onClick={async () => {
+                    try {
+                      onDownloadStateChange(true);
+                      await downloadProtectedResource(
+                        `/api/vault/${entryId}/attachments/${index}/download`,
+                        label.toLowerCase().replace(/\s+/g, '-'),
+                        { headers: authHeaders(token) }
+                      );
+                      toast.success(`${downloadLabel} ready`);
+                    } catch (error) {
+                      toast.error(error instanceof Error ? error.message : 'Download failed');
+                    } finally {
+                      onDownloadStateChange(false);
+                    }
+                  }}
+                  className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Download className="h-4 w-4" />
+                </button>
+              ) : (
+                // No active download approval — show request button
+                <button
+                  type="button"
+                  disabled={requestingAction}
+                  aria-label={`Request download approval for ${label}`}
+                  title="Request approval to download"
+                  onClick={() => onRequestAction('download')}
+                  className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Mail className="h-4 w-4" />
+                </button>
+              )}
+            </>
+          ) : (
+            // No dual-approval — show normal share and download buttons
+            <>
+              <IconButton label={`Share ${label}`} onClick={onShare}>
+                <Share2 className="h-4 w-4" />
+              </IconButton>
+              <button
+                type="button"
+                disabled={downloading}
+                aria-label={`${downloadLabel} for ${label}`}
+                onClick={async () => {
+                  try {
+                    onDownloadStateChange(true);
+                    await downloadProtectedResource(
+                      `/api/vault/${entryId}/attachments/${index}/download`,
+                      label.toLowerCase().replace(/\s+/g, '-'),
+                      { headers: authHeaders(token) }
+                    );
+                    toast.success(`${downloadLabel} ready`);
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Download failed');
+                  } finally {
+                    onDownloadStateChange(false);
+                  }
+                }}
+                className="focus-ring rounded-full p-1.5 text-textMuted transition-colors hover:bg-surface-muted hover:text-textPrimary disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Download className="h-4 w-4" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -616,6 +698,12 @@ function AttachmentCard({
       ) : null}
 
       {previewLoading ? <p className="mt-2 text-xs text-textMuted">Loading preview...</p> : null}
+
+      {requiresDualApproval && actionRequest?.requestedByCurrentUser && !actionRequest?.isActive ? (
+        <p className="mt-2 text-xs text-textMuted">
+          Waiting for the other participant to approve your {actionRequest.action} request…
+        </p>
+      ) : null}
     </div>
   );
 }

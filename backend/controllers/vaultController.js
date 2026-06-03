@@ -9,7 +9,7 @@ const { enforceVaultUnlock } = require('../Utils/lockAccess');
 const { pipeRemoteDocument } = require('../Utils/remoteDocument');
 const { normalizeUnlockAt, isVaultLocked } = require('../Utils/timeLock');
 const { buildAppUrl } = require('../Utils/appUrl');
-const { sendDualApprovalRequestEmail } = require('../Utils/email');
+const { sendDualApprovalRequestEmail, sendActionApprovalRequestEmail } = require('../Utils/email');
 const { findVaultById, findVaultByIdWithRequester } = require('../Utils/vaultQuery');
 
 const DUAL_ACCESS_WINDOW_MS = 10 * 60 * 1000;
@@ -89,6 +89,13 @@ function hasActiveDualApproval(vaultEntry) {
   return Boolean(vaultEntry?.dualAccess?.expiresAt) && new Date(vaultEntry.dualAccess.expiresAt).getTime() > Date.now();
 }
 
+function hasActiveActionApproval(vaultEntry, userId) {
+  if (!vaultEntry?.actionRequest?.expiresAt) return false;
+  if (new Date(vaultEntry.actionRequest.expiresAt).getTime() <= Date.now()) return false;
+  // The user who requested (and whose counterparty approved) may proceed
+  return toIdString(vaultEntry.actionRequest.requestedBy) === toIdString(userId);
+}
+
 function getApprovalStatus(vaultEntry) {
   if (!vaultEntry.requiresDualApproval) return 'not_required';
   if (hasActiveDualApproval(vaultEntry)) return 'approved';
@@ -133,7 +140,20 @@ function buildAccessPolicy(vaultEntry, userId, activeNomineeOwnerIds = new Set()
     approvedAt: vaultEntry?.dualAccess?.approvedAt || null,
     approvalExpiresAt: vaultEntry?.dualAccess?.expiresAt || null,
     canRequestApproval,
-    canApprove: false
+    canApprove: false,
+    actionRequest: vaultEntry.actionRequest
+      ? {
+          action: vaultEntry.actionRequest.action,
+          attachmentIndex: vaultEntry.actionRequest.attachmentIndex,
+          requestedByCurrentUser:
+            toIdString(vaultEntry.actionRequest.requestedBy) === toIdString(userId),
+          approvedAt: vaultEntry.actionRequest.approvedAt || null,
+          expiresAt: vaultEntry.actionRequest.expiresAt || null,
+          isActive:
+            Boolean(vaultEntry.actionRequest.expiresAt) &&
+            new Date(vaultEntry.actionRequest.expiresAt).getTime() > Date.now()
+        }
+      : null
   };
 }
 
@@ -556,7 +576,162 @@ const approveVaultAccessFromEmail = asyncHandler(async (req, res) => {
   });
 });
 
-async function resolveOwnedAttachment(req, res) {
+const ACTION_APPROVAL_WINDOW_MS = 10 * 60 * 1000;
+
+const requestVaultActionApproval = asyncHandler(async (req, res) => {
+  const { action, attachmentIndex } = req.body;
+
+  if (!['download', 'share'].includes(action)) {
+    throw new HttpError('Invalid action. Must be "download" or "share".', 400);
+  }
+
+  const vaultEntry = await findVaultById(req.params.id);
+
+  if (!vaultEntry) {
+    throw new HttpError('Vault entry not found', 404);
+  }
+
+  if (!isDualAccessParticipant(vaultEntry, req.user._id)) {
+    throw new HttpError('Only vault participants can request action approval', 401);
+  }
+
+  if (!vaultEntry.requiresDualApproval || !vaultEntry.secondApprover) {
+    throw new HttpError('Dual approval is not enabled for this entry', 400);
+  }
+
+  const approvalTarget = getCounterparty(vaultEntry, req.user._id);
+
+  if (!approvalTarget?.email) {
+    throw new HttpError('The other vault participant could not be found', 400);
+  }
+
+  vaultEntry.actionRequest = {
+    action,
+    attachmentIndex: attachmentIndex ?? null,
+    requestedBy: req.user._id,
+    requestedAt: new Date(),
+    approvedBy: null,
+    approvedAt: null,
+    expiresAt: null
+  };
+
+  await vaultEntry.save();
+
+  const entryTitle = decrypt(vaultEntry.title);
+  const actionToken = jwt.sign(
+    {
+      scope: 'dual-action-email-approval',
+      vaultId: vaultEntry._id.toString(),
+      requesterId: req.user._id.toString(),
+      approverId: approvalTarget._id.toString(),
+      action,
+      attachmentIndex: attachmentIndex ?? null,
+      requestedAt: vaultEntry.actionRequest.requestedAt.toISOString()
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '30m' }
+  );
+  const approvalUrl = buildAppUrl(req, `/approve-action/${actionToken}`);
+
+  let emailSent = false;
+  let emailErrorMessage = '';
+
+  try {
+    const emailResult = await sendActionApprovalRequestEmail({
+      to: approvalTarget.email,
+      approverName: approvalTarget.name,
+      requesterName: req.user.name,
+      entryTitle,
+      action,
+      approvalUrl
+    });
+    emailSent = Boolean(emailResult.sent);
+    if (emailResult.skipped) {
+      emailErrorMessage = 'SMTP credentials are not configured on the server';
+    }
+  } catch (emailError) {
+    console.error('Action approval email failed:', emailError.message);
+    emailErrorMessage = 'Email delivery failed';
+  }
+
+  const populatedEntry = await findVaultById(vaultEntry._id);
+
+  res.status(200).json({
+    success: true,
+    message: emailSent
+      ? `Approval email sent to ${approvalTarget.email}`
+      : `Approval request created for ${approvalTarget.email}${emailErrorMessage ? ` (${emailErrorMessage})` : ''}`,
+    data: formatVaultEntry(populatedEntry, { userId: req.user._id })
+  });
+});
+
+const approveVaultActionFromEmail = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  let decoded;
+
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    throw new HttpError('Approval link is invalid or expired', 401);
+  }
+
+  if (decoded.scope !== 'dual-action-email-approval') {
+    throw new HttpError('Approval link has invalid scope', 401);
+  }
+
+  const vaultEntry = await findVaultById(decoded.vaultId);
+
+  if (!vaultEntry) {
+    throw new HttpError('Vault entry not found', 404);
+  }
+
+  if (!vaultEntry.requiresDualApproval) {
+    throw new HttpError('Dual approval is not enabled for this entry', 400);
+  }
+
+  if (!vaultEntry?.actionRequest?.requestedAt) {
+    throw new HttpError('There is no pending action approval request for this entry', 400);
+  }
+
+  if (toIdString(vaultEntry.actionRequest.requestedBy) !== toIdString(decoded.requesterId)) {
+    throw new HttpError('This approval link no longer matches the active request', 400);
+  }
+
+  if (new Date(vaultEntry.actionRequest.requestedAt).toISOString() !== decoded.requestedAt) {
+    throw new HttpError('This approval link has already been replaced by a newer request', 400);
+  }
+
+  if (!isDualAccessParticipant(vaultEntry, decoded.approverId)) {
+    throw new HttpError('Approval link is not valid for this vault entry', 401);
+  }
+
+  if (toIdString(vaultEntry.actionRequest.requestedBy) === toIdString(decoded.approverId)) {
+    throw new HttpError('The requester cannot approve their own request', 400);
+  }
+
+  const approvedAt = new Date();
+  vaultEntry.actionRequest = {
+    ...vaultEntry.actionRequest.toObject(),
+    approvedBy: decoded.approverId,
+    approvedAt,
+    expiresAt: new Date(approvedAt.getTime() + ACTION_APPROVAL_WINDOW_MS)
+  };
+
+  await vaultEntry.save();
+
+  res.status(200).json({
+    success: true,
+    message: `${decoded.action === 'share' ? 'Share' : 'Download'} approved for 10 minutes`,
+    data: {
+      vaultId: vaultEntry._id,
+      action: decoded.action,
+      expiresAt: vaultEntry.actionRequest.expiresAt
+    }
+  });
+});
+
+async function resolveOwnedAttachment(req, res, { requireActionApproval = false } = {}) {
   const vaultEntry = await findVaultById(req.params.id);
 
   if (!vaultEntry) {
@@ -571,6 +746,17 @@ async function resolveOwnedAttachment(req, res) {
 
   if (!canViewSensitiveContent(vaultEntry, req.user._id, readAccess.activeNomineeOwnerIds)) {
     throw new HttpError('The other vault participant must approve access before attachments can be opened', 403);
+  }
+
+  // For download/share on dual-approval entries the participant must have an
+  // active per-action approval from their counterparty.
+  if (requireActionApproval && vaultEntry.requiresDualApproval) {
+    if (!hasActiveActionApproval(vaultEntry, req.user._id)) {
+      throw new HttpError(
+        'The other participant must approve this download before it can proceed',
+        403
+      );
+    }
   }
 
   if (await enforceVaultUnlock(req, res, vaultEntry, 'access vault attachment')) {
@@ -606,7 +792,7 @@ const previewVaultAttachment = asyncHandler(async (req, res) => {
 });
 
 const downloadVaultAttachment = asyncHandler(async (req, res) => {
-  const attachment = await resolveOwnedAttachment(req, res);
+  const attachment = await resolveOwnedAttachment(req, res, { requireActionApproval: true });
 
   if (!attachment) return;
 
@@ -625,6 +811,8 @@ module.exports = {
   deleteVaultEntry,
   requestVaultAccessApproval,
   approveVaultAccessFromEmail,
+  requestVaultActionApproval,
+  approveVaultActionFromEmail,
   previewVaultAttachment,
   downloadVaultAttachment
 };

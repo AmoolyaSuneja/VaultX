@@ -124,3 +124,15 @@ export async function requestEntryApproval(token: string, id: string) {
     headers: authHeaders(token)
   });
 }
+
+export async function requestEntryActionApproval(
+  token: string,
+  id: string,
+  payload: { action: 'download' | 'share'; attachmentIndex?: number | null }
+) {
+  return request<{ data: VaultEntry; message: string }>(`/api/vault/${id}/request-action`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+}

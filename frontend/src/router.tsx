@@ -13,6 +13,9 @@ const SettingsPage = lazy(() => import('@/pages/Settings').then((m) => ({ defaul
 const ApproveAccessPage = lazy(() =>
   import('@/pages/ApproveAccess').then((m) => ({ default: m.ApproveAccessPage }))
 );
+const ApproveActionPage = lazy(() =>
+  import('@/pages/ApproveAction').then((m) => ({ default: m.ApproveActionPage }))
+);
 const SharedLinkPage = lazy(() => import('@/pages/SharedLink').then((m) => ({ default: m.SharedLinkPage })));
 
 function RouteFallback() {
@@ -74,6 +77,14 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<RouteFallback />}>
         <ApproveAccessPage />
+      </Suspense>
+    )
+  },
+  {
+    path: '/approve-action/:token',
+    element: (
+      <Suspense fallback={<RouteFallback />}>
+        <ApproveActionPage />
       </Suspense>
     )
   },
