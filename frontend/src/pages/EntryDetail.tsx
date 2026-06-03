@@ -48,6 +48,12 @@ export function EntryDetailPage() {
   const locked = isUnlockPending(entry?.unlockAt);
   const lockedError = queryError instanceof ApiError && queryError.status === 403;
   const accessPolicy = entry?.accessPolicy;
+
+  // Poll every 5 s while approval is pending so the UI reflects the change as
+  // soon as the other participant clicks their email link — no manual refresh needed.
+  const isPendingApproval =
+    accessPolicy?.requiresDualApproval && accessPolicy?.approvalStatus === 'pending';
+  useVaultEntry(id, { refetchInterval: isPendingApproval ? 5000 : false });
   const canSeeSensitive = Boolean(
     entry?.notes || entry?.data || entry?.filePath?.length
   );

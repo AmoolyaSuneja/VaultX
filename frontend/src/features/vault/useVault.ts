@@ -64,13 +64,14 @@ export function useVaultEntries() {
   });
 }
 
-export function useVaultEntry(id?: string) {
+export function useVaultEntry(id?: string, options?: { refetchInterval?: number | false }) {
   const token = useAuthStore((state) => state.token);
 
   return useQuery({
     queryKey: id ? entryKey(id) : ['vault', 'entry', '__none__'],
     queryFn: () => getVaultEntry(token, id as string),
     enabled: Boolean(token && id),
+    refetchInterval: options?.refetchInterval ?? false,
     ...vaultQueryDefaults
   });
 }
