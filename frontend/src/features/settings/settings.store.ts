@@ -21,18 +21,15 @@ function readInitialTheme(): ThemeMode {
   if (storageVersion !== THEME_VERSION) {
     storage?.removeItem(THEME_KEY);
     storage?.setItem(THEME_VERSION_KEY, THEME_VERSION);
-    storage?.setItem(THEME_KEY, DEFAULT_THEME);
     return DEFAULT_THEME;
   }
 
-  const storageTheme = getStorage()?.getItem(THEME_KEY);
+  const storageTheme = storage?.getItem(THEME_KEY);
 
   if (storageTheme === 'light' || storageTheme === 'dark') {
     return storageTheme;
   }
 
-  storage?.setItem(THEME_KEY, DEFAULT_THEME);
-  storage?.setItem(THEME_VERSION_KEY, THEME_VERSION);
   return DEFAULT_THEME;
 }
 
