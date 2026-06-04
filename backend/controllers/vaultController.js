@@ -89,11 +89,21 @@ function hasActiveDualApproval(vaultEntry) {
   return Boolean(vaultEntry?.dualAccess?.expiresAt) && new Date(vaultEntry.dualAccess.expiresAt).getTime() > Date.now();
 }
 
-function hasActiveActionApproval(vaultEntry, userId) {
+function hasActiveActionApproval(vaultEntry, userId, attachmentIndex) {
   if (!vaultEntry?.actionRequest?.expiresAt) return false;
   if (new Date(vaultEntry.actionRequest.expiresAt).getTime() <= Date.now()) return false;
-  // The user who requested (and whose counterparty approved) may proceed
-  return toIdString(vaultEntry.actionRequest.requestedBy) === toIdString(userId);
+  if (toIdString(vaultEntry.actionRequest.requestedBy) !== toIdString(userId)) return false;
+  // If the approval was for a specific attachment, enforce it matches
+  if (
+    vaultEntry.actionRequest.attachmentIndex !== null &&
+    vaultEntry.actionRequest.attachmentIndex !== undefined &&
+    attachmentIndex !== undefined &&
+    attachmentIndex !== null &&
+    Number(vaultEntry.actionRequest.attachmentIndex) !== Number(attachmentIndex)
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function getApprovalStatus(vaultEntry) {
@@ -711,18 +721,15 @@ const approveVaultActionFromEmail = asyncHandler(async (req, res) => {
   }
 
   const approvedAt = new Date();
-  vaultEntry.actionRequest = {
-    ...vaultEntry.actionRequest.toObject(),
-    approvedBy: decoded.approverId,
-    approvedAt,
-    expiresAt: new Date(approvedAt.getTime() + ACTION_APPROVAL_WINDOW_MS)
-  };
+  vaultEntry.actionRequest.approvedBy = decoded.approverId;
+  vaultEntry.actionRequest.approvedAt = approvedAt;
+  vaultEntry.actionRequest.expiresAt = new Date(approvedAt.getTime() + ACTION_APPROVAL_WINDOW_MS);
 
   await vaultEntry.save();
 
   res.status(200).json({
     success: true,
-    message: `${decoded.action === 'share' ? 'Share' : 'Download'} approved for 10 minutes`,
+    message: `${decoded.action === 'share' ? 'Share' : 'Download'} approved for 5 minutes`,
     data: {
       vaultId: vaultEntry._id,
       action: decoded.action,
@@ -751,7 +758,8 @@ async function resolveOwnedAttachment(req, res, { requireActionApproval = false 
   // For download/share on dual-approval entries the participant must have an
   // active per-action approval from their counterparty.
   if (requireActionApproval && vaultEntry.requiresDualApproval) {
-    if (!hasActiveActionApproval(vaultEntry, req.user._id)) {
+    const attachmentIndex = Number(req.params.attachmentIndex);
+    if (!hasActiveActionApproval(vaultEntry, req.user._id, attachmentIndex)) {
       throw new HttpError(
         'The other participant must approve this download before it can proceed',
         403
