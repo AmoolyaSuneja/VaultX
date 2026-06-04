@@ -10,10 +10,6 @@ const { enforceVaultUnlock } = require('../Utils/lockAccess');
 const { pipeRemoteDocument, resolveDocumentKind } = require('../Utils/remoteDocument');
 const { buildAppUrl } = require('../Utils/appUrl');
 
-/**
- * Returns true if the requester has an active per-action share approval
- * from their counterparty for this vault entry.
- */
 function hasActiveShareActionApproval(vaultEntry, userId) {
   if (!vaultEntry?.actionRequest?.expiresAt) return false;
   if (vaultEntry.actionRequest.action !== 'share') return false;
@@ -80,13 +76,8 @@ const createSharedLink = asyncHandler(async (req, res) => {
     throw new HttpError('Not authorized to share documents from this entry', 401);
   }
 
-  // For dual-approval entries the owner must have obtained explicit per-action
-  // share approval from their counterparty before a link can be created.
   if (vaultEntry.requiresDualApproval && !hasActiveShareActionApproval(vaultEntry, req.user._id)) {
-    throw new HttpError(
-      'The other participant must approve this share request before a link can be created',
-      403
-    );
+    throw new HttpError('The other participant must approve this share request before a link can be created', 403);
   }
 
   if (await enforceVaultUnlock(req, res, vaultEntry, 'create a shared link')) {

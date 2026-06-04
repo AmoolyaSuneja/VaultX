@@ -52,11 +52,7 @@ export function EntryDetailPage() {
   const lockedError = queryError instanceof ApiError && queryError.status === 403;
   const accessPolicy = entry?.accessPolicy;
 
-  // Poll every 5 s while approval is pending so the UI reflects the change as
-  // soon as the other participant clicks their email link — no manual refresh needed.
-  // Also poll while an action request (download/share) is pending and not yet approved.
-  const isPendingApproval =
-    accessPolicy?.requiresDualApproval && accessPolicy?.approvalStatus === 'pending';
+  const isPendingApproval = accessPolicy?.requiresDualApproval && accessPolicy?.approvalStatus === 'pending';
   const isPendingAction =
     accessPolicy?.requiresDualApproval &&
     accessPolicy?.actionRequest?.requestedByCurrentUser &&
@@ -599,15 +595,12 @@ function AttachmentCard({
           </IconButton>
 
           {requiresDualApproval ? (
-            // Dual-approval: show action-request buttons or active action buttons
             <>
               {actionRequest?.isActive && actionRequest.action === 'share' ? (
-                // Share approval is active — show the real share button
                 <IconButton label={`Share ${label}`} onClick={onShare}>
                   <Share2 className="h-4 w-4" />
                 </IconButton>
               ) : (
-                // No active share approval — show request button
                 <button
                   type="button"
                   disabled={requestingAction}
@@ -621,7 +614,6 @@ function AttachmentCard({
               )}
 
               {actionRequest?.isActive && actionRequest.action === 'download' ? (
-                // Download approval is active — show the real download button
                 <button
                   type="button"
                   disabled={downloading}
@@ -646,7 +638,6 @@ function AttachmentCard({
                   <Download className="h-4 w-4" />
                 </button>
               ) : (
-                // No active download approval — show request button
                 <button
                   type="button"
                   disabled={requestingAction}
@@ -660,7 +651,6 @@ function AttachmentCard({
               )}
             </>
           ) : (
-            // No dual-approval — show normal share and download buttons
             <>
               <IconButton label={`Share ${label}`} onClick={onShare}>
                 <Share2 className="h-4 w-4" />

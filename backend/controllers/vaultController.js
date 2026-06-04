@@ -755,15 +755,10 @@ async function resolveOwnedAttachment(req, res, { requireActionApproval = false 
     throw new HttpError('The other vault participant must approve access before attachments can be opened', 403);
   }
 
-  // For download/share on dual-approval entries the participant must have an
-  // active per-action approval from their counterparty.
   if (requireActionApproval && vaultEntry.requiresDualApproval) {
     const attachmentIndex = Number(req.params.attachmentIndex);
     if (!hasActiveActionApproval(vaultEntry, req.user._id, attachmentIndex)) {
-      throw new HttpError(
-        'The other participant must approve this download before it can proceed',
-        403
-      );
+      throw new HttpError('The other participant must approve this download before it can proceed', 403);
     }
   }
 

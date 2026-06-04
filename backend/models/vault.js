@@ -110,9 +110,8 @@ const vaultSchema = new mongoose.Schema(
         default: null
       }
     },
-    // Tracks a pending per-action approval (download / share) requested by one
-    // participant that the other participant must approve via email before the
-    // action can proceed.
+    // actionRequest subdoc tracks a pending per-action approval (download / share)
+    // that the other participant must approve via email before the action proceeds.
     actionRequest: {
       action: {
         type: String,

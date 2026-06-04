@@ -47,9 +47,8 @@ export function DashboardPage({ createOpen: createOpenProp = false }: DashboardP
     return (window.localStorage.getItem('vaultx-view') as 'grid' | 'list') || 'grid';
   });
 
-  // Entrance animation: the overlay floats above the dashboard (fixed, z-90) and
-  // fades out. The content underneath is ALWAYS rendered so a route remount can
-  // never leave the dashboard blank.
+  // Entrance animation overlay floats above the dashboard and fades out.
+  // Content underneath is always rendered so a route remount never leaves the dashboard blank.
   const [showOverlay, setShowOverlay] = useState(false);
   const [entrancePlaying, setEntrancePlaying] = useState(false);
 
