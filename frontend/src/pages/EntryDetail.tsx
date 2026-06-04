@@ -573,6 +573,12 @@ function AttachmentCard({
                 const loaded = await loadPreview();
                 if (loaded.kind === 'file') {
                   previewWindow?.close();
+                  // For dual-approval entries, generic files must go through the
+                  // download approval flow — don't silently download here.
+                  if (requiresDualApproval) {
+                    toast.error('Use the download button to request approval for this file.');
+                    return;
+                  }
                   await downloadProtectedResource(
                     `/api/vault/${entryId}/attachments/${index}/download`,
                     label.toLowerCase().replace(/\s+/g, '-'),
