@@ -188,17 +188,16 @@ export function EntryForm({ open, mode, entry, onClose, onSubmit }: EntryFormPro
                         />
                         <label className="grid gap-1.5 text-sm text-textMuted">
                           <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-textMuted">Category</span>
-                          <input
-                            list="vault-categories"
-                            className="focus-ring surface-field rounded-md px-3 py-2.5 text-sm text-textPrimary transition-colors duration-200 placeholder:text-textMuted/70 focus:border-textPrimary/60"
-                            placeholder="Choose or create a category"
+                          <select
+                            className="focus-ring surface-field rounded-md px-3 py-2.5 text-sm text-textPrimary transition-colors duration-200 focus:border-textPrimary/60"
                             {...form.register('category')}
-                          />
-                          <datalist id="vault-categories">
+                          >
                             {categories.map((category) => (
-                              <option key={category} value={category} />
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
                             ))}
-                          </datalist>
+                          </select>
                         </label>
                       </section>
 

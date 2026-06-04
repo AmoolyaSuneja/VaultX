@@ -576,7 +576,7 @@ const approveVaultAccessFromEmail = asyncHandler(async (req, res) => {
   });
 });
 
-const ACTION_APPROVAL_WINDOW_MS = 10 * 60 * 1000;
+const ACTION_APPROVAL_WINDOW_MS = 5 * 60 * 1000;
 
 const requestVaultActionApproval = asyncHandler(async (req, res) => {
   const { action, attachmentIndex } = req.body;
